@@ -102,7 +102,7 @@
                     <tbody class="divide-y divide-isekai-border">
                         <tr><th class="text-left p-3 text-isekai-muted font-normal w-40">Algorithm</th><td class="p-3">Yescrypt</td></tr>
                         <tr><th class="text-left p-3 text-isekai-muted font-normal">Block time</th><td class="p-3">~2.5 minutes</td></tr>
-                        <tr><th class="text-left p-3 text-isekai-muted font-normal">RPC</th><td class="p-3"><code class="text-isekai-accent">http://YOUR_RPC_HOST:8432</code></td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">RPC</th><td class="p-3"><code class="text-isekai-accent">http://153.75.225.100:8432</code></td></tr>
                         <tr><th class="text-left p-3 text-isekai-muted font-normal">P2P port</th><td class="p-3">8433</td></tr>
                         <tr><th class="text-left p-3 text-isekai-muted font-normal">Explorer</th><td class="p-3"><a href="https://explorer.ko-to.org" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">explorer.ko-to.org</a></td></tr>
                         <tr><th class="text-left p-3 text-isekai-muted font-normal">Website</th><td class="p-3"><a href="https://ko-to.org" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">ko-to.org</a></td></tr>
@@ -150,7 +150,7 @@
     <script>
         (function () {
             var meta = IsekaiAPI.COINS.KOTO;
-            document.getElementById('code-qc').textContent = './cpuminer \\\n  --algo=' + meta.minerAlgo + ' \\\n  --url=http://YOUR_RPC_HOST:' + meta.rpcPort + ' \\\n  --user=YOUR_RPC_USER \\\n  --pass=YOUR_RPC_PASS \\\n  --coinbase-addr=YOUR_KOTO_ADDRESS \\\n  --threads=4';
+            document.getElementById('code-qc').textContent = './cpuminer \\\n  --algo=' + meta.minerAlgo + ' \\\n  --url=http://153.75.225.100:8432 \\\n  --user=YOUR_RPC_USER \\\n  --pass=YOUR_RPC_PASS \\\n  --coinbase-addr=YOUR_KOTO_ADDRESS \\\n  --threads=4';
 
             function fmt(n) {
                 if (n == null || n === '') return '—';

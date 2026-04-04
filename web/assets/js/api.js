@@ -7,7 +7,7 @@
 
     var API_BASE = 'https://api.isekai-pool.com/api/v1';
 
-    /** rpcPort + minerAlgo: miner documentation only — never used in fetch(). Use YOUR_RPC_HOST in commands. */
+    /** rpcPort + minerAlgo: miner documentation only — never used in fetch(). RPC host in HTML examples: 153.75.225.100 */
     var COINS = {
         YTN: { slug: 'yenten', name: 'Yenten', symbol: 'YTN', algo: 'YespowerR16', rpcPort: 9982, minerAlgo: 'yespowerr16', page: '/ytn.html' },
         KOTO: { slug: 'koto', name: 'Koto', symbol: 'KOTO', algo: 'Yescrypt', rpcPort: 8432, minerAlgo: 'yescrypt', page: '/koto.html' },

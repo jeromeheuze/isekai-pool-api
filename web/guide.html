@@ -125,10 +125,10 @@ make -j$(nproc)</pre>
 
         <section class="mb-12">
             <h2 class="text-xl font-bold mb-4">Run the miner</h2>
-            <p class="text-isekai-muted text-sm mb-3">Use your coin’s algorithm, RPC host/port, and credentials. Replace placeholders — get RPC details from the <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a> page or your operator.</p>
+            <p class="text-isekai-muted text-sm mb-3">Use your coin’s algorithm, RPC host/port, and credentials. Host <code class="text-gray-400">153.75.225.100</code> — ports: <strong class="text-gray-300">9982</strong> (YTN), <strong class="text-gray-300">8432</strong> (KOTO), <strong class="text-gray-300">9368</strong> (TDC). More on <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a>.</p>
             <pre id="code-miner" class="isekai-code-block text-gray-300">./cpuminer \
   --algo=ALGO \
-  --url=http://YOUR_RPC_HOST:RPC_PORT \
+  --url=http://153.75.225.100:9982 \
   --user=YOUR_RPC_USER \
   --pass=YOUR_RPC_PASS \
   --coinbase-addr=YOUR_ADDRESS \
