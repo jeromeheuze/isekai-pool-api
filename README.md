@@ -1,6 +1,6 @@
 # isekai-pool.com
 
-Version: 1.0.0.1
+Version: 1.0.0.2
 
 > Public infrastructure for CPU-minable coins — the ones your Raspberry Pi can mine.
 
