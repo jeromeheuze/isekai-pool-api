@@ -22,7 +22,11 @@ jobs:
             # API dependencies
             cd api
             composer install --no-dev --optimize-autoloader --quiet
+            # File cache/session — no sqlite "cache" / "sessions" tables required (avoids driver + migration errors)
+            if grep -q '^CACHE_STORE=' .env; then sed -i 's/^CACHE_STORE=.*/CACHE_STORE=file/' .env; else echo 'CACHE_STORE=file' >> .env; fi
+            if grep -q '^SESSION_DRIVER=' .env; then sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' .env; else echo 'SESSION_DRIVER=file' >> .env; fi
             php artisan route:clear
+            php artisan config:clear
             php artisan config:cache
             php artisan route:cache
             chown -R www-data:www-data /var/www/isekai-pool-api
