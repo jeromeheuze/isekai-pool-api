@@ -22,6 +22,7 @@ jobs:
             # API dependencies
             cd api
             composer install --no-dev --optimize-autoloader --quiet
+            php artisan route:clear
             php artisan config:cache
             php artisan route:cache
             chown -R www-data:www-data /var/www/isekai-pool-api
