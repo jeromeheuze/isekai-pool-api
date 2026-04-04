@@ -90,15 +90,19 @@
         </div>
     </section>
 
-    <!-- Live Node Status -->
+    <!-- Live Node Status (Phase 1 — CURSOR.md: homepage dashboard) -->
     <section class="max-w-6xl mx-auto px-4 pb-16">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-sm font-bold text-isekai-muted uppercase tracking-wider">Live Node Status</h2>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <div>
+                <h2 class="text-sm font-bold text-isekai-muted uppercase tracking-wider">Live Node Status</h2>
+                <p id="health-summary" class="text-xs text-isekai-muted mt-1 min-h-[1rem]"></p>
+            </div>
             <span id="last-updated" class="text-xs text-isekai-muted"></span>
         </div>
 
+        <div id="nodes-error" class="hidden mb-4 text-sm text-isekai-red border border-isekai-border bg-isekai-card rounded-xl px-4 py-3"></div>
+
         <div id="nodes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Cards injected by JS -->
             <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 animate-pulse">
                 <div class="h-4 bg-isekai-border rounded w-1/3 mb-3"></div>
                 <div class="h-8 bg-isekai-border rounded w-1/2"></div>
@@ -176,25 +180,52 @@ curl https://api.isekai-pool.com/api/v1/koto/status</code></pre>
     <script>
         const API = 'https://api.isekai-pool.com/api/v1';
 
+        const COIN_ORDER = ['yenten', 'koto', 'tidecoin', 'sugarchain', 'cpuchain'];
+
         const COIN_INFO = {
             yenten:    { name: 'Yenten',    symbol: 'YTN',   algo: 'YespowerR16',   color: '#f59e0b' },
             koto:      { name: 'Koto',      symbol: 'KOTO',  algo: 'Yescrypt',      color: '#8b5cf6' },
             tidecoin:  { name: 'Tidecoin',  symbol: 'TDC',   algo: 'YespowerTIDE',  color: '#06b6d4' },
+            sugarchain:{ name: 'Sugarchain',symbol: 'SUGAR', algo: 'YespowerSugar', color: '#ec4899' },
+            cpuchain:  { name: 'CPUchain',  symbol: 'CPU',   algo: 'Yespower',      color: '#22c55e' },
         };
 
-        function renderCard(coin, data) {
-            const info  = COIN_INFO[coin] || {};
-            const online = data?.online ?? false;
-            const blocks = data?.blocks?.toLocaleString() ?? '—';
-            const progress = data?.progress ?? null;
+        function sortCoins(keys) {
+            return [...keys].sort((a, b) => {
+                const ia = COIN_ORDER.indexOf(a);
+                const ib = COIN_ORDER.indexOf(b);
+                if (ia === -1 && ib === -1) return a.localeCompare(b);
+                if (ia === -1) return 1;
+                if (ib === -1) return -1;
+                return ia - ib;
+            });
+        }
+
+        function titleCaseCoin(slug) {
+            return slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function renderCard(coin, healthRow, detail) {
+            const preset = COIN_INFO[coin] || {};
+            const name = preset.name || titleCaseCoin(coin);
+            const symbol = healthRow?.symbol || preset.symbol || coin.toUpperCase();
+            const algo = healthRow?.algo || preset.algo || '';
+            const color = preset.color || '#7c6af7';
+            const online = healthRow?.online ?? false;
+            const blocks = healthRow?.blocks != null ? Number(healthRow.blocks).toLocaleString() : '—';
+            const progress = online && detail && detail.progress != null ? detail.progress : null;
+            const peers = online && detail && detail.peers != null ? detail.peers : null;
+            const difficulty = online && detail && detail.difficulty != null
+                ? Number(detail.difficulty).toLocaleString(undefined, { maximumFractionDigits: 2 })
+                : null;
 
             return `
             <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 hover:border-opacity-50
-                        transition" style="border-color: ${online ? info.color + '33' : '#1e2330'}">
+                        transition" style="border-color: ${online ? color + '33' : '#1e2330'}">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <span class="font-bold">${info.name || coin}</span>
-                        <span class="text-isekai-muted text-xs ml-2">${info.symbol}</span>
+                        <span class="font-bold">${name}</span>
+                        <span class="text-isekai-muted text-xs ml-2">${symbol}</span>
                     </div>
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full ${online ? 'bg-isekai-green pulse-dot' : 'bg-isekai-red'}"></span>
@@ -208,37 +239,83 @@ curl https://api.isekai-pool.com/api/v1/koto/status</code></pre>
                 ${progress !== null ? `
                 <div class="w-full bg-isekai-border rounded-full h-1">
                     <div class="h-1 rounded-full transition-all"
-                         style="width:${Math.min(progress,100)}%; background:${info.color}"></div>
+                         style="width:${Math.min(progress, 100)}%; background:${color}"></div>
                 </div>
-                <div class="text-xs text-isekai-muted mt-1">${progress}% synced</div>
+                <div class="text-xs text-isekai-muted mt-1">${progress}% verification</div>
                 ` : ''}
-                <div class="mt-3 text-xs text-isekai-muted">${info.algo}</div>
+                <div class="mt-3 grid grid-cols-1 gap-1 text-xs text-isekai-muted">
+                    ${algo ? `<div>${algo}</div>` : ''}
+                    ${peers != null ? `<div>${peers} peers</div>` : ''}
+                    ${difficulty ? `<div>difficulty ${difficulty}</div>` : ''}
+                </div>
             </div>`;
         }
 
+        function setError(msg) {
+            const el = document.getElementById('nodes-error');
+            if (!msg) {
+                el.classList.add('hidden');
+                el.textContent = '';
+                return;
+            }
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
         async function fetchStatus() {
+            const grid = document.getElementById('nodes-grid');
+            const summaryEl = document.getElementById('health-summary');
+
             try {
-                // Fetch all node statuses in parallel
-                const coins = Object.keys(COIN_INFO);
-                const results = await Promise.allSettled(
-                    coins.map(c => fetch(`${API}/${c}/status`).then(r => r.json()))
+                const healthRes = await fetch(`${API}/health`);
+                if (!healthRes.ok) {
+                    throw new Error(`Health check failed (${healthRes.status}). Is the API up?`);
+                }
+                const health = await healthRes.json();
+                const nodes = health.nodes || {};
+                const coins = sortCoins(Object.keys(nodes));
+                if (coins.length === 0) {
+                    summaryEl.textContent = 'No active coins in API registry.';
+                    grid.innerHTML = `
+                        <div class="col-span-full bg-isekai-card border border-isekai-border rounded-xl p-8 text-center text-isekai-muted text-sm">
+                            <code class="text-isekai-accent">GET ${API}/health</code> returned no nodes. Check <span class="text-gray-300">config/coins.php</span> on the API.
+                        </div>`;
+                    setError('');
+                    document.getElementById('last-updated').textContent =
+                        'Page refreshed ' + new Date().toLocaleTimeString();
+                    return;
+                }
+
+                const detailResults = await Promise.all(
+                    coins.map(c =>
+                        nodes[c]?.online
+                            ? fetch(`${API}/${c}/status`).then(r => (r.ok ? r.json() : null))
+                            : Promise.resolve(null)
+                    )
                 );
 
-                const grid = document.getElementById('nodes-grid');
-                grid.innerHTML = results.map((r, i) => {
-                    const data = r.status === 'fulfilled' ? r.value : null;
-                    return renderCard(coins[i], data);
-                }).join('');
+                const onlineCount = coins.filter(c => nodes[c]?.online).length;
+                summaryEl.textContent =
+                    `${onlineCount}/${coins.length} nodes online · API time ${health.timestamp || '—'}`;
 
+                grid.innerHTML = coins
+                    .map((c, i) => renderCard(c, nodes[c], detailResults[i]))
+                    .join('');
+
+                setError('');
                 document.getElementById('last-updated').textContent =
-                    'Updated ' + new Date().toLocaleTimeString();
-
+                    'Page refreshed ' + new Date().toLocaleTimeString();
             } catch (e) {
-                console.error('Failed to fetch status', e);
+                console.error(e);
+                setError(e.message || 'Could not load node status.');
+                summaryEl.textContent = '';
+                grid.innerHTML = `
+                    <div class="col-span-full bg-isekai-card border border-isekai-border rounded-xl p-8 text-center text-isekai-muted text-sm">
+                        Dashboard unavailable. Check <code class="text-isekai-accent">GET ${API}/health</code> from the server.
+                    </div>`;
             }
         }
 
-        // Initial fetch + refresh every 30s
         fetchStatus();
         setInterval(fetchStatus, 30000);
     </script>
