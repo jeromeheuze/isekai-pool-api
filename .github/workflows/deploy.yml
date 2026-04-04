@@ -1,0 +1,33 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to isekai-pool.com
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_DEPLOY_KEY }}
+          script: |
+            cd /var/www/isekai-pool-api
+            git pull origin main
+
+            # API dependencies
+            cd api
+            composer install --no-dev --optimize-autoloader --quiet
+            php artisan config:cache
+            php artisan route:cache
+            chown -R www-data:www-data /var/www/isekai-pool-api
+            chmod -R 755 /var/www/isekai-pool-api/api/storage
+            chmod -R 755 /var/www/isekai-pool-api/api/bootstrap/cache
+
+            # Reload PHP-FPM
+            systemctl reload php8.3-fpm
+            echo "Deploy complete"

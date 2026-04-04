@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>isekai-pool.com — CPU Coin Infrastructure</title>
+    <meta name="description" content="Public RPC nodes for CPU-minable coins. Mine with a Raspberry Pi. No GPU required.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: {
+                            bg:      '#0d0f14',
+                            card:    '#141720',
+                            border:  '#1e2330',
+                            accent:  '#7c6af7',
+                            green:   '#4ade80',
+                            yellow:  '#facc15',
+                            red:     '#f87171',
+                            muted:   '#6b7280',
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }
+        .glow { box-shadow: 0 0 20px rgba(124, 106, 247, 0.15); }
+        .pulse-dot { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        .grid-bg {
+            background-image: linear-gradient(rgba(124,106,247,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(124,106,247,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen grid-bg">
+
+    <!-- Nav -->
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-isekai-accent font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </div>
+            <div class="flex items-center gap-6 text-sm text-isekai-muted">
+                <a href="/pages/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank"
+                   class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="max-w-6xl mx-auto px-4 pt-20 pb-16 text-center">
+        <div class="inline-flex items-center gap-2 bg-isekai-card border border-isekai-border
+                    rounded-full px-4 py-1 text-xs text-isekai-accent mb-6">
+            <span class="pulse-dot w-2 h-2 bg-isekai-accent rounded-full"></span>
+            Infrastructure for another world of crypto
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+            CPU Coin Infrastructure<br>
+            <span class="text-isekai-accent">for the coins nobody hosts</span>
+        </h1>
+        <p class="text-isekai-muted text-lg max-w-2xl mx-auto mb-8">
+            Public RPC nodes for obscure yespower/yescrypt CPU coins.
+            Mine with a Raspberry Pi. No GPU. No ASIC. Just your CPU.
+        </p>
+        <div class="flex items-center justify-center gap-4 flex-wrap">
+            <a href="/pages/api-docs.html"
+               class="bg-isekai-accent text-white px-6 py-2 rounded-lg hover:bg-purple-500 transition text-sm">
+                API Docs
+            </a>
+            <a href="/pages/coins.html"
+               class="border border-isekai-border text-gray-300 px-6 py-2 rounded-lg
+                      hover:border-isekai-accent hover:text-white transition text-sm">
+                View Coins
+            </a>
+        </div>
+    </section>
+
+    <!-- Live Node Status -->
+    <section class="max-w-6xl mx-auto px-4 pb-16">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-sm font-bold text-isekai-muted uppercase tracking-wider">Live Node Status</h2>
+            <span id="last-updated" class="text-xs text-isekai-muted"></span>
+        </div>
+
+        <div id="nodes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Cards injected by JS -->
+            <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 animate-pulse">
+                <div class="h-4 bg-isekai-border rounded w-1/3 mb-3"></div>
+                <div class="h-8 bg-isekai-border rounded w-1/2"></div>
+            </div>
+            <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 animate-pulse">
+                <div class="h-4 bg-isekai-border rounded w-1/3 mb-3"></div>
+                <div class="h-8 bg-isekai-border rounded w-1/2"></div>
+            </div>
+            <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 animate-pulse">
+                <div class="h-4 bg-isekai-border rounded w-1/3 mb-3"></div>
+                <div class="h-8 bg-isekai-border rounded w-1/2"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why CPU coins -->
+    <section class="max-w-6xl mx-auto px-4 pb-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-isekai-card border border-isekai-border rounded-xl p-6">
+                <div class="text-2xl mb-3">🍓</div>
+                <h3 class="font-bold mb-2">Raspberry Pi Ready</h3>
+                <p class="text-isekai-muted text-sm">
+                    Yespower and Yescrypt algorithms are designed for CPUs.
+                    A $35 Raspberry Pi can mine competitively.
+                </p>
+            </div>
+            <div class="bg-isekai-card border border-isekai-border rounded-xl p-6">
+                <div class="text-2xl mb-3">🔒</div>
+                <h3 class="font-bold mb-2">No GPU, No ASIC</h3>
+                <p class="text-isekai-muted text-sm">
+                    GPU miners are slower than CPUs on these algorithms.
+                    Truly decentralized — one CPU, one vote.
+                </p>
+            </div>
+            <div class="bg-isekai-card border border-isekai-border rounded-xl p-6">
+                <div class="text-2xl mb-3">🌐</div>
+                <h3 class="font-bold mb-2">Public RPC</h3>
+                <p class="text-isekai-muted text-sm">
+                    Free public RPC endpoints for coins that have no
+                    reliable infrastructure. Build wallets, check balances.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Preview -->
+    <section class="max-w-6xl mx-auto px-4 pb-20">
+        <div class="bg-isekai-card border border-isekai-border rounded-xl p-6 glow">
+            <h2 class="text-sm font-bold text-isekai-muted uppercase tracking-wider mb-4">Quick API</h2>
+            <pre class="text-sm text-gray-300 overflow-x-auto"><code><span class="text-isekai-muted"># All nodes health</span>
+curl https://api.isekai-pool.com/api/v1/health
+
+<span class="text-isekai-muted"># Yenten block count</span>
+curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"method":"getblockcount","params":[]}'
+
+<span class="text-isekai-muted"># Koto blockchain info</span>
+curl https://api.isekai-pool.com/api/v1/koto/status</code></pre>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex items-center justify-between text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/jeromeheuze/isekai-pool-api"
+                   target="_blank" class="hover:text-white transition">GitHub</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API = 'https://api.isekai-pool.com/api/v1';
+
+        const COIN_INFO = {
+            yenten:    { name: 'Yenten',    symbol: 'YTN',   algo: 'YespowerR16',   color: '#f59e0b' },
+            koto:      { name: 'Koto',      symbol: 'KOTO',  algo: 'Yescrypt',      color: '#8b5cf6' },
+            tidecoin:  { name: 'Tidecoin',  symbol: 'TDC',   algo: 'YespowerTIDE',  color: '#06b6d4' },
+        };
+
+        function renderCard(coin, data) {
+            const info  = COIN_INFO[coin] || {};
+            const online = data?.online ?? false;
+            const blocks = data?.blocks?.toLocaleString() ?? '—';
+            const progress = data?.progress ?? null;
+
+            return `
+            <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 hover:border-opacity-50
+                        transition" style="border-color: ${online ? info.color + '33' : '#1e2330'}">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <span class="font-bold">${info.name || coin}</span>
+                        <span class="text-isekai-muted text-xs ml-2">${info.symbol}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full ${online ? 'bg-isekai-green pulse-dot' : 'bg-isekai-red'}"></span>
+                        <span class="text-xs ${online ? 'text-isekai-green' : 'text-isekai-red'}">
+                            ${online ? 'online' : 'offline'}
+                        </span>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold mb-1">${blocks}</div>
+                <div class="text-xs text-isekai-muted mb-3">blocks</div>
+                ${progress !== null ? `
+                <div class="w-full bg-isekai-border rounded-full h-1">
+                    <div class="h-1 rounded-full transition-all"
+                         style="width:${Math.min(progress,100)}%; background:${info.color}"></div>
+                </div>
+                <div class="text-xs text-isekai-muted mt-1">${progress}% synced</div>
+                ` : ''}
+                <div class="mt-3 text-xs text-isekai-muted">${info.algo}</div>
+            </div>`;
+        }
+
+        async function fetchStatus() {
+            try {
+                // Fetch all node statuses in parallel
+                const coins = Object.keys(COIN_INFO);
+                const results = await Promise.allSettled(
+                    coins.map(c => fetch(`${API}/${c}/status`).then(r => r.json()))
+                );
+
+                const grid = document.getElementById('nodes-grid');
+                grid.innerHTML = results.map((r, i) => {
+                    const data = r.status === 'fulfilled' ? r.value : null;
+                    return renderCard(coins[i], data);
+                }).join('');
+
+                document.getElementById('last-updated').textContent =
+                    'Updated ' + new Date().toLocaleTimeString();
+
+            } catch (e) {
+                console.error('Failed to fetch status', e);
+            }
+        }
+
+        // Initial fetch + refresh every 30s
+        fetchStatus();
+        setInterval(fetchStatus, 30000);
+    </script>
+
+</body>
+</html>

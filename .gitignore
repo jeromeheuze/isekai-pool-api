@@ -1,0 +1,17 @@
+# Laravel
+api/.env
+api/vendor/
+api/storage/logs/
+api/bootstrap/cache/
+
+# Node
+web/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.cursor/
+.vscode/
+*.swp
