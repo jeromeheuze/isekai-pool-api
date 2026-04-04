@@ -8,7 +8,6 @@ use RuntimeException;
 
 class RpcService
 {
-    // Public methods — no auth required
     private const PUBLIC_METHODS = [
         'getblockcount',
         'getblockchaininfo',
@@ -30,7 +29,7 @@ class RpcService
     public function __construct(string $coin)
     {
         $config = config("coins.$coin");
-        if (!$config) {
+        if (! $config) {
             throw new RuntimeException("Unknown coin: $coin");
         }
         if ($config['status'] !== 'active') {
@@ -42,11 +41,10 @@ class RpcService
 
     public function call(string $method, array $params = []): mixed
     {
-        if (!in_array($method, self::PUBLIC_METHODS)) {
+        if (! in_array($method, self::PUBLIC_METHODS)) {
             throw new RuntimeException("Method '$method' is not available on the public API");
         }
 
-        // Cache read-only calls for 15 seconds
         $readOnly = in_array($method, [
             'getblockcount', 'getblockchaininfo', 'getdifficulty',
             'getconnectioncount', 'gettxoutsetinfo', 'getmempoolinfo',
@@ -54,8 +52,9 @@ class RpcService
         ]);
 
         if ($readOnly) {
-            $key = "rpc_{$this->coin}_{$method}_" . md5(json_encode($params));
-            return Cache::remember($key, 15, fn() => $this->execute($method, $params));
+            $key = "rpc_{$this->coin}_{$method}_".md5(json_encode($params));
+
+            return Cache::remember($key, 15, fn () => $this->execute($method, $params));
         }
 
         return $this->execute($method, $params);
@@ -89,7 +88,7 @@ class RpcService
 
         if ($error) {
             Log::error("RPC curl error [{$this->coin}/$method]: $error");
-            throw new RuntimeException("Node unreachable");
+            throw new RuntimeException('Node unreachable');
         }
 
         $data = json_decode($response, true);
@@ -106,6 +105,7 @@ class RpcService
     {
         try {
             $this->execute('getblockcount', []);
+
             return true;
         } catch (\Throwable) {
             return false;

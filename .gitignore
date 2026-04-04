@@ -2,7 +2,8 @@
 api/.env
 api/vendor/
 api/storage/logs/
-api/bootstrap/cache/
+api/bootstrap/cache/*
+!api/bootstrap/cache/.gitignore
 
 # Node
 web/node_modules/

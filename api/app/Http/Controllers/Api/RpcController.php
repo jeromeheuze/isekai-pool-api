@@ -16,7 +16,7 @@ class RpcController extends Controller
      */
     public function health(): JsonResponse
     {
-        $coins   = array_keys(array_filter(config('coins'), fn($c) => $c['status'] === 'active'));
+        $coins   = array_keys(array_filter(config('coins'), fn ($c) => $c['status'] === 'active'));
         $results = [];
 
         foreach ($coins as $coin) {
@@ -52,7 +52,7 @@ class RpcController extends Controller
     public function status(string $coin): JsonResponse
     {
         $coinConfig = config("coins.$coin");
-        if (!$coinConfig) {
+        if (! $coinConfig) {
             return response()->json(['error' => "Unknown coin: $coin"], 404);
         }
 

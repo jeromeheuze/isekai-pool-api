@@ -88,6 +88,15 @@
                 View Coins
             </a>
         </div>
+        <p class="text-isekai-muted text-xs mt-10 mb-1 uppercase tracking-wider">Nodes running today</p>
+        <div class="flex flex-wrap items-center justify-center gap-2 text-xs">
+            <span class="px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-200">YTN · Yenten</span>
+            <span class="px-3 py-1 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-200">KOTO · Koto</span>
+            <span class="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-200">TDC · Tidecoin</span>
+        </div>
+        <p class="text-isekai-muted text-xs mt-4 max-w-xl mx-auto">
+            Coming soon: Sugarchain, CPUchain, Documentchain — see roadmap in the repo.
+        </p>
     </section>
 
     <!-- Live Node Status (Phase 1 — CURSOR.md: homepage dashboard) -->
@@ -96,6 +105,8 @@
             <div>
                 <h2 class="text-sm font-bold text-isekai-muted uppercase tracking-wider">Live Node Status</h2>
                 <p id="health-summary" class="text-xs text-isekai-muted mt-1 min-h-[1rem]"></p>
+                <a id="health-json-link" href="https://api.isekai-pool.com/api/v1/health" target="_blank" rel="noopener"
+                   class="text-xs text-isekai-accent hover:underline mt-1 inline-block">Open raw JSON</a>
             </div>
             <span id="last-updated" class="text-xs text-isekai-muted"></span>
         </div>
@@ -179,15 +190,15 @@ curl https://api.isekai-pool.com/api/v1/koto/status</code></pre>
 
     <script>
         const API = 'https://api.isekai-pool.com/api/v1';
+        document.getElementById('health-json-link').href = `${API}/health`;
 
-        const COIN_ORDER = ['yenten', 'koto', 'tidecoin', 'sugarchain', 'cpuchain'];
+        const COIN_ORDER = ['yenten', 'koto', 'tidecoin', 'sugarchain'];
 
         const COIN_INFO = {
-            yenten:    { name: 'Yenten',    symbol: 'YTN',   algo: 'YespowerR16',   color: '#f59e0b' },
-            koto:      { name: 'Koto',      symbol: 'KOTO',  algo: 'Yescrypt',      color: '#8b5cf6' },
-            tidecoin:  { name: 'Tidecoin',  symbol: 'TDC',   algo: 'YespowerTIDE',  color: '#06b6d4' },
-            sugarchain:{ name: 'Sugarchain',symbol: 'SUGAR', algo: 'YespowerSugar', color: '#ec4899' },
-            cpuchain:  { name: 'CPUchain',  symbol: 'CPU',   algo: 'Yespower',      color: '#22c55e' },
+            yenten:     { name: 'Yenten',     symbol: 'YTN',   algo: 'YespowerR16',   color: '#f59e0b' },
+            koto:       { name: 'Koto',       symbol: 'KOTO',  algo: 'Yescrypt',      color: '#8b5cf6' },
+            tidecoin:   { name: 'Tidecoin',   symbol: 'TDC',   algo: 'YespowerTIDE',  color: '#06b6d4' },
+            sugarchain: { name: 'Sugarchain', symbol: 'SUGAR', algo: 'YespowerSugar', color: '#ec4899' },
         };
 
         function sortCoins(keys) {

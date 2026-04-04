@@ -58,7 +58,6 @@ return [
         ],
     ],
 
-    // Coming soon
     'sugarchain' => [
         'name'        => 'Sugarchain',
         'symbol'      => 'SUGAR',
