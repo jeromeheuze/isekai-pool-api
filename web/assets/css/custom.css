@@ -1,0 +1,21 @@
+/* Overrides beyond Tailwind CDN — spec: code blocks #1a1a2e */
+.isekai-code-block {
+    background-color: #1a1a2e;
+    border: 1px solid #1e2330;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+}
+
+.coin-logo-placeholder {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+}

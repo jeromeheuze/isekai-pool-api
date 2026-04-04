@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supported Coins — YTN, KOTO, TDC | isekai-pool.com</title>
+    <meta name="description" content="Browse all CPU-mineable coins available on isekai-pool.com. Public RPC endpoints for Yenten, Koto, and Tidecoin.">
+    <link rel="canonical" href="https://isekai-pool.com/coins.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/coins.html">
+    <meta property="og:title" content="Supported Coins — YTN, KOTO, TDC | isekai-pool.com">
+    <meta property="og:description" content="Browse all CPU-mineable coins available on isekai-pool.com. Public RPC endpoints for Yenten, Koto, and Tidecoin.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Supported Coins — YTN, KOTO, TDC | isekai-pool.com">
+    <meta name="twitter:description" content="Browse all CPU-mineable coins available on isekai-pool.com. Public RPC endpoints for Yenten, Koto, and Tidecoin.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', green: '#4ade80', red: '#f87171', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
+                <span class="text-white font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="text-white">Coins</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-6xl mx-auto px-4 py-12 w-full">
+        <header class="mb-10 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-bold mb-3">Supported Coins</h1>
+            <p class="text-isekai-muted text-lg max-w-2xl">Public RPC nodes for CPU-mineable coins. Point your miner, start earning.</p>
+            <p class="text-isekai-muted text-sm mt-4">Live status uses <a href="https://api.isekai-pool.com/api/v1/health" class="text-isekai-accent hover:underline">the public API</a> — not raw node IPs in the browser.</p>
+        </header>
+
+        <div id="coin-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </main>
+
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/assets/js/api.js"></script>
+    <script>
+        (function () {
+            var C = IsekaiAPI.COINS;
+            var order = ['YTN', 'KOTO', 'TDC'];
+            var colors = { YTN: '#f59e0b', KOTO: '#8b5cf6', TDC: '#06b6d4' };
+
+            function card(k, meta, live) {
+                var online = live && live.ok && live.data && live.data.online === true;
+                var blocks = online && live.data.blocks != null ? Number(live.data.blocks).toLocaleString() : '—';
+                var pill = online
+                    ? '<span class="text-isekai-green text-xs">🟢 Online</span>'
+                    : '<span class="text-isekai-red text-xs">🔴 Offline</span>';
+                var initials = meta.symbol;
+                var border = online ? colors[k] + '55' : '#1e2330';
+                return (
+                    '<article class="bg-isekai-card border rounded-xl p-6 flex flex-col" style="border-color:' + border + '">' +
+                    '<div class="flex items-start gap-4 mb-4">' +
+                    '<div class="coin-logo-placeholder shrink-0 text-white" style="background:' + colors[k] + '44">' + initials + '</div>' +
+                    '<div><h2 class="font-bold text-lg">' + meta.name + ' <span class="text-isekai-muted font-normal">' + meta.symbol + '</span></h2>' +
+                    '<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-isekai-border text-isekai-muted">' + meta.algo + '</span></div></div>' +
+                    '<div class="flex items-center justify-between mb-2">' + pill + '</div>' +
+                    '<p class="text-sm text-isekai-muted mb-1">Block height</p>' +
+                    '<p class="text-2xl font-bold mb-6">' + blocks + '</p>' +
+                    '<div class="mt-auto flex flex-col gap-2">' +
+                    '<a href="' + meta.page + '" class="text-center bg-isekai-accent text-white py-2 rounded-lg text-sm hover:opacity-90">View Details →</a>' +
+                    '<a href="/guide.html#choose-coin" class="text-center border border-isekai-border py-2 rounded-lg text-sm hover:border-isekai-accent">Mining Guide →</a>' +
+                    '</div></article>'
+                );
+            }
+
+            function renderLoading() {
+                var html = '';
+                order.forEach(function () {
+                    html += '<div class="bg-isekai-card border border-isekai-border rounded-xl p-6 animate-pulse h-64"></div>';
+                });
+                document.getElementById('coin-grid').innerHTML = html;
+            }
+
+            async function load() {
+                renderLoading();
+                var out = '';
+                for (var i = 0; i < order.length; i++) {
+                    var k = order[i];
+                    var meta = C[k];
+                    var live = await IsekaiAPI.getCoinStatus(meta.slug);
+                    out += card(k, meta, live);
+                }
+                document.getElementById('coin-grid').innerHTML = out;
+            }
+            load();
+        })();
+    </script>
+</body>
+</html>

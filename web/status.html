@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Status — Live RPC Dashboard | isekai-pool.com</title>
+    <meta name="description" content="Live status of all isekai-pool.com RPC nodes. Check block height, network hashrate, difficulty, and uptime for YTN, KOTO, and TDC.">
+    <link rel="canonical" href="https://isekai-pool.com/status.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/status.html">
+    <meta property="og:title" content="Node Status — Live RPC Dashboard | isekai-pool.com">
+    <meta property="og:description" content="Live status of all isekai-pool.com RPC nodes. Check block height, difficulty, and peers for YTN, KOTO, and TDC.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Node Status | isekai-pool.com">
+    <meta name="twitter:description" content="Live RPC dashboard for YTN, KOTO, and TDC.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', green: '#4ade80', red: '#f87171', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>
+        body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }
+        .pulse-dot { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
+                <span class="text-white font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="text-white">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-6xl mx-auto px-4 py-12 w-full">
+        <header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold">Node Status</h1>
+                <p class="text-isekai-muted text-sm mt-2">Data from <code class="text-isekai-accent">GET /api/v1/{coin}/status</code>. Network hashrate requires a future API field (<code class="text-isekai-accent">getmininginfo</code> not on the public whitelist yet).</p>
+            </div>
+            <p id="updated" class="text-xs text-isekai-muted"></p>
+        </header>
+        <div id="grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6"></div>
+        <p class="text-isekai-muted text-sm mt-10">Solo mining uses your node’s RPC host and credentials — see each <a href="/coins.html" class="text-isekai-accent hover:underline">coin page</a>. Never paste secrets into this site; configure them only in your miner on your machine.</p>
+    </main>
+
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/assets/js/api.js"></script>
+    <script>
+        (function () {
+            var C = IsekaiAPI.COINS;
+            var order = ['YTN', 'KOTO', 'TDC'];
+            var colors = { YTN: '#f59e0b', KOTO: '#8b5cf6', TDC: '#06b6d4' };
+
+            function fmtNum(n) {
+                if (n == null || n === '') return '—';
+                var x = Number(n);
+                if (isNaN(x)) return '—';
+                return x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            }
+
+            function row(label, val) {
+                return '<div class="flex justify-between gap-4 text-sm py-1"><span class="text-isekai-muted">' + label + '</span><span class="text-right">' + val + '</span></div>';
+            }
+
+            function renderCard(k, meta, d, ms) {
+                var online = d && d.online === true;
+                var dot = online ? 'bg-isekai-green pulse-dot' : 'bg-isekai-red';
+                var rpcLine = meta.rpcPort
+                    ? 'http://YOUR_RPC_HOST:' + meta.rpcPort
+                    : '—';
+                return (
+                    '<article class="bg-isekai-card border border-isekai-border rounded-xl p-6" style="border-color:' + (online ? colors[k] + '44' : '#1e2330') + '">' +
+                    '<div class="flex items-center justify-between mb-4">' +
+                    '<div><h2 class="font-bold text-lg"><a href="' + meta.page + '" class="hover:text-isekai-accent">' + meta.name + '</a> <span class="text-isekai-muted font-normal">' + meta.symbol + '</span></h2>' +
+                    '<p class="text-xs text-isekai-muted">' + meta.algo + '</p></div>' +
+                    '<span class="w-2.5 h-2.5 rounded-full ' + dot + '" title="' + (online ? 'online' : 'offline') + '"></span></div>' +
+                    '<div class="space-y-1 mb-4">' +
+                    row('Status', online ? '<span class="text-isekai-green">Online</span>' : '<span class="text-isekai-red">Offline</span>') +
+                    row('Block height', fmtNum(d && d.blocks)) +
+                    row('Difficulty', fmtNum(d && d.difficulty)) +
+                    row('Peers', d && d.peers != null ? String(d.peers) : '—') +
+                    row('Verification %', d && d.progress != null ? d.progress + '%' : '—') +
+                    row('Response time', ms != null ? ms + ' ms' : '—') +
+                    row('Network hashrate', '<span class="text-isekai-muted">Not in API yet</span>') +
+                    '</div>' +
+                    '<div class="text-xs text-isekai-muted mb-1">RPC endpoint (miner)</div>' +
+                    '<code class="block text-xs bg-black/30 rounded px-2 py-2 break-all">' + rpcLine + '</code>' +
+                    '</article>'
+                );
+            }
+
+            async function refresh() {
+                var html = '';
+                for (var i = 0; i < order.length; i++) {
+                    var k = order[i];
+                    var meta = C[k];
+                    var t0 = performance.now();
+                    var res = await IsekaiAPI.getCoinStatus(meta.slug);
+                    var ms = Math.round(performance.now() - t0);
+                    var d = res.ok ? res.data : (res.data || {});
+                    if (!res.ok) d = Object.assign({ online: false }, d);
+                    html += renderCard(k, meta, d, res.ok ? ms : null);
+                }
+                document.getElementById('grid').innerHTML = html;
+                document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleString();
+            }
+            refresh();
+            setInterval(refresh, 30000);
+        })();
+    </script>
+</body>
+</html>

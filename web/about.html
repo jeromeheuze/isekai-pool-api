@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About isekai-pool.com</title>
+    <meta name="description" content="Public CPU mining infrastructure for obscure yespower and yescrypt cryptocurrencies. Free RPC nodes, no registration, no fees.">
+    <link rel="canonical" href="https://isekai-pool.com/about.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/about.html">
+    <meta property="og:title" content="About isekai-pool.com">
+    <meta property="og:description" content="Public CPU mining infrastructure for obscure yespower and yescrypt cryptocurrencies.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="About isekai-pool.com">
+    <meta name="twitter:description" content="Free public RPC nodes for CPU-mineable coins.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
+                <span class="text-white font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="text-white">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
+        <h1 class="text-3xl font-bold mb-8">About isekai-pool.com</h1>
+        <div class="space-y-6 text-isekai-muted text-sm leading-relaxed">
+            <section>
+                <h2 class="text-white font-bold text-base mb-2">What</h2>
+                <p>Public RPC infrastructure for CPU-mineable yespower and yescrypt coins — so wallets, scripts, and miners can talk to the network without everyone running a full node at home.</p>
+            </section>
+            <section>
+                <h2 class="text-white font-bold text-base mb-2">Why</h2>
+                <p>Small coins often lose reliable public endpoints. This project keeps a few networks reachable: free JSON-RPC through <a href="https://api.isekai-pool.com/api/v1/health" class="text-isekai-accent hover:underline">the API</a>, documented for builders and home miners.</p>
+            </section>
+            <section>
+                <h2 class="text-white font-bold text-base mb-2">Who</h2>
+                <p>Run by a solo developer. Not a company, not a pool (yet) — just infrastructure.</p>
+            </section>
+            <section>
+                <h2 class="text-white font-bold text-base mb-2">Uptime</h2>
+                <p>Best-effort. There is no SLA. Check <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a> for live health.</p>
+            </section>
+            <section>
+                <h2 class="text-white font-bold text-base mb-2">Add a coin</h2>
+                <p>Open an issue or PR on <a href="https://github.com/jeromeheuze/isekai-pool-api" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">GitHub</a>.</p>
+            </section>
+        </div>
+        <p class="text-sm text-isekai-muted mt-10">
+            <a href="/coins.html" class="text-isekai-accent hover:underline">Supported coins</a> ·
+            <a href="/guide.html" class="text-isekai-accent hover:underline">Mining guide</a> ·
+            <a href="/" class="text-isekai-accent hover:underline">Home</a>
+        </p>
+    </main>
+
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

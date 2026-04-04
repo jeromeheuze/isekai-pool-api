@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU Mining Setup Guide — cpuminer-opt | isekai-pool.com</title>
+    <meta name="description" content="Step-by-step guide to CPU mining with cpuminer-opt on Linux, Raspberry Pi, and Windows. Mine yespower and yescrypt coins today.">
+    <link rel="canonical" href="https://isekai-pool.com/guide.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/guide.html">
+    <meta property="og:title" content="CPU Mining Setup Guide — cpuminer-opt | isekai-pool.com">
+    <meta property="og:description" content="Step-by-step guide to CPU mining with cpuminer-opt on Linux, Raspberry Pi, and Windows.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CPU Mining Setup Guide | isekai-pool.com">
+    <meta name="twitter:description" content="cpuminer-opt on Linux, Raspberry Pi, and Windows.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"HowTo","name":"How to Mine CPU Coins with cpuminer-opt","description":"Step-by-step guide to setting up cpuminer-opt and mining yespower/yescrypt coins on isekai-pool.com public RPC nodes.","step":[{"@type":"HowToStep","name":"Install dependencies","text":"Install build tools and libraries required for cpuminer-opt."},{"@type":"HowToStep","name":"Clone and compile cpuminer-opt","text":"Download and compile cpuminer-opt from source with architecture-optimized flags."},{"@type":"HowToStep","name":"Get a wallet address","text":"Generate a wallet address for the coin you want to mine."},{"@type":"HowToStep","name":"Start mining","text":"Run cpuminer-opt pointed at the isekai-pool.com RPC endpoint."}]}
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
+                <span class="text-white font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/guide.html" class="text-white">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
+        <h1 class="text-3xl font-bold mb-6">CPU mining setup</h1>
+
+        <section class="mb-12">
+            <h2 class="text-xl font-bold mb-3">What is CPU mining?</h2>
+            <p class="text-isekai-muted text-sm leading-relaxed mb-3">Yespower and yescrypt families are built so ordinary CPUs stay competitive — GPUs and ASICs don’t dominate the way they do on SHA-256 or Ethash.</p>
+            <p class="text-isekai-muted text-sm leading-relaxed mb-3">You run a miner on hardware you already own: a Raspberry Pi, an old laptop, or a desktop. Your machine talks to a coin node over RPC (or a pool) and hashes blocks.</p>
+            <p class="text-isekai-muted text-sm leading-relaxed">isekai-pool.com hosts public RPC nodes so you can solo-mine or build tools without syncing a full node yourself. See the <a href="/status.html" class="text-isekai-accent hover:underline">status dashboard</a> and <a href="/pages/api-docs.html" class="text-isekai-accent hover:underline">API docs</a>.</p>
+        </section>
+
+        <section id="choose-coin" class="mb-12 scroll-mt-24">
+            <h2 class="text-xl font-bold mb-4">Choose your coin</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="/ytn.html" class="bg-isekai-card border border-isekai-border rounded-xl p-4 hover:border-isekai-accent transition">
+                    <h3 class="font-bold text-amber-400">Yenten (YTN)</h3>
+                    <p class="text-xs text-isekai-muted mt-1">YespowerR16</p>
+                </a>
+                <a href="/koto.html" class="bg-isekai-card border border-isekai-border rounded-xl p-4 hover:border-isekai-accent transition">
+                    <h3 class="font-bold text-violet-400">Koto (KOTO)</h3>
+                    <p class="text-xs text-isekai-muted mt-1">Yescrypt</p>
+                </a>
+                <a href="/tdc.html" class="bg-isekai-card border border-isekai-border rounded-xl p-4 hover:border-isekai-accent transition">
+                    <h3 class="font-bold text-cyan-400">Tidecoin (TDC)</h3>
+                    <p class="text-xs text-isekai-muted mt-1">YespowerTIDE</p>
+                </a>
+            </div>
+            <p class="text-sm text-isekai-muted mt-4"><a href="/coins.html" class="text-isekai-accent hover:underline">Browse all coins</a> · <a href="/about.html" class="text-isekai-accent hover:underline">About this project</a></p>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-xl font-bold mb-4">Install cpuminer-opt</h2>
+            <div id="os-tabs" class="border border-isekai-border rounded-xl overflow-hidden">
+                <div class="flex flex-wrap border-b border-isekai-border bg-isekai-bg">
+                    <button type="button" data-tab="arm" class="px-4 py-2 text-sm border-b-2 border-isekai-accent text-white bg-isekai-card">Linux / RPi (ARM64)</button>
+                    <button type="button" data-tab="x86" class="px-4 py-2 text-sm border-b-2 border-transparent text-isekai-muted">Linux (x86_64)</button>
+                    <button type="button" data-tab="win" class="px-4 py-2 text-sm border-b-2 border-transparent text-isekai-muted">Windows</button>
+                </div>
+                <div data-tab-panel="arm" class="p-4">
+                    <pre id="code-arm" class="isekai-code-block text-gray-300">sudo apt update && sudo apt install -y git build-essential automake autoconf \
+  libcurl4-openssl-dev libssl-dev libjansson-dev libgmp-dev zlib1g-dev screen
+
+git clone https://github.com/JayDDee/cpuminer-opt.git
+cd cpuminer-opt
+./autogen.sh
+./configure CFLAGS="-O3 -march=armv8.2-a+crypto -mtune=cortex-a76"
+make -j4</pre>
+                    <button type="button" data-copy-target="#code-arm" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
+                </div>
+                <div data-tab-panel="x86" class="p-4 hidden">
+                    <pre id="code-x86" class="isekai-code-block text-gray-300">sudo apt update && sudo apt install -y git build-essential automake autoconf \
+  libcurl4-openssl-dev libssl-dev libjansson-dev libgmp-dev zlib1g-dev screen
+
+git clone https://github.com/JayDDee/cpuminer-opt.git
+cd cpuminer-opt
+./autogen.sh
+./configure CFLAGS="-O3 -march=native"
+make -j$(nproc)</pre>
+                    <button type="button" data-copy-target="#code-x86" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
+                </div>
+                <div data-tab-panel="win" class="p-4 hidden">
+                    <p class="text-sm text-isekai-muted mb-2">Use pre-built releases from the cpuminer-opt project when available. Linux is recommended for long-running nodes.</p>
+                    <a href="https://github.com/JayDDee/cpuminer-opt/releases" class="text-isekai-accent text-sm hover:underline" target="_blank" rel="noopener">JayDDee/cpuminer-opt releases →</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-xl font-bold mb-4">Run the miner</h2>
+            <p class="text-isekai-muted text-sm mb-3">Use your coin’s algorithm, RPC host/port, and credentials. Replace placeholders — get RPC details from the <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a> page or your operator.</p>
+            <pre id="code-miner" class="isekai-code-block text-gray-300">./cpuminer \
+  --algo=ALGO \
+  --url=http://YOUR_RPC_HOST:RPC_PORT \
+  --user=YOUR_RPC_USER \
+  --pass=YOUR_RPC_PASS \
+  --coinbase-addr=YOUR_ADDRESS \
+  --threads=4</pre>
+            <button type="button" data-copy-target="#code-miner" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold mb-3">Tips</h2>
+            <ul class="text-sm text-isekai-muted space-y-2 list-disc pl-5">
+                <li>Use <code class="text-gray-400">screen</code> or <code class="text-gray-400">tmux</code> so mining survives SSH disconnect.</li>
+                <li><code class="text-gray-400">--cpu-priority=2</code> can keep the system responsive.</li>
+                <li>Watch for <code class="text-gray-400">accepted</code> in logs when you find shares/blocks.</li>
+                <li>Raspberry Pi: <code class="text-gray-400">vcgencmd measure_temp</code> · Linux: <code class="text-gray-400">sensors</code></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/assets/js/ui.js"></script>
+    <script>
+        IsekaiUI.initTabs(document.getElementById('os-tabs'));
+        IsekaiUI.initCopyButtons(document);
+    </script>
+</body>
+</html>

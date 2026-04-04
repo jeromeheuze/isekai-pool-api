@@ -3,8 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>isekai-pool.com — CPU Coin Infrastructure</title>
-    <meta name="description" content="Public RPC nodes for CPU-minable coins. Mine with a Raspberry Pi. No GPU required.">
+    <title>Public CPU Mining RPC Nodes | isekai-pool.com</title>
+    <meta name="description" content="Free public RPC nodes for yespower and yescrypt CPU-mineable cryptocurrencies. Mine YTN, KOTO, and TDC with your CPU today.">
+    <link rel="canonical" href="https://isekai-pool.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/">
+    <meta property="og:title" content="Public CPU Mining RPC Nodes | isekai-pool.com">
+    <meta property="og:description" content="Free public RPC nodes for yespower and yescrypt CPU-mineable cryptocurrencies.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="isekai-pool.com — CPU coin infrastructure">
+    <meta name="twitter:description" content="Public RPC for YTN, KOTO, TDC.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebSite","name":"isekai-pool.com","url":"https://isekai-pool.com","description":"Public RPC node infrastructure for CPU-mineable yespower and yescrypt cryptocurrencies.","potentialAction":{"@type":"SearchAction","target":"https://isekai-pool.com/coins.html?q={search_term_string}","query-input":"required name=search_term_string"}}
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -47,13 +61,17 @@
 
     <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
+            <a href="/" class="flex items-center gap-2">
                 <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
                 <span class="text-white font-bold text-lg">isekai</span>
                 <span class="text-isekai-muted text-sm">異世界</span>
-            </div>
-            <div class="flex items-center gap-6 text-sm text-isekai-muted">
-                <a href="/pages/coins.html" class="hover:text-white transition">Coins</a>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="text-white">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
                 <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
                 <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener"
                    class="hover:text-white transition">GitHub</a>
@@ -74,10 +92,15 @@
                class="bg-isekai-accent text-white px-6 py-2.5 rounded-lg hover:opacity-90 transition text-sm font-medium">
                 View API Docs
             </a>
-            <a href="/pages/coins.html"
+            <a href="/coins.html"
                class="border border-isekai-border text-gray-300 px-6 py-2.5 rounded-lg
                       hover:border-isekai-accent hover:text-white transition text-sm font-medium">
                 See Coins
+            </a>
+            <a href="/guide.html"
+               class="border border-isekai-border text-gray-300 px-6 py-2.5 rounded-lg
+                      hover:border-isekai-accent hover:text-white transition text-sm font-medium">
+                Mining Guide
             </a>
         </div>
     </section>
@@ -148,7 +171,9 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
     <footer class="border-t border-isekai-border">
         <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
             <span>isekai-pool.com — 異世界インフラ</span>
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap items-center gap-4">
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
                 <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener"
                    class="hover:text-white transition">GitHub</a>
                 <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
@@ -177,7 +202,7 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
             el.classList.remove('hidden');
         }
 
-        function renderCard(coin, data) {
+        function renderCard(coin, data, pageUrl) {
             const meta = COIN_META[coin] || { name: coin, symbol: coin.toUpperCase(), color: '#7c6af7' };
             const online = data && data.online === true;
             const blocks = data && data.blocks != null
@@ -185,13 +210,16 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
                 : '—';
             const algo = (data && data.algo) || meta.algo || '';
             const progress = online && data.progress != null ? Number(data.progress) : null;
+            const title = pageUrl
+                ? `<a href="${pageUrl}" class="font-bold hover:text-isekai-accent">${meta.name}</a>`
+                : `<span class="font-bold">${meta.name}</span>`;
 
             return `
             <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 transition"
                  style="border-color: ${online ? meta.color + '40' : '#1e2330'}">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <span class="font-bold">${meta.name}</span>
+                        ${title}
                         <span class="text-isekai-muted text-xs ml-2">${meta.symbol}</span>
                     </div>
                     <div class="flex items-center gap-1.5">
@@ -212,6 +240,12 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
             </div>`;
         }
 
+        const COIN_PAGE = {
+            yenten: '/ytn.html',
+            koto: '/koto.html',
+            tidecoin: '/tdc.html',
+        };
+
         async function fetchStatuses() {
             const grid = document.getElementById('nodes-grid');
             try {
@@ -228,13 +262,13 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
                 );
 
                 setError('');
-                grid.innerHTML = results.map(({ coin, data }) => renderCard(coin, data)).join('');
+                grid.innerHTML = results.map(({ coin, data }) => renderCard(coin, data, COIN_PAGE[coin])).join('');
                 document.getElementById('last-updated').textContent =
                     'Updated ' + new Date().toLocaleTimeString();
             } catch (e) {
                 console.error(e);
                 setError('Could not reach the API. Check your connection or try again later.');
-                grid.innerHTML = COINS.map((coin) => renderCard(coin, null)).join('');
+                grid.innerHTML = COINS.map((coin) => renderCard(coin, null, COIN_PAGE[coin])).join('');
             }
         }
 

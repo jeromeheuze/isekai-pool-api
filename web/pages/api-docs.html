@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference | isekai-pool.com</title>
+    <meta name="description" content="Public JSON API for Yenten, Koto, and Tidecoin: health, node status, and whitelisted RPC proxy at api.isekai-pool.com.">
+    <link rel="canonical" href="https://isekai-pool.com/pages/api-docs.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/pages/api-docs.html">
+    <meta property="og:title" content="API Reference | isekai-pool.com">
+    <meta property="og:description" content="Health, per-coin status, and RPC proxy — HTTPS only.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="API Reference | isekai-pool.com">
+    <meta name="twitter:description" content="Public JSON API for CPU coin nodes.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
+                <span class="text-white font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="text-white">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
+        <h1 class="text-3xl font-bold mb-2">API reference</h1>
+        <p class="text-isekai-muted text-sm mb-8">Base URL: <code class="text-isekai-accent">https://api.isekai-pool.com/api/v1</code></p>
+
+        <section class="mb-10">
+            <h2 class="text-lg font-bold mb-3">Endpoints</h2>
+            <ul class="text-sm text-isekai-muted space-y-2 font-mono">
+                <li><code class="text-green-400">GET</code> <code>/health</code> — all active coins, block height, online flag</li>
+                <li><code class="text-green-400">GET</code> <code>/{coin}/status</code> — blockchain + network summary for one coin</li>
+                <li><code class="text-amber-400">POST</code> <code>/{coin}/rpc</code> — JSON-RPC proxy (whitelisted methods only)</li>
+            </ul>
+            <p class="text-sm text-isekai-muted mt-4">Coin slugs: <code class="text-gray-400">yenten</code>, <code class="text-gray-400">koto</code>, <code class="text-gray-400">tidecoin</code>.</p>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-lg font-bold mb-3"><code class="text-isekai-accent">GET /health</code></h2>
+            <p class="text-sm text-isekai-muted mb-3">Quick check of every active node.</p>
+            <pre class="isekai-code-block text-gray-300 text-xs overflow-x-auto">curl https://api.isekai-pool.com/api/v1/health</pre>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-lg font-bold mb-3"><code class="text-isekai-accent">GET /{coin}/status</code></h2>
+            <p class="text-sm text-isekai-muted mb-3">Returns fields such as <code class="text-gray-400">blocks</code>, <code class="text-gray-400">difficulty</code>, <code class="text-gray-400">peers</code>, <code class="text-gray-400">progress</code>, <code class="text-gray-400">online</code>, <code class="text-gray-400">algo</code>, <code class="text-gray-400">symbol</code> when the node is up. Use this from browsers — do not call raw node IPs from frontend code.</p>
+            <pre class="isekai-code-block text-gray-300 text-xs overflow-x-auto">curl https://api.isekai-pool.com/api/v1/yenten/status</pre>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-lg font-bold mb-3"><code class="text-isekai-accent">POST /{coin}/rpc</code></h2>
+            <p class="text-sm text-isekai-muted mb-3">Body: <code class="text-gray-400">{"method":"getblockcount","params":[]}</code>. Only approved methods are allowed server-side.</p>
+            <pre class="isekai-code-block text-gray-300 text-xs overflow-x-auto">curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"method":"getblockcount","params":[]}'</pre>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-lg font-bold mb-3">Whitelisted RPC methods</h2>
+            <p class="text-sm text-isekai-muted mb-2">Including (not exhaustive — see server config for the canonical list):</p>
+            <p class="text-xs text-gray-400 leading-relaxed">getblockcount · getblockchaininfo · getnetworkinfo · getmempoolinfo · getblock · getblockhash · getrawtransaction · decoderawtransaction · sendrawtransaction · gettxoutsetinfo · getdifficulty · getconnectioncount</p>
+        </section>
+
+        <p class="text-sm text-isekai-muted">
+            <a href="/status.html" class="text-isekai-accent hover:underline">Node status dashboard</a> ·
+            <a href="/" class="text-isekai-accent hover:underline">Home</a> ·
+            <a href="https://github.com/jeromeheuze/isekai-pool-api" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">Source on GitHub</a>
+        </p>
+    </main>
+
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine Yenten (YTN) — yespower CPU Mining | isekai-pool.com</title>
+    <meta name="description" content="Public RPC node for Yenten (YTN) CPU mining. Algorithm: YespowerR16. Free endpoint, solo mining, instant setup with cpuminer-opt.">
+    <link rel="canonical" href="https://isekai-pool.com/ytn.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/ytn.html">
+    <meta property="og:title" content="Mine Yenten (YTN) — yespower CPU Mining | isekai-pool.com">
+    <meta property="og:description" content="Solo-mine YTN with cpuminer-opt via our public infrastructure.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mine Yenten (YTN) | isekai-pool.com">
+    <meta name="twitter:description" content="YespowerR16 CPU mining on isekai-pool.com.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"What hardware do I need to mine Yenten (YTN)?","acceptedAnswer":{"@type":"Answer","text":"Any CPU can mine YTN. A Raspberry Pi 5 often reaches roughly 3,000–4,000 H/s. A modern desktop CPU can reach higher rates depending on cores and clocks."}},
+      {"@type":"Question","name":"Is the isekai-pool.com RPC node free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes. Public RPC access through our API is free. Solo mining uses RPC credentials supplied by the operator — see the Node Status page for how to connect."}},
+      {"@type":"Question","name":"What is Yespower / YespowerR16?","acceptedAnswer":{"@type":"Answer","text":"Yespower is a CPU-oriented proof-of-work family. Yenten uses the R16 variant (YespowerR16), designed so GPUs do not dominate the network."}},
+      {"@type":"Question","name":"How do I solo mine without a pool?","acceptedAnswer":{"@type":"Answer","text":"Run cpuminer-opt with your wallet address and point --url at your RPC endpoint (host, port, user, pass). When you find a block, the reward goes to your address."}},
+      {"@type":"Question","name":"Where do I get RPC host and credentials?","acceptedAnswer":{"@type":"Answer","text":"Check the Node Status page and project announcements for the current public RPC host, port, and credentials. Never share your wallet seed; only configure RPC in your miner."}}
+    ]}
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', green: '#4ade80', red: '#f87171', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
+                <span class="text-white font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
+        <header class="flex flex-wrap items-start gap-6 mb-10">
+            <div class="coin-logo-placeholder shrink-0 text-white text-xl" style="background:#f59e0b44" aria-hidden="true">YTN</div>
+            <div>
+                <h1 class="text-3xl font-bold">Mine Yenten <span class="text-amber-400">(YTN)</span></h1>
+                <p class="text-isekai-muted mt-2">CPU-mineable · YespowerR16 · Public RPC via isekai-pool.com</p>
+                <p class="text-sm text-isekai-muted mt-4">
+                    <a href="/guide.html" class="text-isekai-accent hover:underline">Full mining guide</a> ·
+                    <a href="/coins.html" class="text-isekai-accent hover:underline">All coins</a> ·
+                    <a href="/status.html" class="text-isekai-accent hover:underline">Live node status</a>
+                </p>
+            </div>
+        </header>
+
+        <section class="bg-isekai-card border border-isekai-border rounded-xl p-4 mb-8" aria-labelledby="live-stats">
+            <h2 id="live-stats" class="text-sm font-bold text-isekai-muted uppercase tracking-wider mb-4">Live stats</h2>
+            <p class="text-xs text-isekai-muted mb-3">From <code class="text-isekai-accent">GET /api/v1/yenten/status</code>. Network hashrate is not in this response yet.</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div><span class="text-isekai-muted block text-xs">Block height</span><span id="stat-blocks" class="font-bold text-lg">—</span></div>
+                <div><span class="text-isekai-muted block text-xs">Difficulty</span><span id="stat-diff" class="font-bold text-lg">—</span></div>
+                <div><span class="text-isekai-muted block text-xs">Peers</span><span id="stat-peers" class="font-bold text-lg">—</span></div>
+                <div><span class="text-isekai-muted block text-xs">Node</span><span id="stat-node" class="font-bold text-lg">—</span></div>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-3">Quick connect</h2>
+            <pre id="code-qc" class="isekai-code-block text-gray-300 text-sm overflow-x-auto"></pre>
+            <button type="button" data-copy-target="#code-qc" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
+            <p class="text-isekai-muted text-sm mt-3">Replace <code class="text-gray-400">YOUR_YTN_ADDRESS</code> with your wallet. Use <code class="text-gray-400">YOUR_RPC_USER</code> / <code class="text-gray-400">YOUR_RPC_PASS</code> and the RPC host from the <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a> page or operator docs. Port for reference: <strong class="text-gray-300">9982</strong> (RPC).</p>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-4">Coin info</h2>
+            <div class="overflow-x-auto border border-isekai-border rounded-xl">
+                <table class="w-full text-sm">
+                    <tbody class="divide-y divide-isekai-border">
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal w-40">Algorithm</th><td class="p-3">YespowerR16</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Block time</th><td class="p-3">~2 minutes</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">RPC</th><td class="p-3"><code class="text-isekai-accent">http://YOUR_RPC_HOST:9982</code></td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">P2P port</th><td class="p-3">9981</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Explorer</th><td class="p-3"><a href="https://explorer.yentencoin.info/" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">explorer.yentencoin.info</a></td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Source</th><td class="p-3"><a href="https://github.com/yentencoin/yenten" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">github.com/yentencoin/yenten</a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-3">Mining setup</h2>
+            <p class="text-isekai-muted text-sm mb-4">Install dependencies, compile cpuminer-opt (ARM64 or x86_64), then run the miner. Full copy-paste steps with tabs are on the <a href="/guide.html" class="text-isekai-accent hover:underline">mining guide</a>.</p>
+            <ul class="text-sm text-isekai-muted list-decimal pl-5 space-y-2">
+                <li>Install build tools and libraries (see guide).</li>
+                <li>Clone <a href="https://github.com/JayDDee/cpuminer-opt" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">cpuminer-opt</a> and compile.</li>
+                <li>Generate a YTN receiving address in your wallet.</li>
+                <li>Run cpuminer with this page’s Quick connect command.</li>
+                <li>Watch for <code class="text-gray-400">accepted</code> in the log.</li>
+            </ul>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-4">Rough hashrates (reference)</h2>
+            <div class="overflow-x-auto border border-isekai-border rounded-xl">
+                <table class="w-full text-sm">
+                    <thead><tr class="border-b border-isekai-border text-isekai-muted text-left"><th class="p-3 font-medium">Hardware</th><th class="p-3 font-medium">Hashrate</th></tr></thead>
+                    <tbody class="divide-y divide-isekai-border">
+                        <tr><td class="p-3">Raspberry Pi 5</td><td class="p-3">~3,000–4,000 H/s</td></tr>
+                        <tr><td class="p-3">Raspberry Pi 4</td><td class="p-3">~1,500–2,000 H/s</td></tr>
+                        <tr><td class="p-3">Intel i7 (4c/8t)</td><td class="p-3">~8,000–12,000 H/s</td></tr>
+                        <tr><td class="p-3">AMD Ryzen 9 5900X</td><td class="p-3">~25,000–35,000 H/s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-isekai-muted mt-2">Figures vary by clock, compiler flags, and cpuminer version.</p>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-3">Links</h2>
+            <ul class="text-sm space-y-2 text-isekai-accent">
+                <li><a href="https://yentencoin.info" class="hover:underline" target="_blank" rel="noopener">yentencoin.info</a></li>
+                <li><a href="https://explorer.yentencoin.info/" class="hover:underline" target="_blank" rel="noopener">Block explorer</a></li>
+                <li><a href="https://github.com/yentencoin/yenten" class="hover:underline" target="_blank" rel="noopener">Yenten GitHub</a></li>
+            </ul>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-xl font-bold mb-4">FAQ</h2>
+            <div class="space-y-4 text-sm text-isekai-muted">
+                <div><h3 class="text-white font-medium mb-1">What hardware do I need?</h3><p>Any CPU works; Pis and desktops are common. See the hashrate table above for ballpark numbers.</p></div>
+                <div><h3 class="text-white font-medium mb-1">Is this free?</h3><p>Using our <a href="/pages/api-docs.html" class="text-isekai-accent hover:underline">HTTP API</a> for status and RPC proxy is free. Mining rewards come from the network when you find blocks.</p></div>
+                <div><h3 class="text-white font-medium mb-1">What algorithm is YTN?</h3><p>YespowerR16 — tuned for CPU mining.</p></div>
+                <div><h3 class="text-white font-medium mb-1">Solo vs pool?</h3><p>This page describes solo-style mining against an RPC node. Pool mining would use a different URL and stratum.</p></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="/koto.html" class="hover:text-white transition">Koto</a>
+                <a href="/tdc.html" class="hover:text-white transition">Tidecoin</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/ui.js"></script>
+    <script>
+        (function () {
+            var meta = IsekaiAPI.COINS.YTN;
+            var pre = document.getElementById('code-qc');
+            pre.textContent = './cpuminer \\\n  --algo=' + meta.minerAlgo + ' \\\n  --url=http://YOUR_RPC_HOST:' + meta.rpcPort + ' \\\n  --user=YOUR_RPC_USER \\\n  --pass=YOUR_RPC_PASS \\\n  --coinbase-addr=YOUR_YTN_ADDRESS \\\n  --threads=4';
+
+            function fmt(n) {
+                if (n == null || n === '') return '—';
+                var x = Number(n);
+                return isNaN(x) ? '—' : x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            }
+
+            IsekaiAPI.getCoinStatus(meta.slug).then(function (res) {
+                var d = res.data || {};
+                var on = res.ok && d.online === true;
+                document.getElementById('stat-blocks').textContent = fmt(d.blocks);
+                document.getElementById('stat-diff').textContent = fmt(d.difficulty);
+                document.getElementById('stat-peers').textContent = d.peers != null ? String(d.peers) : '—';
+                document.getElementById('stat-node').innerHTML = on
+                    ? '<span class="text-isekai-green">Online</span>'
+                    : '<span class="text-isekai-red">Offline</span>';
+            });
+
+            IsekaiUI.initCopyButtons(document);
+        })();
+    </script>
+</body>
+</html>

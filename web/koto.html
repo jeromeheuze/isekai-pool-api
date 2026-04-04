@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine Koto (KOTO) — yescrypt CPU Mining | isekai-pool.com</title>
+    <meta name="description" content="Public RPC node for Koto (KOTO) CPU mining. Algorithm: Yescrypt. Free endpoint for solo miners using cpuminer-opt.">
+    <link rel="canonical" href="https://isekai-pool.com/koto.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/koto.html">
+    <meta property="og:title" content="Mine Koto (KOTO) — yescrypt CPU Mining | isekai-pool.com">
+    <meta property="og:description" content="Solo-mine KOTO with cpuminer-opt via isekai-pool.com.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mine Koto (KOTO) | isekai-pool.com">
+    <meta name="twitter:description" content="Yescrypt CPU mining on isekai-pool.com.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"What hardware do I need to mine Koto (KOTO)?","acceptedAnswer":{"@type":"Answer","text":"Koto uses Yescrypt, which is intended for CPU mining. Raspberry Pi class devices and desktops can participate; hashrates depend on CPU and tuning."}},
+      {"@type":"Question","name":"Is the isekai-pool.com RPC node free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes. Use the public API for status and the documented RPC endpoint for mining. Credentials are provided by the operator — see Node Status."}},
+      {"@type":"Question","name":"What is yescrypt?","acceptedAnswer":{"@type":"Answer","text":"Yescrypt is a memory-hard password-based KDF adapted for proof-of-work. Koto uses it so ordinary CPUs remain viable miners."}},
+      {"@type":"Question","name":"How do I solo mine KOTO?","acceptedAnswer":{"@type":"Answer","text":"Compile or download cpuminer-opt, set your KOTO address, and point the miner at the RPC URL with valid user and password."}},
+      {"@type":"Question","name":"Where is the block explorer?","acceptedAnswer":{"@type":"Answer","text":"The official explorer is linked from this page under Coin info and Links."}}
+    ]}
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', green: '#4ade80', red: '#f87171', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-isekai-accent text-lg" aria-hidden="true">▲</span>
+                <span class="text-white font-bold text-lg">isekai</span>
+                <span class="text-isekai-muted text-sm">異世界</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
+        <header class="flex flex-wrap items-start gap-6 mb-10">
+            <div class="coin-logo-placeholder shrink-0 text-white text-xl" style="background:#8b5cf644" aria-hidden="true">KOTO</div>
+            <div>
+                <h1 class="text-3xl font-bold">Mine Koto <span class="text-violet-400">(KOTO)</span></h1>
+                <p class="text-isekai-muted mt-2">CPU-mineable · Yescrypt · Public RPC via isekai-pool.com</p>
+                <p class="text-sm text-isekai-muted mt-4">
+                    <a href="/guide.html" class="text-isekai-accent hover:underline">Full mining guide</a> ·
+                    <a href="/coins.html" class="text-isekai-accent hover:underline">All coins</a> ·
+                    <a href="/status.html" class="text-isekai-accent hover:underline">Live node status</a>
+                </p>
+            </div>
+        </header>
+
+        <section class="bg-isekai-card border border-isekai-border rounded-xl p-4 mb-8" aria-labelledby="live-stats">
+            <h2 id="live-stats" class="text-sm font-bold text-isekai-muted uppercase tracking-wider mb-4">Live stats</h2>
+            <p class="text-xs text-isekai-muted mb-3">From <code class="text-isekai-accent">GET /api/v1/koto/status</code>. Network hashrate is not in this response yet.</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div><span class="text-isekai-muted block text-xs">Block height</span><span id="stat-blocks" class="font-bold text-lg">—</span></div>
+                <div><span class="text-isekai-muted block text-xs">Difficulty</span><span id="stat-diff" class="font-bold text-lg">—</span></div>
+                <div><span class="text-isekai-muted block text-xs">Peers</span><span id="stat-peers" class="font-bold text-lg">—</span></div>
+                <div><span class="text-isekai-muted block text-xs">Node</span><span id="stat-node" class="font-bold text-lg">—</span></div>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-3">Quick connect</h2>
+            <pre id="code-qc" class="isekai-code-block text-gray-300 text-sm overflow-x-auto"></pre>
+            <button type="button" data-copy-target="#code-qc" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
+            <p class="text-isekai-muted text-sm mt-3">Replace <code class="text-gray-400">YOUR_KOTO_ADDRESS</code> and RPC credentials. Host and user/pass: <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a>. RPC port reference: <strong class="text-gray-300">8432</strong>.</p>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-4">Coin info</h2>
+            <div class="overflow-x-auto border border-isekai-border rounded-xl">
+                <table class="w-full text-sm">
+                    <tbody class="divide-y divide-isekai-border">
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal w-40">Algorithm</th><td class="p-3">Yescrypt</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Block time</th><td class="p-3">~2.5 minutes</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">RPC</th><td class="p-3"><code class="text-isekai-accent">http://YOUR_RPC_HOST:8432</code></td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">P2P port</th><td class="p-3">8433</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Explorer</th><td class="p-3"><a href="https://explorer.ko-to.org" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">explorer.ko-to.org</a></td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Website</th><td class="p-3"><a href="https://ko-to.org" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">ko-to.org</a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-3">Mining setup</h2>
+            <p class="text-isekai-muted text-sm mb-4">See the <a href="/guide.html" class="text-isekai-accent hover:underline">mining guide</a> for install and compile steps, then use Quick connect here with the Yescrypt algorithm flag.</p>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-3">Links</h2>
+            <ul class="text-sm space-y-2 text-isekai-accent">
+                <li><a href="https://ko-to.org" class="hover:underline" target="_blank" rel="noopener">ko-to.org</a></li>
+                <li><a href="https://explorer.ko-to.org" class="hover:underline" target="_blank" rel="noopener">Block explorer</a></li>
+            </ul>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-xl font-bold mb-4">FAQ</h2>
+            <div class="space-y-4 text-sm text-isekai-muted">
+                <div><h3 class="text-white font-medium mb-1">What algorithm does KOTO use?</h3><p>Yescrypt — aimed at CPU-friendly mining.</p></div>
+                <div><h3 class="text-white font-medium mb-1">cpuminer flag?</h3><p>Typically <code class="text-gray-400">--algo=yescrypt</code> with cpuminer-opt; confirm against your binary’s <code class="text-gray-400">--help</code>.</p></div>
+                <div><h3 class="text-white font-medium mb-1">Other coins?</h3><p><a href="/ytn.html" class="text-isekai-accent hover:underline">Yenten</a> and <a href="/tdc.html" class="text-isekai-accent hover:underline">Tidecoin</a> are also on this hub.</p></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-isekai-border">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex items-center gap-4">
+                <a href="/ytn.html" class="hover:text-white transition">Yenten</a>
+                <a href="/tdc.html" class="hover:text-white transition">Tidecoin</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/ui.js"></script>
+    <script>
+        (function () {
+            var meta = IsekaiAPI.COINS.KOTO;
+            document.getElementById('code-qc').textContent = './cpuminer \\\n  --algo=' + meta.minerAlgo + ' \\\n  --url=http://YOUR_RPC_HOST:' + meta.rpcPort + ' \\\n  --user=YOUR_RPC_USER \\\n  --pass=YOUR_RPC_PASS \\\n  --coinbase-addr=YOUR_KOTO_ADDRESS \\\n  --threads=4';
+
+            function fmt(n) {
+                if (n == null || n === '') return '—';
+                var x = Number(n);
+                return isNaN(x) ? '—' : x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            }
+
+            IsekaiAPI.getCoinStatus(meta.slug).then(function (res) {
+                var d = res.data || {};
+                var on = res.ok && d.online === true;
+                document.getElementById('stat-blocks').textContent = fmt(d.blocks);
+                document.getElementById('stat-diff').textContent = fmt(d.difficulty);
+                document.getElementById('stat-peers').textContent = d.peers != null ? String(d.peers) : '—';
+                document.getElementById('stat-node').innerHTML = on
+                    ? '<span class="text-isekai-green">Online</span>'
+                    : '<span class="text-isekai-red">Offline</span>';
+            });
+
+            IsekaiUI.initCopyButtons(document);
+        })();
+    </script>
+</body>
+</html>
