@@ -63,7 +63,7 @@ class RpcService
     private function execute(string $method, array $params): mixed
     {
         $rpc = $this->config['rpc'];
-        $url = "http://{$rpc['user']}:{$rpc['pass']}@{$rpc['host']}:{$rpc['port']}/";
+        $url = "http://{$rpc['host']}:{$rpc['port']}/";
 
         $payload = json_encode([
             'jsonrpc' => '1.0',
@@ -72,12 +72,17 @@ class RpcService
             'params'  => $params,
         ]);
 
+        $auth = base64_encode(($rpc['user'] ?? '').':'.($rpc['pass'] ?? ''));
+
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Authorization: Basic '.$auth,
+            ],
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_TIMEOUT        => 30,
         ]);
