@@ -16,3 +16,9 @@ Thumbs.db
 .cursor/
 .vscode/
 *.swp
+
+# zny-nomp local secrets (only if you keep a pool checkout in-repo; paths are repo-root relative)
+/pool_configs/*.json
+/config.json
+/zny-nomp/pool_configs/*.json
+/zny-nomp/config.json

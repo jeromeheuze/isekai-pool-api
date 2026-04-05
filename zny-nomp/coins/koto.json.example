@@ -1,0 +1,8 @@
+{
+  "name": "Koto",
+  "symbol": "KOTO",
+  "algorithm": "yescryptR8G",
+  "coinbase": "isekai-pool",
+  "peerMagic": "5a6f6f54",
+  "txMessages": false
+}

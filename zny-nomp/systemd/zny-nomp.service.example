@@ -1,0 +1,16 @@
+[Unit]
+Description=zny-nomp Koto stratum pool
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+User=crypto
+WorkingDirectory=/home/crypto/zny-nomp
+ExecStart=/usr/local/bin/node init.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

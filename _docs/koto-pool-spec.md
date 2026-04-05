@@ -1,6 +1,9 @@
 # KOTO Pool — zny-nomp Setup Spec
 **koto.isekai-pool.com · VPS 153.75.225.100**
 
+> **Canonical specs (goals, ports, safe templates):** [koto-pool-specs.md](./koto-pool-specs.md)  
+> This file is a **hands-on runbook**; keep secrets out of git.
+
 ---
 
 ## Overview
@@ -9,6 +12,8 @@ Set up a KOTO (yescryptR8G) mining pool using zny-nomp on the existing VPS.
 The pool runs as a separate service alongside the existing Yenten/TDC/KOTO RPC nodes.
 Frontend served at `koto.isekai-pool.com` via nginx reverse proxy.
 
+**Templates in git:** [zny-nomp/](../zny-nomp/) (`*.json.example`, systemd, nginx snippet) — copy into your clone under `/home/crypto/zny-nomp`.
+
 ---
 
 ## Prerequisites (verify before starting)
@@ -16,7 +21,7 @@ Frontend served at `koto.isekai-pool.com` via nginx reverse proxy.
 ```bash
 # KOTO node must be fully synced
 koto-cli -datadir=/home/crypto/.koto getblockcount
-# Compare to https://explorer.koto.cash — must match
+# Compare to https://explorer.ko-to.org — must match
 
 # Check Node.js version
 node --version  # needs v16.11+
@@ -109,15 +114,15 @@ Create `pool_configs/koto.json`:
     "coin": "koto.json",
     "blockIdentifier": "isekai-pool.com",
 
-    "address": "KOTO_T_ADDRESS",
+    "address": "KOTO_T_ADDRESS_POOL_FEE",
     "BTCover17": false,
 
     "zAddress": "KOTO_Z_ADDRESS",
-    "tAddress": "KOTO_T_ADDRESS_2",
+    "tAddress": "KOTO_T_ADDRESS_PAYOUT",
     "walletInterval": 2.5,
 
     "rewardRecipients": {
-        "KOTO_T_ADDRESS": 1.0
+        "KOTO_T_ADDRESS_POOL_FEE": 1.0
     },
 
     "paymentProcessing": {
@@ -202,11 +207,12 @@ Create `pool_configs/koto.json`:
 }
 ```
 
-> Fill in:
-> - `KOTO_T_ADDRESS` — transparent address from Step 3
-> - `KOTO_Z_ADDRESS` — shielded address from Step 3
-> - `KOTO_RPC_PASSWORD` — from `/home/crypto/.koto/koto.conf`
-> - `port 8432` — verify KOTO RPC port from `koto.conf`
+> Fill in on the server only (never commit):
+> - Transparent + shielded addresses from Step 3
+> - `KOTO_RPC_PASSWORD` from `/home/crypto/.koto/koto.conf`
+> - Verify RPC port **8432** in `koto.conf`
+>
+> Canonical high-level spec: [_docs/koto-pool-specs.md](./koto-pool-specs.md)
 
 ---
 

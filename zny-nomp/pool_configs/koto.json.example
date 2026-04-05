@@ -1,0 +1,107 @@
+{
+  "enabled": true,
+  "coin": "koto.json",
+  "blockIdentifier": "isekai-pool.com",
+
+  "address": "KOTO_T_ADDRESS_POOL_FEE",
+  "BTCover17": false,
+
+  "zAddress": "KOTO_Z_ADDRESS",
+  "tAddress": "KOTO_T_ADDRESS_PAYOUT",
+  "walletInterval": 2.5,
+
+  "rewardRecipients": {
+    "KOTO_T_ADDRESS_POOL_FEE": 1.0
+  },
+
+  "paymentProcessing": {
+    "minConf": 10,
+    "enabled": true,
+    "paymentMode": "prop",
+    "paymentInterval": 120,
+    "minimumPayment": 0.5,
+    "maxBlocksPerPayment": 3,
+    "daemon": {
+      "host": "127.0.0.1",
+      "port": 8432,
+      "user": "isekai_koto",
+      "password": "KOTO_RPC_PASSWORD"
+    }
+  },
+
+  "tlsOptions": {
+    "enabled": false,
+    "serverKey": "",
+    "serverCert": "",
+    "ca": ""
+  },
+
+  "ports": {
+    "3301": {
+      "diff": 0.01,
+      "tls": false,
+      "varDiff": {
+        "minDiff": 0.001,
+        "maxDiff": 1,
+        "targetTime": 15,
+        "retargetTime": 60,
+        "variancePercent": 30
+      }
+    },
+    "3302": {
+      "diff": 0.5,
+      "tls": false,
+      "varDiff": {
+        "minDiff": 0.01,
+        "maxDiff": 16,
+        "targetTime": 15,
+        "retargetTime": 60,
+        "variancePercent": 30
+      }
+    },
+    "3303": {
+      "diff": 1,
+      "tls": false,
+      "varDiff": {
+        "minDiff": 0.1,
+        "maxDiff": 32,
+        "targetTime": 15,
+        "retargetTime": 60,
+        "variancePercent": 30
+      }
+    },
+    "3304": {
+      "diff": 5,
+      "tls": false,
+      "varDiff": {
+        "minDiff": 0.5,
+        "maxDiff": 128,
+        "targetTime": 15,
+        "retargetTime": 60,
+        "variancePercent": 30
+      }
+    }
+  },
+
+  "poolId": "main",
+
+  "daemons": [
+    {
+      "host": "127.0.0.1",
+      "port": 8432,
+      "user": "isekai_koto",
+      "password": "KOTO_RPC_PASSWORD"
+    }
+  ],
+
+  "p2p": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 8433,
+    "disableTransactions": true
+  },
+
+  "mposMode": {
+    "enabled": false
+  }
+}

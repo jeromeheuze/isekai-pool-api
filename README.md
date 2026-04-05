@@ -59,7 +59,8 @@ isekai-pool-api/
 │   ├── build-uraniumx.sh          ← Template only (dead coin)
 │   ├── build-bitzeny.sh           ← Parked — v2 vs v3 mismatch
 │   └── vps-init.sh
-└── _docs/                         ← Internal notes / Cursor specs (e.g. CURSOR.md)
+├── zny-nomp/                      ← Koto pool templates (*.json.example) — see README inside
+└── _docs/                         ← Internal specs (e.g. koto-pool-specs.md, CURSOR.md)
 ```
 
 Public URLs map from `web/` as document root (e.g. `/coins.html`, `/pages/api-docs.html`).
