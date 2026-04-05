@@ -4,24 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mine Koto (KOTO) — yescryptR8G | isekai-pool.com</title>
-    <meta name="description" content="Koto (KOTO) CPU mining with yescryptR8G: pooled stratum at mofumofu.me or solo via public RPC. Ports and examples.">
+    <meta name="description" content="Mine KOTO at koto.isekai-pool.com — yescryptR8G, 1% fee, no registration. Official minerd (cpuminer-yescrypt). Solo RPC via isekai-pool.com.">
     <link rel="canonical" href="https://isekai-pool.com/koto.html">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://isekai-pool.com/koto.html">
     <meta property="og:title" content="Mine Koto (KOTO) — yescryptR8G | isekai-pool.com">
-    <meta property="og:description" content="yescryptR8G mining: mofumofu.me stratum or solo RPC via isekai-pool.com.">
+    <meta property="og:description" content="Public KOTO pool at koto.isekai-pool.com — minerd / cpuminer-yescrypt. Solo RPC and API on isekai-pool.com.">
     <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
     <meta property="og:site_name" content="isekai-pool.com">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Mine Koto (KOTO) | isekai-pool.com">
-    <meta name="twitter:description" content="KOTO: mofumofu.me pool (yescryptR8G) or solo RPC via isekai-pool.com.">
+    <meta name="twitter:description" content="koto.isekai-pool.com — minerd (cpuminer-yescrypt), not cpuminer-opt.">
     <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
       {"@type":"Question","name":"What hardware do I need to mine Koto (KOTO)?","acceptedAnswer":{"@type":"Answer","text":"Koto uses yescryptR8G for mining. CPU-friendly — Raspberry Pi class devices and desktops can participate."}},
-      {"@type":"Question","name":"Where can I pool-mine KOTO?","acceptedAnswer":{"@type":"Answer","text":"The mofumofu.me Koto pool at koto.mofumofu.me offers stratum on ports 3301–3304 with algorithm yescryptR8G, PROP payouts, and a published fee."}},
+      {"@type":"Question","name":"Where can I pool-mine KOTO?","acceptedAnswer":{"@type":"Answer","text":"The isekai KOTO pool at koto.isekai-pool.com offers stratum on ports 3301–3303 with a 1% fee and no registration. An alternative community pool is koto.mofumofu.me."}},
       {"@type":"Question","name":"Is the isekai-pool.com RPC node free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes for API status and optional solo-style mining against RPC when you have credentials from the operator — see Node Status."}},
-      {"@type":"Question","name":"How do I solo mine KOTO via RPC?","acceptedAnswer":{"@type":"Answer","text":"Use cpuminer-opt with algo yescryptR8G (or as listed in your miner’s --help), your KOTO address, and the RPC URL with valid user and password."}},
+      {"@type":"Question","name":"How do I solo mine KOTO via RPC?","acceptedAnswer":{"@type":"Answer","text":"Use minerd from KotoDevelopers cpuminer-yescrypt, not cpuminer-opt. Point your KOTO address and RPC credentials at the node URL."}},
       {"@type":"Question","name":"Where is the block explorer?","acceptedAnswer":{"@type":"Answer","text":"The official explorer is linked under Coin info and Links on this page."}}
     ]}
     </script>
@@ -70,9 +70,10 @@
                 <h1 class="text-3xl font-bold">Mine Koto <span class="text-violet-400">(KOTO)</span></h1>
                 <p class="text-isekai-muted mt-2">CPU-mineable · <strong class="text-gray-300">yescryptR8G</strong> · Pool or solo RPC</p>
                 <p class="text-sm text-isekai-muted mt-4">
-                    <a href="/guide.html" class="text-isekai-accent hover:underline">Full mining guide</a> ·
+                    <a href="https://koto.isekai-pool.com" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.isekai-pool.com</a> (pool) ·
+                    <a href="/guide.html" class="text-isekai-accent hover:underline">Mining guide</a> ·
                     <a href="/coins.html" class="text-isekai-accent hover:underline">All coins</a> ·
-                    <a href="/status.html" class="text-isekai-accent hover:underline">Live node status</a>
+                    <a href="/status.html" class="text-isekai-accent hover:underline">Node status</a>
                 </p>
             </div>
         </header>
@@ -90,18 +91,37 @@
 
         <section class="mb-10">
             <h2 class="text-xl font-bold mb-3">Pooled mining</h2>
-            <p class="text-isekai-muted text-sm mb-3">Community Koto stratum pool: <a href="https://koto.mofumofu.me/" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.mofumofu.me</a> — algorithm <code class="text-gray-400">yescryptR8G</code>, username <code class="text-gray-400">{your KOTO address}.{worker name}</code>. Typical settings: ~0.5% pool fee, min payout 0.1 KOTO, PROP (confirm on the pool site).</p>
-            <p class="text-xs text-isekai-muted mb-2">Stratum ports (difficulty tiers): <strong class="text-gray-400">3301</strong> mobile · <strong class="text-gray-400">3302</strong> middle · <strong class="text-gray-400">3303</strong> high · <strong class="text-gray-400">3304</strong> cloud</p>
-            <pre id="code-pool" class="isekai-code-block text-gray-300 text-sm overflow-x-auto">./cpuminer --algo=yescryptR8G -o stratum+tcp://koto.mofumofu.me:3302 -u YOUR_KOTO_ADDRESS.worker1 -p x</pre>
-            <button type="button" data-copy-target="#code-pool" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
-            <p class="text-isekai-muted text-xs mt-2">Legacy minerd-style example from the pool: <code class="text-gray-500">minerd -a yescryptR8G -o stratum+tcp://koto.mofumofu.me:3302 -u Address.Worker</code></p>
+            <p class="text-isekai-muted text-sm mb-4">Mine KOTO at our public pool — <strong class="text-gray-300">no registration</strong>, <strong class="text-gray-300">1% fee</strong>, direct payouts. Username format: <code class="text-gray-400">YOUR_KOTO_ADDRESS.worker_name</code>.</p>
+            <ul class="text-sm text-isekai-muted space-y-2 mb-4 font-mono">
+                <li><code class="text-isekai-accent">stratum+tcp://koto.isekai-pool.com:3301</code> — low diff (RPi, mobile)</li>
+                <li><code class="text-isekai-accent">stratum+tcp://koto.isekai-pool.com:3302</code> — mid diff (desktop)</li>
+                <li><code class="text-isekai-accent">stratum+tcp://koto.isekai-pool.com:3303</code> — high diff (multi-core)</li>
+            </ul>
+            <p class="text-xs text-amber-100/95 border border-amber-500/35 bg-amber-500/10 rounded-lg p-3 mb-4">
+                <strong class="text-amber-200">Important:</strong> Use the official <strong class="text-gray-200">KotoDevelopers</strong> miner (<strong class="text-gray-200">minerd</strong> from <a href="https://github.com/KotoDevelopers/cpuminer-yescrypt" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">cpuminer-yescrypt</a>). <strong class="text-gray-200">cpuminer-opt</strong> does not work correctly for KOTO (shares rejected).
+            </p>
+            <p class="text-sm text-isekai-muted mb-2">Download: <a href="https://github.com/KotoDevelopers/cpuminer-yescrypt/releases" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">github.com/KotoDevelopers/cpuminer-yescrypt/releases</a></p>
+
+            <p class="text-xs text-isekai-muted uppercase tracking-wider mb-1 mt-6">Windows</p>
+            <pre id="code-pool-win" class="isekai-code-block text-gray-300 text-sm overflow-x-auto">minerd-avx2.exe -o stratum+tcp://koto.isekai-pool.com:3302 -u YOUR_KOTO_ADDRESS.worker1 -p x</pre>
+            <button type="button" data-copy-target="#code-pool-win" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
+
+            <p class="text-xs text-isekai-muted uppercase tracking-wider mb-1 mt-6">Linux / RPi5</p>
+            <pre id="code-pool-linux" class="isekai-code-block text-gray-300 text-sm overflow-x-auto">./minerd -o stratum+tcp://koto.isekai-pool.com:3301 -u YOUR_KOTO_ADDRESS.rpi5 -p x -t 4</pre>
+            <button type="button" data-copy-target="#code-pool-linux" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
+
+            <p class="text-sm text-isekai-muted mt-6">
+                → Full RPi5 setup: <a href="https://koto.isekai-pool.com/getting-started" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.isekai-pool.com/getting-started</a><br>
+                → Pool dashboard: <a href="https://koto.isekai-pool.com" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.isekai-pool.com</a>
+            </p>
+            <p class="text-sm text-isekai-muted mt-4">Alternative pool: <a href="https://koto.mofumofu.me/" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.mofumofu.me</a> (Japanese community)</p>
         </section>
 
         <section class="mb-10">
             <h2 class="text-xl font-bold mb-3">Solo quick connect (RPC)</h2>
             <pre id="code-qc" class="isekai-code-block text-gray-300 text-sm overflow-x-auto"></pre>
             <button type="button" data-copy-target="#code-qc" class="mt-2 text-xs text-isekai-accent hover:underline">Copy</button>
-            <p class="text-isekai-muted text-sm mt-3">Replace <code class="text-gray-400">YOUR_KOTO_ADDRESS</code> and RPC credentials. Host and user/pass: <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a>. RPC port reference: <strong class="text-gray-300">8432</strong>.</p>
+            <p class="text-isekai-muted text-sm mt-3">Use <strong class="text-gray-300">minerd</strong> from cpuminer-yescrypt. Replace <code class="text-gray-400">YOUR_RPC_PASS</code> and address. RPC user defaults from <a href="/status.html" class="text-isekai-accent hover:underline">Node Status</a> / operator. Port: <strong class="text-gray-300">8432</strong>.</p>
         </section>
 
         <section class="mb-10">
@@ -110,8 +130,8 @@
                 <table class="w-full text-sm">
                     <tbody class="divide-y divide-isekai-border">
                         <tr><th class="text-left p-3 text-isekai-muted font-normal w-40">Algorithm</th><td class="p-3"><strong class="text-gray-300">yescryptR8G</strong></td></tr>
-                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Mining pool</th><td class="p-3"><a href="https://koto.mofumofu.me/" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.mofumofu.me</a> (stratum)</td></tr>
-                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Block time</th><td class="p-3">~2.5 minutes</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Block time</th><td class="p-3">~60 seconds</td></tr>
+                        <tr><th class="text-left p-3 text-isekai-muted font-normal">Mining pool</th><td class="p-3"><a href="https://koto.isekai-pool.com" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.isekai-pool.com</a></td></tr>
                         <tr><th class="text-left p-3 text-isekai-muted font-normal">RPC</th><td class="p-3"><code class="text-isekai-accent">http://153.75.225.100:8432</code></td></tr>
                         <tr><th class="text-left p-3 text-isekai-muted font-normal">P2P port</th><td class="p-3">8433</td></tr>
                         <tr><th class="text-left p-3 text-isekai-muted font-normal">Explorer</th><td class="p-3"><a href="https://explorer.ko-to.org" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">explorer.ko-to.org</a></td></tr>
@@ -123,23 +143,26 @@
 
         <section class="mb-10">
             <h2 class="text-xl font-bold mb-3">Mining setup</h2>
-            <p class="text-isekai-muted text-sm mb-4">See the <a href="/guide.html" class="text-isekai-accent hover:underline">mining guide</a> for toolchain setup. For Koto use <code class="text-gray-400">yescryptR8G</code> with pools (above) or the solo RPC block on this page.</p>
+            <p class="text-isekai-muted text-sm mb-4">Build <a href="https://github.com/KotoDevelopers/cpuminer-yescrypt" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">cpuminer-yescrypt</a> for KOTO. For Yespower coins (YTN/TDC) use cpuminer-opt — see the <a href="/guide.html" class="text-isekai-accent hover:underline">mining guide</a>.</p>
         </section>
 
         <section class="mb-10">
             <h2 class="text-xl font-bold mb-3">Links</h2>
             <ul class="text-sm space-y-2 text-isekai-accent">
-                <li><a href="https://koto.mofumofu.me/" class="hover:underline" target="_blank" rel="noopener">Koto pool — mofumofu.me</a></li>
+                <li><a href="https://koto.isekai-pool.com" class="hover:underline font-medium" target="_blank" rel="noopener">KOTO pool — koto.isekai-pool.com</a></li>
+                <li><a href="https://koto.isekai-pool.com/getting-started" class="hover:underline" target="_blank" rel="noopener">Getting started (RPi5 &amp; more)</a></li>
+                <li><a href="https://github.com/KotoDevelopers/cpuminer-yescrypt/releases" class="hover:underline" target="_blank" rel="noopener">cpuminer-yescrypt releases</a></li>
                 <li><a href="https://ko-to.org" class="hover:underline" target="_blank" rel="noopener">ko-to.org</a></li>
                 <li><a href="https://explorer.ko-to.org" class="hover:underline" target="_blank" rel="noopener">Block explorer</a></li>
+                <li class="text-isekai-muted text-xs pt-2">Alternative: <a href="https://koto.mofumofu.me/" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.mofumofu.me</a></li>
             </ul>
         </section>
 
         <section class="mb-6">
             <h2 class="text-xl font-bold mb-4">FAQ</h2>
             <div class="space-y-4 text-sm text-isekai-muted">
-                <div><h3 class="text-white font-medium mb-1">Pool vs solo?</h3><p>For regular payouts, use stratum at <a href="https://koto.mofumofu.me/" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.mofumofu.me</a> with <code class="text-gray-400">yescryptR8G</code>. Solo uses RPC against a full node (see above).</p></div>
-                <div><h3 class="text-white font-medium mb-1">What algorithm flag?</h3><p>Pools document <code class="text-gray-400">yescryptR8G</code> (e.g. <code class="text-gray-400">-a yescryptR8G</code> / <code class="text-gray-400">--algo=yescryptR8G</code>). Run <code class="text-gray-400">--help</code> on your miner build if a variant name differs.</p></div>
+                <div><h3 class="text-white font-medium mb-1">Pool vs solo?</h3><p>For regular payouts, use stratum at <a href="https://koto.isekai-pool.com" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.isekai-pool.com</a> with <strong class="text-gray-300">minerd</strong> (cpuminer-yescrypt). Solo RPC uses the same <code class="text-gray-400">minerd</code> binary against <code class="text-gray-400">http://…:8432</code> with your credentials. Optional alternative: <a href="https://koto.mofumofu.me/" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">koto.mofumofu.me</a>.</p></div>
+                <div><h3 class="text-white font-medium mb-1">Which miner?</h3><p><strong class="text-gray-300">minerd</strong> from <a href="https://github.com/KotoDevelopers/cpuminer-yescrypt" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">KotoDevelopers/cpuminer-yescrypt</a>. Do not use cpuminer-opt for KOTO — shares are rejected. Stratum usually needs no <code class="text-gray-400">-a</code> flag; run <code class="text-gray-400">./minerd --help</code> if unsure.</p></div>
                 <div><h3 class="text-white font-medium mb-1">Other coins?</h3><p><a href="/ytn.html" class="text-isekai-accent hover:underline">Yenten</a> and <a href="/tdc.html" class="text-isekai-accent hover:underline">Tidecoin</a> are also on this hub.</p></div>
             </div>
         </section>
@@ -149,6 +172,7 @@
         <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
             <span>isekai-pool.com — 異世界インフラ</span>
             <div class="flex items-center gap-4">
+                <a href="https://koto.isekai-pool.com" class="hover:text-white transition" target="_blank" rel="noopener">KOTO pool</a>
                 <a href="/ytn.html" class="hover:text-white transition">Yenten</a>
                 <a href="/tdc.html" class="hover:text-white transition">Tidecoin</a>
                 <a href="/status.html" class="hover:text-white transition">Node Status</a>
@@ -161,7 +185,7 @@
     <script>
         (function () {
             var meta = IsekaiAPI.COINS.KOTO;
-            document.getElementById('code-qc').textContent = './cpuminer \\\n  --algo=' + meta.minerAlgo + ' \\\n  --url=http://153.75.225.100:8432 \\\n  --user=YOUR_RPC_USER \\\n  --pass=YOUR_RPC_PASS \\\n  --coinbase-addr=YOUR_KOTO_ADDRESS \\\n  --threads=4';
+            document.getElementById('code-qc').textContent = './minerd \\\n  -o http://153.75.225.100:8432 \\\n  -u isekai_koto \\\n  -p YOUR_RPC_PASS \\\n  --coinbase-addr=YOUR_KOTO_ADDRESS \\\n  -t 4';
 
             function fmt(n) {
                 if (n == null || n === '') return '—';
