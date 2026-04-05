@@ -32,36 +32,37 @@ Miners, developers, and wallet apps can use our public API without running their
 ```
 isekai-pool-api/
 ├── .github/workflows/deploy.yml   ← Auto-deploy on push to main
+├── nginx.conf                     ← Example Nginx (site root → web/)
 ├── api/                           ← Laravel 11 — RPC proxy + JSON API
 │   ├── app/Http/Controllers/Api/
 │   │   └── RpcController.php      ← /health, /status, /rpc endpoints
 │   ├── app/Services/
 │   │   └── RpcService.php         ← Node communication + caching
 │   ├── config/
-│   │   └── coins.php              ← Coin registry (ports, RPC creds)
+│   │   └── coins.php              ← Coin registry (ports, RPC via .env)
 │   └── routes/api.php
-├── web/                           ← HTML + Tailwind frontend
-│   ├── index.html                 ← Homepage — live node status
+├── web/                           ← Static HTML + Tailwind CDN (no build)
+│   ├── index.html                 ← Homepage + live node cards
+│   ├── coins.html                 ← Coin directory (API-backed status)
+│   ├── ytn.html, koto.html, tdc.html
+│   ├── guide.html, status.html, about.html
+│   ├── sitemap.xml, robots.txt
 │   ├── pages/
-│   │   ├── coins.html             ← All supported coins
-│   │   ├── api-docs.html          ← API documentation
-│   │   └── coin.html              ← Single coin detail page
-│   ├── components/
-│   │   ├── nav.html               ← Shared navigation
-│   │   └── coin-card.html         ← Reusable coin status card
+│   │   └── api-docs.html          ← Human-readable API reference
 │   └── assets/
-│       └── css/app.css            ← Tailwind + custom styles
-├── scripts/                       ← Node build/install scripts
+│       ├── css/custom.css
+│       └── js/api.js, ui.js       ← Shared API helpers + copy/tabs
+├── scripts/                       ← Full-node build/install (VPS)
 │   ├── build-yenten.sh
 │   ├── build-koto.sh
 │   ├── build-tidecoin.sh
-│   ├── build-uraniumx.sh          ← Dead coin — template only
-│   └── build-bitzeny.sh           ← Parked — v2 vs v3 mismatch
-└── docs/
-    ├── api.md                     ← Public API reference
-    ├── coins.md                   ← Coin details + infra notes
-    └── vps-setup.md               ← VPS bootstrap documentation
+│   ├── build-uraniumx.sh          ← Template only (dead coin)
+│   ├── build-bitzeny.sh           ← Parked — v2 vs v3 mismatch
+│   └── vps-init.sh
+└── _docs/                         ← Internal notes / Cursor specs (e.g. CURSOR.md)
 ```
+
+Public URLs map from `web/` as document root (e.g. `/coins.html`, `/pages/api-docs.html`).
 
 ---
 
@@ -157,7 +158,7 @@ zk-SNARK params downloaded from Zcash CDN (ko-to.org splits fail SHA256).
 | Backend API | Laravel 11, PHP 8.3 |
 | Frontend | HTML5, Tailwind CSS |
 | Web server | Nginx + PHP-FPM |
-| Cache | Redis |
+| Cache | File (production `.env`); Redis optional |
 | Node daemons | Bitcoin/Zcash forks via systemd |
 | SSL | Let's Encrypt via certbot |
 | CI/CD | GitHub Actions → SSH deploy |
