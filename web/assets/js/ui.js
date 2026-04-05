@@ -27,8 +27,10 @@
 
     function initTabs(container) {
         if (!container) return;
-        var buttons = container.querySelectorAll('[data-tab]');
-        var panels = container.querySelectorAll('[data-tab-panel]');
+        var strip = container.querySelector('.tab-strip');
+        if (!strip) return;
+        var buttons = strip.querySelectorAll('[data-tab]');
+        var panels = container.querySelectorAll(':scope > [data-tab-panel]');
         buttons.forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var id = btn.getAttribute('data-tab');
