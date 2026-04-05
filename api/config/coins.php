@@ -23,8 +23,8 @@ return [
     'koto' => [
         'name'        => 'Koto',
         'symbol'      => 'KOTO',
-        'algo'        => 'Yescrypt',
-        'description' => 'Japanese privacy coin. Zcash fork with Yescrypt CPU mining.',
+        'algo'        => 'yescryptR8G',
+        'description' => 'Japanese privacy coin. Zcash fork; miners use yescryptR8G.',
         'supply'      => '210,000,000',
         'block_time'  => '2.5 min',
         'explorer'    => 'https://explorer.ko-to.org',

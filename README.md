@@ -20,7 +20,7 @@ Miners, developers, and wallet apps can use our public API without running their
 | Coin | Algorithm | Ports P2P/RPC | Status |
 |------|-----------|---------------|--------|
 | Yenten (YTN) | YespowerR16 | 9981 / 9982 | ✅ Synced |
-| Koto (KOTO) | Yescrypt | 8433 / 8432 | 🔄 Syncing |
+| Koto (KOTO) | yescryptR8G | 8433 / 8432 | 🔄 Syncing |
 | Tidecoin (TDC) | YespowerTIDE | 9369 / 9368 | 🔄 Syncing |
 | Sugarchain (SUGAR) | YespowerSugar | TBD | 🗓 Planned |
 | CPUchain (CPU) | CPUpower | TBD | 🗓 Planned |
