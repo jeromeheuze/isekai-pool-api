@@ -21,7 +21,7 @@ Frontend served at `koto.isekai-pool.com` via nginx reverse proxy.
 ```bash
 # KOTO node must be fully synced
 koto-cli -datadir=/home/crypto/.koto getblockcount
-# Compare to https://explorer.ko-to.org — must match
+# Compare to https://explorer.isekai-pool.com (block height / tip) — must match
 
 # Check Node.js version
 node --version  # needs v16.11+

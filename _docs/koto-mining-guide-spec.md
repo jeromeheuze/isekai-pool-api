@@ -320,7 +320,7 @@ hardware makes a meaningful contribution.
 
 - **Pool dashboard**: https://koto.isekai-pool.com/stats
 - **Your worker stats**: https://koto.isekai-pool.com/workers/YOUR_KOTO_ADDRESS
-- **Block explorer**: https://insight.kotocoin.info
+- **Block explorer**: https://explorer.isekai-pool.com
 - **Network stats**: https://miningpoolstats.stream/koto
 
 ---

@@ -37,7 +37,7 @@ Browsers ──HTTPS──► nginx :443 ──proxy──► zny-nomp website :
 
 ## 4. Prerequisites
 
-- `kotod` fully synced; block height matches a public explorer (e.g. [explorer.ko-to.org](https://explorer.ko-to.org)).
+- `kotod` fully synced; block height matches a public explorer (e.g. [explorer.isekai-pool.com](https://explorer.isekai-pool.com)).
 - Node.js **≥ 16.11** (verify zny-nomp README if stricter).
 - Redis running (`redis-cli ping` → `PONG`).
 - OS user (e.g. `crypto`) owning `/home/crypto/.koto` and pool install dir.
