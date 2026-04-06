@@ -7,14 +7,18 @@
     <link rel="icon" type="image/png" href="/favicon-32x32.png?v=2" sizes="32x32" />
     <link rel="icon" type="image/png" href="/favicon-16x16.png?v=2" sizes="16x16" />
     <title>KOTO Faucet | isekai-pool.com</title>
-    <meta name="description" content="KOTO faucet: API-first rewards on api.isekai-pool.com. Gamified earn hub planned on koto.isekai-pool.com.">
+    <meta name="description" content="Public KOTO rewards API and live faucet stats. Full earn hub (games, quizzes) planned at koto.isekai-pool.com/earn.">
     <link rel="canonical" href="https://isekai-pool.com/faucet.html">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://isekai-pool.com/faucet.html">
     <meta property="og:title" content="KOTO Faucet | isekai-pool.com">
-    <meta property="og:description" content="Earn KOTO via the public faucet API. Full games UI coming to koto.isekai-pool.com.">
+    <meta property="og:description" content="Earn KOTO via the public API — balance, activity slugs, Turnstile. Gamified UI coming to the KOTO pool domain.">
     <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
     <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="KOTO Faucet | isekai-pool.com">
+    <meta name="twitter:description" content="Public KOTO faucet API and live stats.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,7 +26,7 @@
             theme: {
                 extend: {
                     colors: {
-                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', muted: '#6b7280' }
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', green: '#4ade80', red: '#f87171', muted: '#6b7280' }
                     },
                     fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
                 }
@@ -31,9 +35,20 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/custom.css">
-    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+    <style>
+        body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }
+        .grid-bg {
+            background-image: linear-gradient(rgba(124,106,247,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(124,106,247,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .faucet-stat-card {
+            background: linear-gradient(145deg, rgba(20,23,32,0.95) 0%, rgba(13,15,20,0.98) 100%);
+            border: 1px solid rgba(124, 106, 247, 0.12);
+        }
+    </style>
 </head>
-<body class="text-gray-100 min-h-screen flex flex-col">
+<body class="text-gray-100 min-h-screen flex flex-col grid-bg">
     <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
             <a href="/" class="flex items-center shrink-0 py-0.5" aria-label="isekai-pool.com — home">
@@ -52,39 +67,103 @@
         </div>
     </nav>
 
-    <main class="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
-        <h1 class="text-3xl font-bold mb-2">KOTO <span class="text-violet-400">Faucet</span></h1>
-        <p class="text-isekai-muted text-sm mb-8">Earn small amounts of KOTO through the operator-funded rewards API.</p>
+    <main class="flex-1 max-w-4xl mx-auto px-4 py-10 md:py-14 w-full">
+        <header class="flex flex-wrap items-start gap-6 mb-10">
+            <img class="coin-logo-img coin-logo-img-lg ring-2 ring-violet-500/20" src="/img/coins/koto-icon-front-color-640.png" alt="" width="160" height="160" loading="eager" />
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-medium uppercase tracking-wider text-violet-400/90 mb-1">Rewards · transparency</p>
+                <h1 class="text-3xl md:text-4xl font-bold text-white">KOTO <span class="text-violet-400">Faucet</span></h1>
+                <p class="text-isekai-muted mt-2 max-w-xl">Operator-funded payouts over HTTPS. No account — your <code class="text-gray-500">k1…</code> wallet is your ID. Full games UI ships on the pool domain; this page shows <strong class="text-gray-400">live stats</strong> and how to integrate.</p>
+                <p class="text-sm text-isekai-muted mt-4 flex flex-wrap gap-x-3 gap-y-1">
+                    <a href="/koto.html" class="text-isekai-accent hover:underline">KOTO mining</a>
+                    <span class="text-gray-600">·</span>
+                    <a href="https://koto.isekai-pool.com" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">Pool</a>
+                    <span class="text-gray-600">·</span>
+                    <a href="https://explorer.ko-to.org" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">Explorer</a>
+                </p>
+            </div>
+        </header>
 
-        <section class="bg-isekai-card border border-isekai-border rounded-xl p-6 mb-8">
-            <h2 class="text-white font-bold text-base mb-3">Where is the full frontend?</h2>
-            <p class="text-isekai-muted text-sm leading-relaxed mb-4">
-                The <strong class="text-gray-300">gamified earn hub</strong> (games, quizzes, shrine visit) is specified for
-                <code class="text-gray-400">koto.isekai-pool.com</code> (Laravel + Livewire) — same infrastructure family as the pool — and is <strong class="text-gray-300">not</strong> shipped as static HTML in this repo.
-            </p>
-            <p class="text-isekai-muted text-sm leading-relaxed">
-                This site (<code class="text-gray-400">isekai-pool.com</code>) documents the public <strong class="text-gray-300">JSON API</strong> you can call from any app once the operator enables it.
-            </p>
+        <section class="mb-10" aria-labelledby="live-stats">
+            <h2 id="live-stats" class="text-sm font-bold text-isekai-muted uppercase tracking-wider mb-4">Live faucet</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="faucet-stat-card rounded-xl p-5">
+                    <span class="text-isekai-muted text-xs block mb-1">Book balance</span>
+                    <p id="stat-balance" class="text-2xl md:text-3xl font-bold text-amber-300 tabular-nums">—</p>
+                    <p class="text-xs text-isekai-muted mt-2" id="stat-sync"></p>
+                </div>
+                <div class="faucet-stat-card rounded-xl p-5">
+                    <span class="text-isekai-muted text-xs block mb-1">API status</span>
+                    <p id="stat-api" class="text-xl font-bold">Checking…</p>
+                    <p class="text-xs text-isekai-muted mt-2">JSON at <code class="text-gray-500">api.isekai-pool.com</code></p>
+                </div>
+                <div class="faucet-stat-card rounded-xl p-5">
+                    <span class="text-isekai-muted text-xs block mb-1">Paid today <span class="text-gray-600">(JST day)</span></span>
+                    <p id="stat-daily" class="text-2xl font-bold text-gray-200 tabular-nums">—</p>
+                </div>
+                <div class="faucet-stat-card rounded-xl p-5">
+                    <span class="text-isekai-muted text-xs block mb-1">Claims (all time)</span>
+                    <p id="stat-claims" class="text-2xl font-bold text-gray-200 tabular-nums">—</p>
+                </div>
+            </div>
         </section>
 
-        <section class="mb-8">
-            <h2 class="text-white font-bold text-base mb-3">API (backend)</h2>
-            <p class="text-isekai-muted text-sm leading-relaxed mb-4">
-                Base URL: <code class="text-isekai-accent">https://api.isekai-pool.com/api/v1/faucet</code>
-                — <code class="text-gray-400">/balance</code>, <code class="text-gray-400">/status</code>, <code class="text-gray-400">/recent</code>, <code class="text-gray-400">POST /claim</code> (Cloudflare Turnstile + wallet).
-            </p>
-            <a href="/pages/api-docs.html" class="inline-flex text-isekai-accent hover:underline text-sm font-medium">Read the API reference →</a>
+        <section id="faucet-wallet-section" class="hidden mb-10 bg-isekai-card border border-isekai-border rounded-xl p-5">
+            <h3 class="text-sm font-bold text-isekai-muted uppercase tracking-wider mb-2">Public wallet</h3>
+            <p class="text-xs text-isekai-muted mb-2">Transparency — funds sent here feed the faucet.</p>
+            <p id="faucet-wallet-addr" class="text-sm text-gray-300 break-all font-mono"></p>
+            <a id="faucet-wallet-explorer" href="#" target="_blank" rel="noopener" class="inline-block mt-3 text-sm text-isekai-accent hover:underline">View on explorer →</a>
         </section>
 
-        <section class="bg-isekai-card border border-isekai-border rounded-xl p-6 mb-8" aria-live="polite">
-            <h2 class="text-white font-bold text-base mb-3">Live status</h2>
-            <p id="faucet-live" class="text-sm text-isekai-muted">Checking <code class="text-gray-400">GET /faucet/balance</code>…</p>
+        <section class="mb-10">
+            <h2 class="text-lg font-bold text-white mb-3">Planned on <span class="text-violet-400">koto.isekai-pool.com</span></h2>
+            <p class="text-sm text-isekai-muted mb-5 max-w-2xl">Roadmap from the earn spec: interactive hub at <code class="text-gray-500">/earn</code> (Laravel + Livewire), not static HTML here.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-isekai-card border border-isekai-border rounded-xl p-5">
+                    <h3 class="font-bold text-white mb-2">Earn hub</h3>
+                    <p class="text-sm text-isekai-muted leading-relaxed">Hero, live balance, wallet field (localStorage), activity grid with cooldowns, Turnstile on claims.</p>
+                </div>
+                <div class="bg-isekai-card border border-isekai-border rounded-xl p-5">
+                    <h3 class="font-bold text-white mb-2">Activities</h3>
+                    <p class="text-sm text-isekai-muted leading-relaxed">Shrine visit, kanji quiz, partner games (yokai, retro trivia, maps, coffee quiz), daily bonus — up to <strong class="text-gray-400">10 KOTO</strong>/day routine cap.</p>
+                </div>
+                <div class="bg-isekai-card border border-isekai-border rounded-xl p-5">
+                    <h3 class="font-bold text-white mb-2">Fair play</h3>
+                    <p class="text-sm text-isekai-muted leading-relaxed">Cloudflare Turnstile, per-wallet &amp; IP cooldowns, public recent payouts.</p>
+                </div>
+                <div class="bg-isekai-card border border-isekai-border rounded-xl p-5">
+                    <h3 class="font-bold text-white mb-2">This site</h3>
+                    <p class="text-sm text-isekai-muted leading-relaxed">isekai-pool.com documents the <strong class="text-gray-400">JSON API</strong> for builders and keeps static SEO pages.</p>
+                </div>
+            </div>
         </section>
 
-        <p class="text-sm text-isekai-muted">
-            <a href="/koto.html" class="text-isekai-accent hover:underline">Koto (KOTO) mining</a> ·
-            <a href="https://koto.isekai-pool.com" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">KOTO pool</a>
-        </p>
+        <section class="mb-10">
+            <h2 class="text-lg font-bold text-white mb-3">Developers</h2>
+            <p class="text-sm text-isekai-muted mb-3">Base URL (HTTPS only):</p>
+            <pre class="isekai-code-block text-gray-300 text-xs overflow-x-auto mb-4">https://api.isekai-pool.com/api/v1/faucet</pre>
+            <p class="text-sm text-isekai-muted mb-3">Endpoints: <code class="text-gray-500">GET /balance</code> · <code class="text-gray-500">GET /status?wallet=</code> · <code class="text-gray-500">GET /recent</code> · <code class="text-gray-500">POST /claim</code></p>
+            <a href="/pages/api-docs.html" class="inline-flex items-center gap-2 text-isekai-accent hover:underline text-sm font-medium">Full API reference →</a>
+        </section>
+
+        <section class="mb-6" aria-labelledby="recent-payouts">
+            <h2 id="recent-payouts" class="text-lg font-bold text-white mb-3">Recent payouts</h2>
+            <p id="recent-empty" class="text-sm text-isekai-muted">Loading…</p>
+            <div id="recent-table-wrap" class="hidden overflow-x-auto rounded-xl border border-isekai-border">
+                <table class="w-full text-sm text-left">
+                    <thead>
+                        <tr class="border-b border-isekai-border bg-isekai-card/80 text-isekai-muted text-xs uppercase tracking-wide">
+                            <th class="p-3 font-medium">When</th>
+                            <th class="p-3 font-medium">Activity</th>
+                            <th class="p-3 font-medium text-right">KOTO</th>
+                            <th class="p-3 font-medium">Wallet</th>
+                            <th class="p-3 font-medium">Tx</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-tbody" class="text-gray-300"></tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <footer class="border-t border-isekai-border mt-auto">
@@ -103,31 +182,98 @@
 
     <script>
         (function () {
-            var el = document.getElementById('faucet-live');
-            var url = 'https://api.isekai-pool.com/api/v1/faucet/balance';
-            fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
-                .then(function (r) {
-                    if (r.status === 503) {
-                        el.innerHTML = 'Faucet API is <span class="text-amber-400">disabled</span> or not configured on the server (<code class="text-gray-500">FAUCET_ENABLED</code>).';
-                        return null;
-                    }
-                    return r.json();
-                })
-                .then(function (data) {
-                    if (!data || data.error) return;
-                    var parts = [
-                        '<span class="text-isekai-green">Online</span> — book balance: <strong class="text-gray-200">' + (data.balance ?? '—') + '</strong> KOTO',
-                        'paid today: <strong class="text-gray-300">' + (data.daily_paid ?? '0') + '</strong>',
-                        'claims (all time): <strong class="text-gray-300">' + (data.total_claims ?? '0') + '</strong>'
-                    ];
-                    if (data.faucet_wallet) {
-                        parts.push('public wallet: <code class="text-xs text-gray-400 break-all">' + data.faucet_wallet + '</code>');
-                    }
-                    el.innerHTML = parts.join(' · ');
-                })
-                .catch(function () {
-                    el.textContent = 'Could not reach the faucet API (network or CORS). Try again later.';
-                });
+            var API = 'https://api.isekai-pool.com/api/v1';
+            var EXPLORER_TX = 'https://explorer.ko-to.org/tx/';
+            var EXPLORER_ADDR = 'https://explorer.ko-to.org/address/';
+
+            function fmtTime(iso) {
+                if (!iso) return '—';
+                try {
+                    var d = new Date(iso);
+                    return d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+                } catch (e) { return iso; }
+            }
+
+            function loadBalance() {
+                var elApi = document.getElementById('stat-api');
+                fetch(API + '/faucet/balance', { method: 'GET', headers: { 'Accept': 'application/json' } })
+                    .then(function (r) {
+                        if (r.status === 503) {
+                            elApi.innerHTML = '<span class="text-amber-400">Off</span> <span class="text-isekai-muted text-sm font-normal">(FAUCET_ENABLED)</span>';
+                            document.getElementById('stat-balance').textContent = '—';
+                            return null;
+                        }
+                        elApi.innerHTML = '<span class="text-isekai-green">Online</span>';
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (!data || data.error) return;
+                        var bal = data.balance != null ? data.balance : '—';
+                        document.getElementById('stat-balance').textContent = bal + ' KOTO';
+                        document.getElementById('stat-daily').textContent = data.daily_paid != null ? data.daily_paid : '0';
+                        document.getElementById('stat-claims').textContent = data.total_claims != null ? String(data.total_claims) : '0';
+                        var syncEl = document.getElementById('stat-sync');
+                        if (data.last_sync) {
+                            syncEl.textContent = 'Last RPC sync: ' + fmtTime(data.last_sync);
+                        } else {
+                            syncEl.textContent = '';
+                        }
+                        if (data.faucet_wallet) {
+                            var sec = document.getElementById('faucet-wallet-section');
+                            sec.classList.remove('hidden');
+                            document.getElementById('faucet-wallet-addr').textContent = data.faucet_wallet;
+                            var ex = document.getElementById('faucet-wallet-explorer');
+                            ex.href = EXPLORER_ADDR + encodeURIComponent(data.faucet_wallet);
+                        }
+                    })
+                    .catch(function () {
+                        elApi.innerHTML = '<span class="text-isekai-red">Unreachable</span>';
+                        document.getElementById('stat-balance').textContent = '—';
+                    });
+            }
+
+            function loadRecent() {
+                var empty = document.getElementById('recent-empty');
+                var wrap = document.getElementById('recent-table-wrap');
+                var tbody = document.getElementById('recent-tbody');
+                fetch(API + '/faucet/recent', { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) {
+                        if (r.status === 503) {
+                            empty.textContent = 'Faucet API disabled.';
+                            return null;
+                        }
+                        return r.json();
+                    })
+                    .then(function (rows) {
+                        if (!rows || !Array.isArray(rows)) {
+                            empty.textContent = 'Could not load recent payouts.';
+                            return;
+                        }
+                        if (rows.length === 0) {
+                            empty.textContent = 'No paid claims yet.';
+                            return;
+                        }
+                        empty.classList.add('hidden');
+                        wrap.classList.remove('hidden');
+                        tbody.innerHTML = rows.map(function (row) {
+                            var txLink = row.txid
+                                ? '<a href="' + EXPLORER_TX + encodeURIComponent(row.txid) + '" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">' + row.txid.slice(0, 10) + '…</a>'
+                                : '—';
+                            return '<tr class="border-b border-isekai-border/80 hover:bg-isekai-card/50">' +
+                                '<td class="p-3 text-isekai-muted whitespace-nowrap">' + fmtTime(row.time) + '</td>' +
+                                '<td class="p-3">' + (row.activity || '—') + '</td>' +
+                                '<td class="p-3 text-right tabular-nums text-amber-200/90">' + (row.amount || '—') + '</td>' +
+                                '<td class="p-3 text-isekai-muted text-xs">' + (row.wallet_short || '—') + '</td>' +
+                                '<td class="p-3 text-xs">' + txLink + '</td></tr>';
+                        }).join('');
+                    })
+                    .catch(function () {
+                        empty.textContent = 'Could not load recent payouts.';
+                    });
+            }
+
+            loadBalance();
+            loadRecent();
         })();
     </script>
 </body>

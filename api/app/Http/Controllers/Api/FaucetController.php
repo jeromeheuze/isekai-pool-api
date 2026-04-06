@@ -138,6 +138,7 @@ class FaucetController extends Controller
             'total_paid' => (string) $row->total_paid,
             'total_claims' => (int) $row->total_claims,
             'daily_paid' => $dailyPaid,
+            'last_sync' => $row->last_sync?->toIso8601String(),
         ];
 
         if (config('faucet.faucet_wallet')) {
