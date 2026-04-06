@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
+        if (config('network_tracker.enabled')) {
+            $schedule->command('network:snapshot KOTO')
+                ->everyFifteenMinutes()
+                ->withoutOverlapping(600);
+        }
         if (config('faucet.auto_sync_balance')) {
             $m = (int) config('faucet.sync_balance_interval_minutes', 5);
             $schedule->command('faucet:sync-balance')

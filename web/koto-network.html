@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico?v=2" sizes="any" />
+    <link rel="icon" type="image/png" href="/favicon-32x32.png?v=2" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/favicon-16x16.png?v=2" sizes="16x16" />
+    <title>KOTO Network &amp; Pool History | isekai-pool.com</title>
+    <meta name="description" content="Historical KOTO network hashrate, difficulty, and mining pool distribution — collected every 15 minutes.">
+    <link rel="canonical" href="https://isekai-pool.com/koto-network.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/koto-network.html">
+    <meta property="og:title" content="KOTO Network &amp; Pool History | isekai-pool.com">
+    <meta property="og:description" content="Historical KOTO network hashrate, difficulty, and pool distribution.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="KOTO Network history | isekai-pool.com">
+    <meta name="twitter:description" content="Network hashrate, difficulty, and pool share over time.">
+    <meta name="twitter:image" content="https://isekai-pool.com/img/og-default.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', green: '#4ade80', red: '#f87171', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center shrink-0 py-0.5" aria-label="isekai-pool.com — home">
+                <img src="/assets/IsekaiPool_WhiteText.svg" alt="Isekai Pool" class="h-8 w-auto sm:h-9 md:h-10" width="2000" height="600" decoding="async" />
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/faucet.html" class="hover:text-white transition">KOTO Faucet</a>
+                <a href="/koto-network.html" class="text-white">KOTO Network</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-5xl mx-auto px-4 py-10 w-full">
+        <header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold">KOTO <span class="text-violet-400">Network</span></h1>
+                <p id="subtitle" class="text-sm text-isekai-muted mt-2">Loading…</p>
+            </div>
+            <div class="flex flex-wrap gap-2" id="range-btns" role="group" aria-label="Time range">
+                <button type="button" data-range="24h" class="range-btn px-3 py-1.5 text-xs rounded border border-isekai-border text-isekai-muted hover:text-white hover:border-isekai-accent transition">1D</button>
+                <button type="button" data-range="7d" class="range-btn px-3 py-1.5 text-xs rounded border border-isekai-accent text-white bg-isekai-card">7D</button>
+                <button type="button" data-range="30d" class="range-btn px-3 py-1.5 text-xs rounded border border-isekai-border text-isekai-muted hover:text-white hover:border-isekai-accent transition">30D</button>
+                <button type="button" data-range="all" class="range-btn px-3 py-1.5 text-xs rounded border border-isekai-border text-isekai-muted hover:text-white hover:border-isekai-accent transition">ALL</button>
+            </div>
+        </header>
+
+        <p id="load-err" class="hidden text-sm text-red-400 mb-4"></p>
+
+        <section class="mb-8 rounded-lg border border-isekai-border bg-isekai-card/50 p-4">
+            <h2 class="text-sm font-semibold text-gray-300 mb-3">Network hashrate &amp; pool share</h2>
+            <div class="h-72 sm:h-80 w-full">
+                <canvas id="chart-hash"></canvas>
+            </div>
+        </section>
+
+        <section class="mb-10 rounded-lg border border-isekai-border bg-isekai-card/50 p-4">
+            <h2 class="text-sm font-semibold text-gray-300 mb-3">Difficulty</h2>
+            <div class="h-56 sm:h-64 w-full">
+                <canvas id="chart-diff"></canvas>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-lg font-bold text-white mb-4">Current pool stats</h2>
+            <div class="overflow-x-auto rounded-lg border border-isekai-border">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-isekai-muted border-b border-isekai-border bg-isekai-bg/80">
+                        <tr>
+                            <th class="p-3 font-normal">Pool</th>
+                            <th class="p-3 font-normal">Hashrate</th>
+                            <th class="p-3 font-normal">Share</th>
+                            <th class="p-3 font-normal">Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pool-table"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="text-sm text-isekai-muted border-t border-isekai-border pt-8">
+            <h2 class="text-white font-medium mb-2">About this data</h2>
+            <p class="mb-2">Snapshots are collected every <strong class="text-gray-400">15 minutes</strong> from the public KOTO RPC node and each pool&apos;s stats API.</p>
+            <p>JSON API: <a href="https://api.isekai-pool.com/api/v1/network/KOTO/current" class="text-isekai-accent hover:underline break-all" target="_blank" rel="noopener">https://api.isekai-pool.com/api/v1/network/KOTO/current</a></p>
+        </section>
+    </main>
+
+    <footer class="border-t border-isekai-border mt-auto">
+        <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <a href="/koto.html" class="hover:text-white transition">← KOTO mining</a>
+            <a href="/pages/api-docs.html" class="hover:text-white transition">API docs</a>
+        </div>
+    </footer>
+
+    <script>
+(function () {
+    const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        ? 'http://localhost:8000/api/v1/network/KOTO'
+        : 'https://api.isekai-pool.com/api/v1/network/KOTO';
+
+    const POOL_ORDER = ['isekai', 'mofumofu', 'leywapool', 'unknown'];
+    const COLORS = {
+        isekai: { fill: 'rgba(124, 106, 247, 0.35)', stroke: '#7c6af7', label: 'isekai-pool.com' },
+        mofumofu: { fill: 'rgba(240, 192, 64, 0.35)', stroke: '#f0c040', label: 'mofumofu.me' },
+        leywapool: { fill: 'rgba(239, 68, 68, 0.35)', stroke: '#ef4444', label: 'leywapool.com' },
+        unknown: { fill: 'rgba(55, 65, 81, 0.5)', stroke: '#6b7280', label: 'Unknown' },
+    };
+
+    let range = '7d';
+    let chartHash = null;
+    let chartDiff = null;
+
+    function formatHashrate(hs) {
+        const n = Number(hs);
+        if (!Number.isFinite(n)) return '—';
+        if (n >= 1e9) return (n / 1e9).toFixed(2) + ' GH/s';
+        if (n >= 1e6) return (n / 1e6).toFixed(2) + ' MH/s';
+        if (n >= 1e3) return (n / 1e3).toFixed(2) + ' KH/s';
+        return n.toFixed(0) + ' H/s';
+    }
+
+    function formatNum(n, d) {
+        const x = Number(n);
+        if (!Number.isFinite(x)) return '—';
+        return x.toLocaleString(undefined, { maximumFractionDigits: d });
+    }
+
+    function setErr(msg) {
+        const el = document.getElementById('load-err');
+        if (!msg) {
+            el.classList.add('hidden');
+            el.textContent = '';
+            return;
+        }
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+
+    function destroyCharts() {
+        if (chartHash) { chartHash.destroy(); chartHash = null; }
+        if (chartDiff) { chartDiff.destroy(); chartDiff = null; }
+    }
+
+    function renderTable(pools) {
+        const tb = document.getElementById('pool-table');
+        tb.innerHTML = '';
+        if (!pools || !pools.length) {
+            tb.innerHTML = '<tr><td colspan="4" class="p-4 text-isekai-muted">No pool data yet.</td></tr>';
+            return;
+        }
+        pools.forEach(function (p) {
+            const tr = document.createElement('tr');
+            tr.className = 'border-b border-isekai-border/60 last:border-0';
+            const fee = p.pool_fee != null ? String(p.pool_fee) + '%' : '—';
+            tr.innerHTML =
+                '<td class="p-3">' + (p.pool_name || p.pool_slug) + (p.is_online === false ? ' <span class="text-isekai-muted text-xs">(offline)</span>' : '') + '</td>' +
+                '<td class="p-3">' + formatHashrate(p.hashrate_hs != null ? p.hashrate_hs : p.hashrate) + '</td>' +
+                '<td class="p-3">' + formatNum(p.network_share_percent, 1) + '%</td>' +
+                '<td class="p-3">' + fee + '</td>';
+            tb.appendChild(tr);
+        });
+    }
+
+    function buildCharts(hist) {
+        destroyCharts();
+        const net = hist.network || [];
+        const pools = hist.pools || {};
+        if (!net.length) {
+            return;
+        }
+
+        const diffData = net.map(function (pt) {
+            return { x: new Date(pt.time), y: pt.difficulty };
+        });
+
+        const datasets = [];
+        POOL_ORDER.forEach(function (slug) {
+            const pts = pools[slug];
+            if (!pts || !pts.length) return;
+            const c = COLORS[slug];
+            if (!c) return;
+            datasets.push({
+                label: c.label,
+                data: pts.map(function (pt) { return { x: new Date(pt.time), y: pt.hashrate }; }),
+                fill: true,
+                backgroundColor: c.fill,
+                borderColor: c.stroke,
+                borderWidth: 1,
+                pointRadius: 0,
+                tension: 0.15,
+            });
+        });
+
+        const ctxH = document.getElementById('chart-hash').getContext('2d');
+        if (datasets.length) {
+            chartHash = new Chart(ctxH, {
+            type: 'line',
+            data: { datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#9ca3af', boxWidth: 12 } },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                const v = ctx.parsed.y;
+                                return ctx.dataset.label + ': ' + formatHashrate(v);
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { tooltipFormat: 'MMM d, HH:mm' },
+                        grid: { color: 'rgba(55,65,81,0.35)' },
+                        ticks: { color: '#6b7280', maxRotation: 0 },
+                    },
+                    y: {
+                        stacked: true,
+                        title: { display: true, text: 'H/s', color: '#6b7280' },
+                        grid: { color: 'rgba(55,65,81,0.35)' },
+                        ticks: {
+                            color: '#6b7280',
+                            callback: function (v) { return formatHashrate(v); },
+                        },
+                    },
+                },
+            },
+        });
+        }
+
+        const ctxD = document.getElementById('chart-diff').getContext('2d');
+        chartDiff = new Chart(ctxD, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Difficulty',
+                    data: diffData,
+                    fill: true,
+                    backgroundColor: 'rgba(6, 182, 212, 0.15)',
+                    borderColor: '#06b6d4',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    tension: 0.15,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return 'Difficulty: ' + formatNum(ctx.parsed.y, 4);
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { tooltipFormat: 'MMM d, HH:mm' },
+                        grid: { color: 'rgba(55,65,81,0.35)' },
+                        ticks: { color: '#6b7280', maxRotation: 0 },
+                    },
+                    y: {
+                        grid: { color: 'rgba(55,65,81,0.35)' },
+                        ticks: { color: '#6b7280' },
+                    },
+                },
+            },
+        });
+    }
+
+    async function load() {
+        setErr('');
+        document.getElementById('subtitle').textContent = 'Loading…';
+        try {
+            const [cur, hist] = await Promise.all([
+                fetch(API + '/current', { headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }),
+                fetch(API + '/history?range=' + encodeURIComponent(range), { headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }),
+            ]);
+
+            if (cur.error) {
+                setErr(cur.error);
+                return;
+            }
+
+            const net = cur.network;
+            if (net) {
+                document.getElementById('subtitle').textContent =
+                    'Block ' + formatNum(net.block_height, 0) + ' · ' +
+                    formatHashrate(net.network_hashrate_hs) + ' · Diff ' + formatNum(net.difficulty, 4) +
+                    (cur.captured_at ? ' · ' + cur.captured_at : '');
+            } else {
+                document.getElementById('subtitle').textContent = cur.message || 'No snapshots yet — charts need collector data.';
+            }
+
+            renderTable(cur.pools || []);
+
+            if (hist.error) {
+                setErr(hist.error);
+                return;
+            }
+            buildCharts(hist);
+        } catch (e) {
+            setErr('Could not load API: ' + (e && e.message ? e.message : String(e)));
+        }
+    }
+
+    document.querySelectorAll('.range-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            range = btn.getAttribute('data-range');
+            document.querySelectorAll('.range-btn').forEach(function (b) {
+                b.classList.remove('border-isekai-accent', 'text-white', 'bg-isekai-card');
+                b.classList.add('border-isekai-border', 'text-isekai-muted');
+            });
+            btn.classList.add('border-isekai-accent', 'text-white', 'bg-isekai-card');
+            btn.classList.remove('text-isekai-muted');
+            load();
+        });
+    });
+
+    load();
+})();
+    </script>
+</body>
+</html>

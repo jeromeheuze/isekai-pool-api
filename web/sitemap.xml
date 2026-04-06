@@ -4,6 +4,7 @@
   <url><loc>https://isekai-pool.com/coins.html</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://isekai-pool.com/ytn.html</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://isekai-pool.com/koto.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://isekai-pool.com/koto-network.html</loc><priority>0.75</priority><changefreq>daily</changefreq></url>
   <url><loc>https://isekai-pool.com/faucet.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://isekai-pool.com/tdc.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://isekai-pool.com/guide.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>

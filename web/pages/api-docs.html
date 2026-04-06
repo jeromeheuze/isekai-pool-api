@@ -47,6 +47,7 @@
                 <a href="/" class="hover:text-white transition">Home</a>
                 <a href="/coins.html" class="hover:text-white transition">Coins</a>
                 <a href="/faucet.html" class="hover:text-white transition">KOTO Faucet</a>
+                <a href="/koto-network.html" class="hover:text-white transition">KOTO Network</a>
                 <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
                 <a href="/status.html" class="hover:text-white transition">Node Status</a>
                 <a href="/about.html" class="hover:text-white transition">About</a>
@@ -64,6 +65,9 @@
             <h2 class="text-lg font-bold mb-3">Endpoints</h2>
             <ul class="text-sm text-isekai-muted space-y-2 font-mono">
                 <li><code class="text-green-400">GET</code> <code>/health</code> — all active coins, block height, online flag</li>
+                <li><code class="text-green-400">GET</code> <code>/network/{COIN}/current</code> — latest network + pool snapshot (e.g. <code class="text-gray-400">KOTO</code>)</li>
+                <li><code class="text-green-400">GET</code> <code>/network/{COIN}/history?range=24h|7d|30d|all</code> — time series for charts</li>
+                <li><code class="text-green-400">GET</code> <code>/network/{COIN}/pools</code> — current pool stats</li>
                 <li><code class="text-green-400">GET</code> <code>/{coin}/status</code> — blockchain + network summary for one coin</li>
                 <li><code class="text-amber-400">POST</code> <code>/{coin}/rpc</code> — JSON-RPC proxy (whitelisted methods only)</li>
                 <li><code class="text-amber-400">POST</code> <code>/faucet/claim</code> — KOTO gamified faucet claim (server must enable <code class="text-gray-400">FAUCET_ENABLED</code>)</li>
@@ -121,6 +125,7 @@
                 <a href="https://www.interserver.net/r/1131521" class="hover:text-white transition" target="_blank" rel="noopener sponsored">Hosted on InterServer VPS</a>
                 <a href="/coins.html" class="hover:text-white transition">Coins</a>
                 <a href="/faucet.html" class="hover:text-white transition">KOTO Faucet</a>
+                <a href="/koto-network.html" class="hover:text-white transition">KOTO Network</a>
                 <a href="/status.html" class="hover:text-white transition">Node Status</a>
             </div>
         </div>
