@@ -59,23 +59,6 @@ class RpcController extends Controller
         try {
             $rpc = new RpcService($coin);
             $info = $rpc->call('getblockchaininfo');
-            $net = $rpc->call('getnetworkinfo');
-
-            return response()->json([
-                'coin' => strtoupper($coin),
-                'symbol' => $coinConfig['symbol'],
-                'algo' => $coinConfig['algo'],
-                'online' => true,
-                'blocks' => $info['blocks'] ?? null,
-                'headers' => $info['headers'] ?? null,
-                'synced' => ($info['blocks'] ?? 0) >= ($info['headers'] ?? 1),
-                'progress' => round(($info['verificationprogress'] ?? 0) * 100, 2),
-                'difficulty' => $info['difficulty'] ?? null,
-                'peers' => $net['connections'] ?? null,
-                'version' => $net['subversion'] ?? null,
-                'explorer' => $coinConfig['explorer'] ?? null,
-            ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'coin' => strtoupper($coin),
@@ -84,6 +67,28 @@ class RpcController extends Controller
                 'error' => $e->getMessage(),
             ], 503);
         }
+
+        // Peers/version are optional; a failing getnetworkinfo must not mark the node offline if the chain RPC works.
+        $net = null;
+        try {
+            $net = $rpc->call('getnetworkinfo');
+        } catch (\Throwable) {
+        }
+
+        return response()->json([
+            'coin' => strtoupper($coin),
+            'symbol' => $coinConfig['symbol'],
+            'algo' => $coinConfig['algo'],
+            'online' => true,
+            'blocks' => $info['blocks'] ?? null,
+            'headers' => $info['headers'] ?? null,
+            'synced' => ($info['blocks'] ?? 0) >= ($info['headers'] ?? 1),
+            'progress' => round(($info['verificationprogress'] ?? 0) * 100, 2),
+            'difficulty' => $info['difficulty'] ?? null,
+            'peers' => $net !== null ? ($net['connections'] ?? null) : null,
+            'version' => $net !== null ? ($net['subversion'] ?? null) : null,
+            'explorer' => $coinConfig['explorer'] ?? null,
+        ]);
     }
 
     /**
