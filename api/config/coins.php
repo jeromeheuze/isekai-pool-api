@@ -27,7 +27,7 @@ return [
         'description' => 'Japanese privacy coin. Zcash fork; miners use yescryptR8G.',
         'supply' => '210,000,000',
         'block_time' => '~60 sec',
-        'explorer' => 'https://explorer.ko-to.org',
+        'explorer' => 'https://explorer.isekai-pool.com',
         'website' => 'https://ko-to.org',
         'exchange' => 'TradeOgre',
         'status' => 'active',
