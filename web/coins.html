@@ -90,10 +90,13 @@
                     : '<span class="text-isekai-red text-xs">🔴 Offline</span>';
                 var initials = meta.symbol;
                 var border = online ? colors[k] + '55' : '#1e2330';
+                var logo = meta.img
+                    ? '<img class="coin-logo-img" src="' + meta.img + '" alt="' + meta.name + ' (' + meta.symbol + ')" width="48" height="48" loading="lazy" />'
+                    : '<div class="coin-logo-placeholder shrink-0 text-white" style="background:' + colors[k] + '44">' + initials + '</div>';
                 return (
                     '<article class="bg-isekai-card border rounded-xl p-6 flex flex-col" style="border-color:' + border + '">' +
                     '<div class="flex items-start gap-4 mb-4">' +
-                    '<div class="coin-logo-placeholder shrink-0 text-white" style="background:' + colors[k] + '44">' + initials + '</div>' +
+                    logo +
                     '<div><h2 class="font-bold text-lg">' + meta.name + ' <span class="text-isekai-muted font-normal">' + meta.symbol + '</span></h2>' +
                     '<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-isekai-border text-isekai-muted">' + meta.algo + '</span></div></div>' +
                     '<div class="flex items-center justify-between mb-2">' + pill + '</div>' +

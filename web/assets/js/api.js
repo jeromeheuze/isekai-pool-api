@@ -9,9 +9,9 @@
 
     /** rpcPort + minerAlgo: miner documentation only — never used in fetch(). RPC host in HTML examples: 153.75.225.100 */
     var COINS = {
-        YTN: { slug: 'yenten', name: 'Yenten', symbol: 'YTN', algo: 'YespowerR16', rpcPort: 9982, minerAlgo: 'yespowerr16', page: '/ytn.html' },
-        KOTO: { slug: 'koto', name: 'Koto', symbol: 'KOTO', algo: 'yescryptR8G', rpcPort: 8432, minerAlgo: 'yescryptR8G', page: '/koto.html' },
-        TDC: { slug: 'tidecoin', name: 'Tidecoin', symbol: 'TDC', algo: 'YespowerTIDE', rpcPort: 9368, minerAlgo: 'yespowertide', page: '/tdc.html' },
+        YTN: { slug: 'yenten', name: 'Yenten', symbol: 'YTN', algo: 'YespowerR16', rpcPort: 9982, minerAlgo: 'yespowerr16', page: '/ytn.html', img: '/img/coins/yenten_400x400.jpg' },
+        KOTO: { slug: 'koto', name: 'Koto', symbol: 'KOTO', algo: 'yescryptR8G', rpcPort: 8432, minerAlgo: 'yescryptR8G', page: '/koto.html', img: '/img/coins/koto-icon-front-color-640.png' },
+        TDC: { slug: 'tidecoin', name: 'Tidecoin', symbol: 'TDC', algo: 'YespowerTIDE', rpcPort: 9368, minerAlgo: 'yespowertide', page: '/tdc.html', img: '/img/coins/tidecoin_400x400.jpg' },
     };
 
     function getCoinStatus(slug) {

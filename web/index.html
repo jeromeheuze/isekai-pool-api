@@ -186,9 +186,9 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
         const COINS = ['yenten', 'koto', 'tidecoin'];
 
         const COIN_META = {
-            yenten:   { name: 'Yenten',   symbol: 'YTN',  color: '#f59e0b', algo: 'YespowerR16' },
-            koto:     { name: 'Koto',     symbol: 'KOTO', color: '#8b5cf6', algo: 'yescryptR8G' },
-            tidecoin: { name: 'Tidecoin', symbol: 'TDC',  color: '#06b6d4', algo: 'YespowerTIDE' },
+            yenten:   { name: 'Yenten',   symbol: 'YTN',  color: '#f59e0b', algo: 'YespowerR16', img: '/img/coins/yenten_400x400.jpg' },
+            koto:     { name: 'Koto',     symbol: 'KOTO', color: '#8b5cf6', algo: 'yescryptR8G', img: '/img/coins/koto-icon-front-color-640.png' },
+            tidecoin: { name: 'Tidecoin', symbol: 'TDC',  color: '#06b6d4', algo: 'YespowerTIDE', img: '/img/coins/tidecoin_400x400.jpg' },
         };
 
         function setError(msg) {
@@ -213,14 +213,20 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
             const title = pageUrl
                 ? `<a href="${pageUrl}" class="font-bold hover:text-isekai-accent">${meta.name}</a>`
                 : `<span class="font-bold">${meta.name}</span>`;
+            const logo = meta.img
+                ? `<img src="${meta.img}" alt="" class="w-10 h-10 rounded-full object-cover shrink-0 border border-isekai-border" width="40" height="40" loading="lazy" />`
+                : '';
 
             return `
             <div class="bg-isekai-card border border-isekai-border rounded-xl p-5 transition"
                  style="border-color: ${online ? meta.color + '40' : '#1e2330'}">
                 <div class="flex items-center justify-between mb-4">
-                    <div>
+                    <div class="flex items-center gap-3 min-w-0">
+                        ${logo}
+                        <div class="min-w-0">
                         ${title}
                         <span class="text-isekai-muted text-xs ml-2">${meta.symbol}</span>
+                        </div>
                     </div>
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full ${online ? 'bg-isekai-green pulse-dot' : 'bg-isekai-red'}"></span>
