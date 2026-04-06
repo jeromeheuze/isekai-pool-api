@@ -52,9 +52,6 @@
                 <a href="/koto-network.html" class="text-white">KOTO Network</a>
                 <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
                 <a href="/status.html" class="hover:text-white transition">Node Status</a>
-                <a href="/about.html" class="hover:text-white transition">About</a>
-                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
-                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
             </div>
         </div>
     </nav>
@@ -114,11 +111,54 @@
         </section>
     </main>
 
-    <footer class="border-t border-isekai-border mt-auto">
-        <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
-            <a href="/koto.html" class="hover:text-white transition">← KOTO mining</a>
-            <a href="https://explorer.isekai-pool.com" class="hover:text-white transition" target="_blank" rel="noopener">Block explorer</a>
-            <a href="/pages/api-docs.html" class="hover:text-white transition">API docs</a>
+    <footer class="border-t border-isekai-border bg-isekai-bg/50 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 py-14 md:py-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 text-sm">
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <a href="/" class="inline-block mb-4" aria-label="isekai-pool.com home">
+                        <img src="/assets/IsekaiPool_WhiteText.svg" alt="Isekai Pool" class="h-8 w-auto opacity-90" width="2000" height="600" decoding="async" />
+                    </a>
+                    <p class="text-isekai-muted text-xs leading-relaxed max-w-sm">
+                        Public RPC nodes for CPU-only yespower and yescrypt coins. Solo mine or build tools — no API key required.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-white font-semibold text-xs uppercase tracking-wider mb-4">Explore</h3>
+                    <ul class="space-y-2.5 text-isekai-muted">
+                        <li><a href="/koto.html" class="hover:text-white transition">KOTO mining</a></li>
+                        <li><a href="/coins.html" class="hover:text-white transition">Coins</a></li>
+                        <li><a href="/guide.html" class="hover:text-white transition">Mining guide</a></li>
+                        <li><a href="/status.html" class="hover:text-white transition">Node status</a></li>
+                        <li><a href="/faucet.html" class="hover:text-white transition">KOTO faucet</a></li>
+                        <li><a href="/koto-network.html" class="hover:text-white transition">KOTO network</a></li>
+                        <li><a href="https://koto.isekai-pool.com" class="hover:text-white transition" target="_blank" rel="noopener">KOTO pool (stratum)</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-white font-semibold text-xs uppercase tracking-wider mb-4">Coins</h3>
+                    <ul class="space-y-2.5 text-isekai-muted">
+                        <li><a href="/ytn.html" class="hover:text-white transition">Yenten (YTN)</a></li>
+                        <li><a href="/koto.html" class="hover:text-white transition">Koto (KOTO)</a></li>
+                        <li><a href="/tdc.html" class="hover:text-white transition">Tidecoin (TDC)</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-white font-semibold text-xs uppercase tracking-wider mb-4">Project</h3>
+                    <ul class="space-y-2.5 text-isekai-muted">
+                        <li><a href="/about.html" class="hover:text-white transition">About</a></li>
+                        <li><a href="/pages/api-docs.html" class="hover:text-white transition">API documentation</a></li>
+                        <li><a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a></li>
+                        <li><a href="https://explorer.isekai-pool.com" target="_blank" rel="noopener" class="hover:text-white transition">KOTO block explorer</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-isekai-border flex flex-col md:flex-row flex-wrap items-start md:items-center justify-between gap-6 text-xs text-isekai-muted">
+                <span>isekai-pool.com — 異世界インフラ</span>
+                <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                    <a href="https://gameglass.live/" class="hover:text-white transition" target="_blank" rel="noopener" title="Partner">GameGlass.Live</a>
+                    <a href="https://www.interserver.net/r/1131521" class="hover:text-white transition" target="_blank" rel="noopener sponsored">Hosted on InterServer VPS</a>
+                </div>
+            </div>
         </div>
     </footer>
 
