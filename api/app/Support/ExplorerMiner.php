@@ -14,17 +14,18 @@ final class ExplorerMiner
         }
 
         $raw = @hex2bin($coinbaseHex);
-        if ($raw === false) {
+        if ($raw === false || $raw === '') {
             return 'Unknown';
         }
 
-        if (str_contains($raw, 'isekai-pool.com')) {
+        // Case-insensitive — pools often embed hostnames in mixed case in the extranonce area.
+        if (stripos($raw, 'isekai-pool.com') !== false) {
             return 'isekai-pool.com';
         }
-        if (str_contains($raw, 'mofumofu')) {
+        if (stripos($raw, 'mofumofu') !== false) {
             return 'mofumofu.me';
         }
-        if (str_contains($raw, 'leywapool')) {
+        if (stripos($raw, 'leywapool') !== false) {
             return 'leywapool.com';
         }
 
@@ -32,7 +33,7 @@ final class ExplorerMiner
     }
 
     /**
-     * @param  array<string, mixed>  $tx  Verbose transaction (getrawtransaction …, true)
+     * @param  array<string, mixed>  $tx  Verbose transaction (getrawtransaction …, true) or embedded getblock …, 2 tx
      */
     public static function labelFromTransaction(array $tx): string
     {
@@ -41,8 +42,14 @@ final class ExplorerMiner
             return 'Unknown';
         }
 
-        $coinbase = $vin['coinbase'] ?? null;
+        $hex = null;
+        if (isset($vin['coinbase']) && is_string($vin['coinbase'])) {
+            $hex = $vin['coinbase'];
+        } elseif (isset($vin['scriptSig']['hex']) && is_string($vin['scriptSig']['hex'])) {
+            // Some RPC shapes expose coinbase payload only under scriptSig (compatibility).
+            $hex = $vin['scriptSig']['hex'];
+        }
 
-        return self::labelFromCoinbaseHex(is_string($coinbase) ? $coinbase : null);
+        return self::labelFromCoinbaseHex($hex);
     }
 }
