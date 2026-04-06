@@ -13,6 +13,7 @@ class RpcService
         'getblockchaininfo',
         'getnetworkinfo',
         'getmempoolinfo',
+        'getmininginfo',
         'getblock',
         'getblockhash',
         'getrawtransaction',
@@ -21,6 +22,8 @@ class RpcService
         'gettxoutsetinfo',
         'getdifficulty',
         'getconnectioncount',
+        'getreceivedbyaddress',
+        'listunspent',
     ];
 
     private array $config;
@@ -49,7 +52,7 @@ class RpcService
         $readOnly = in_array($method, [
             'getblockcount', 'getblockchaininfo', 'getdifficulty',
             'getconnectioncount', 'gettxoutsetinfo', 'getmempoolinfo',
-            'getnetworkinfo',
+            'getnetworkinfo', 'getmininginfo',
         ]);
 
         if ($readOnly) {
