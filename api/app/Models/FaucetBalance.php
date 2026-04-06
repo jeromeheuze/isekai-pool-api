@@ -27,8 +27,18 @@ class FaucetBalance extends Model
         ];
     }
 
+    /**
+     * Single bookkeeping row (id = 1). Auto-creates if missing so the API does not 500 after deploy.
+     */
     public static function singleton(): self
     {
-        return static::query()->firstOrFail();
+        return static::query()->firstOrCreate(
+            ['id' => 1],
+            [
+                'balance' => 0,
+                'total_paid' => 0,
+                'total_claims' => 0,
+            ]
+        );
     }
 }

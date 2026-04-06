@@ -10,6 +10,8 @@ use App\Services\Faucet\FaucetClaimService;
 use App\Services\Faucet\KotoFaucetWalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class FaucetController extends Controller
@@ -99,21 +101,42 @@ class FaucetController extends Controller
             return response()->json(['error' => 'Faucet is disabled'], 503);
         }
 
-        $row = FaucetBalance::singleton();
+        if (! Schema::hasTable('faucet_balance')) {
+            return response()->json([
+                'error' => 'Faucet tables missing',
+                'hint' => 'Run php artisan migrate on the API server',
+            ], 503);
+        }
+
+        try {
+            $row = FaucetBalance::singleton();
+        } catch (Throwable $e) {
+            Log::error('faucet.balance.singleton', ['message' => $e->getMessage()]);
+
+            return response()->json([
+                'error' => 'Could not load faucet balance row',
+                'hint' => 'Run php artisan migrate and ensure database is writable',
+            ], 503);
+        }
 
         $tz = config('faucet.timezone');
         $start = now($tz)->startOfDay()->utc();
         $end = now($tz)->endOfDay()->utc();
 
-        $dailyPaid = (string) FaucetClaim::query()
-            ->where('status', FaucetClaimStatus::Paid)
-            ->whereBetween('created_at', [$start, $end])
-            ->sum('amount');
+        try {
+            $dailyPaid = (string) (FaucetClaim::query()
+                ->where('status', FaucetClaimStatus::Paid->value)
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('amount') ?? '0');
+        } catch (Throwable $e) {
+            Log::error('faucet.balance.daily', ['message' => $e->getMessage()]);
+            $dailyPaid = '0';
+        }
 
         $payload = [
             'balance' => (string) $row->balance,
             'total_paid' => (string) $row->total_paid,
-            'total_claims' => $row->total_claims,
+            'total_claims' => (int) $row->total_claims,
             'daily_paid' => $dailyPaid,
         ];
 
