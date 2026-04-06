@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+    <title>KOTO Faucet | isekai-pool.com</title>
+    <meta name="description" content="KOTO faucet: API-first rewards on api.isekai-pool.com. Gamified earn hub planned on koto.isekai-pool.com.">
+    <link rel="canonical" href="https://isekai-pool.com/faucet.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isekai-pool.com/faucet.html">
+    <meta property="og:title" content="KOTO Faucet | isekai-pool.com">
+    <meta property="og:description" content="Earn KOTO via the public faucet API. Full games UI coming to koto.isekai-pool.com.">
+    <meta property="og:image" content="https://isekai-pool.com/img/og-default.png">
+    <meta property="og:site_name" content="isekai-pool.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        isekai: { bg: '#0d0f14', card: '#141720', border: '#1e2330', accent: '#7c6af7', muted: '#6b7280' }
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'Fira Code', 'monospace'] }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <style>body { background-color: #0d0f14; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-isekai-border bg-isekai-bg/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href="/" class="flex items-center shrink-0 py-0.5" aria-label="isekai-pool.com — home">
+                <img src="/assets/IsekaiPool_WhiteText.svg" alt="Isekai Pool" class="h-8 w-auto sm:h-9 md:h-10" width="2000" height="600" decoding="async" />
+            </a>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-isekai-muted">
+                <a href="/" class="hover:text-white transition">Home</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/faucet.html" class="text-white">KOTO Faucet</a>
+                <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/about.html" class="hover:text-white transition">About</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+                <a href="https://github.com/jeromeheuze/isekai-pool-api" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
+        <h1 class="text-3xl font-bold mb-2">KOTO <span class="text-violet-400">Faucet</span></h1>
+        <p class="text-isekai-muted text-sm mb-8">Earn small amounts of KOTO through the operator-funded rewards API.</p>
+
+        <section class="bg-isekai-card border border-isekai-border rounded-xl p-6 mb-8">
+            <h2 class="text-white font-bold text-base mb-3">Where is the full frontend?</h2>
+            <p class="text-isekai-muted text-sm leading-relaxed mb-4">
+                The <strong class="text-gray-300">gamified earn hub</strong> (games, quizzes, shrine visit) is specified for
+                <code class="text-gray-400">koto.isekai-pool.com</code> (Laravel + Livewire) — same infrastructure family as the pool — and is <strong class="text-gray-300">not</strong> shipped as static HTML in this repo.
+            </p>
+            <p class="text-isekai-muted text-sm leading-relaxed">
+                This site (<code class="text-gray-400">isekai-pool.com</code>) documents the public <strong class="text-gray-300">JSON API</strong> you can call from any app once the operator enables it.
+            </p>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-white font-bold text-base mb-3">API (backend)</h2>
+            <p class="text-isekai-muted text-sm leading-relaxed mb-4">
+                Base URL: <code class="text-isekai-accent">https://api.isekai-pool.com/api/v1/faucet</code>
+                — <code class="text-gray-400">/balance</code>, <code class="text-gray-400">/status</code>, <code class="text-gray-400">/recent</code>, <code class="text-gray-400">POST /claim</code> (Cloudflare Turnstile + wallet).
+            </p>
+            <a href="/pages/api-docs.html" class="inline-flex text-isekai-accent hover:underline text-sm font-medium">Read the API reference →</a>
+        </section>
+
+        <section class="bg-isekai-card border border-isekai-border rounded-xl p-6 mb-8" aria-live="polite">
+            <h2 class="text-white font-bold text-base mb-3">Live status</h2>
+            <p id="faucet-live" class="text-sm text-isekai-muted">Checking <code class="text-gray-400">GET /faucet/balance</code>…</p>
+        </section>
+
+        <p class="text-sm text-isekai-muted">
+            <a href="/koto.html" class="text-isekai-accent hover:underline">Koto (KOTO) mining</a> ·
+            <a href="https://koto.isekai-pool.com" class="text-isekai-accent hover:underline" target="_blank" rel="noopener">KOTO pool</a>
+        </p>
+    </main>
+
+    <footer class="border-t border-isekai-border mt-auto">
+        <div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap items-center justify-between gap-4 text-isekai-muted text-xs">
+            <span>isekai-pool.com — 異世界インフラ</span>
+            <div class="flex flex-wrap items-center gap-4">
+                <a href="https://gameglass.live/" class="hover:text-white transition" target="_blank" rel="noopener" title="Partner">GameGlass.Live</a>
+                <a href="https://www.interserver.net/r/1131521" class="hover:text-white transition" target="_blank" rel="noopener sponsored">Hosted on InterServer VPS</a>
+                <a href="/coins.html" class="hover:text-white transition">Coins</a>
+                <a href="/faucet.html" class="hover:text-white transition">KOTO Faucet</a>
+                <a href="/status.html" class="hover:text-white transition">Node Status</a>
+                <a href="/pages/api-docs.html" class="hover:text-white transition">API</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var el = document.getElementById('faucet-live');
+            var url = 'https://api.isekai-pool.com/api/v1/faucet/balance';
+            fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
+                .then(function (r) {
+                    if (r.status === 503) {
+                        el.innerHTML = 'Faucet API is <span class="text-amber-400">disabled</span> or not configured on the server (<code class="text-gray-500">FAUCET_ENABLED</code>).';
+                        return null;
+                    }
+                    return r.json();
+                })
+                .then(function (data) {
+                    if (!data || data.error) return;
+                    var parts = [
+                        '<span class="text-isekai-green">Online</span> — book balance: <strong class="text-gray-200">' + (data.balance ?? '—') + '</strong> KOTO',
+                        'paid today: <strong class="text-gray-300">' + (data.daily_paid ?? '0') + '</strong>',
+                        'claims (all time): <strong class="text-gray-300">' + (data.total_claims ?? '0') + '</strong>'
+                    ];
+                    if (data.faucet_wallet) {
+                        parts.push('public wallet: <code class="text-xs text-gray-400 break-all">' + data.faucet_wallet + '</code>');
+                    }
+                    el.innerHTML = parts.join(' · ');
+                })
+                .catch(function () {
+                    el.textContent = 'Could not reach the faucet API (network or CORS). Try again later.';
+                });
+        })();
+    </script>
+</body>
+</html>
