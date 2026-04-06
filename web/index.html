@@ -189,7 +189,9 @@ curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
     </footer>
 
     <script>
-        const API = 'https://api.isekai-pool.com/api/v1';
+        const API = (location.hostname === 'isekai-pool.com' || location.hostname === 'www.isekai-pool.com')
+            ? '/api/v1'
+            : 'https://api.isekai-pool.com/api/v1';
         const COINS = ['yenten', 'koto', 'tidecoin'];
 
         const COIN_META = {

@@ -5,7 +5,14 @@
 (function (global) {
     'use strict';
 
-    var API_BASE = 'https://api.isekai-pool.com/api/v1';
+    /** Same-origin on isekai-pool.com (nginx proxies /api/ → api vhost); direct URL elsewhere. */
+    var API_BASE = (function () {
+        try {
+            var h = location.hostname;
+            if (h === 'isekai-pool.com' || h === 'www.isekai-pool.com') return '/api/v1';
+        } catch (e) {}
+        return 'https://api.isekai-pool.com/api/v1';
+    })();
 
     /** rpcPort + minerAlgo: miner documentation only — never used in fetch(). RPC host in HTML examples: 153.75.225.100 */
     var COINS = {

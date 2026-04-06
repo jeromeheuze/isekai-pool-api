@@ -183,7 +183,9 @@
 
     <script>
         (function () {
-            var API = 'https://api.isekai-pool.com/api/v1';
+            var API = (location.hostname === 'isekai-pool.com' || location.hostname === 'www.isekai-pool.com')
+                ? '/api/v1'
+                : 'https://api.isekai-pool.com/api/v1';
             var EXPLORER_TX = 'https://explorer.isekai-pool.com/tx/';
             var EXPLORER_ADDR = 'https://explorer.isekai-pool.com/address/';
 
