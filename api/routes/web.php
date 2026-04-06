@@ -3,12 +3,11 @@
 use App\Http\Controllers\ExplorerController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-$explorerRoutes = function () {
-    Route::get('/', [ExplorerController::class, 'index'])->name('explorer.home');
+/*
+| Explorer: register the explorer domain BEFORE the catch-all "/", so
+| explorer.isekai-pool.com/ resolves to ExplorerController (not welcome).
+*/
+$explorerInner = function () {
     Route::get('/block/{heightOrHash}', [ExplorerController::class, 'block'])
         ->where('heightOrHash', '(\d+|[a-fA-F0-9]{64})')
         ->name('explorer.block');
@@ -20,7 +19,15 @@ $explorerRoutes = function () {
 };
 
 if ($domain = config('explorer.domain')) {
-    Route::domain($domain)->group($explorerRoutes);
+    Route::domain($domain)->get('/', [ExplorerController::class, 'index'])->name('explorer.home');
+    Route::domain($domain)->group($explorerInner);
 } else {
-    Route::prefix('explorer')->group($explorerRoutes);
+    Route::prefix('explorer')->group(function () use ($explorerInner) {
+        Route::get('/', [ExplorerController::class, 'index'])->name('explorer.home');
+        $explorerInner();
+    });
 }
+
+Route::get('/', function () {
+    return view('welcome');
+});
