@@ -24,6 +24,7 @@ class RpcService
     ];
 
     private array $config;
+
     private string $coin;
 
     public function __construct(string $coin)
@@ -36,7 +37,7 @@ class RpcService
             throw new RuntimeException("Coin $coin is not yet active on this node");
         }
         $this->config = $config;
-        $this->coin   = $coin;
+        $this->coin = $coin;
     }
 
     public function call(string $method, array $params = []): mixed
@@ -67,9 +68,9 @@ class RpcService
 
         $payload = json_encode([
             'jsonrpc' => '1.0',
-            'id'      => uniqid(),
-            'method'  => $method,
-            'params'  => $params,
+            'id' => uniqid(),
+            'method' => $method,
+            'params' => $params,
         ]);
 
         $auth = base64_encode(($rpc['user'] ?? '').':'.($rpc['pass'] ?? ''));
@@ -77,18 +78,18 @@ class RpcService
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_HTTPHEADER     => [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Authorization: Basic '.$auth,
             ],
             CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_TIMEOUT => 30,
         ]);
 
         $response = curl_exec($ch);
-        $error    = curl_error($ch);
+        $error = curl_error($ch);
         curl_close($ch);
 
         if ($error) {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\FaucetController;
 use App\Http\Controllers\Api\RpcController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,17 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
 
     Route::get('/health', [RpcController::class, 'health']);
+
+    Route::prefix('faucet')->group(function () {
+        Route::post('/claim', [FaucetController::class, 'claim'])
+            ->middleware('throttle:12,1');
+        Route::get('/status', [FaucetController::class, 'status'])
+            ->middleware('throttle:60,1');
+        Route::get('/balance', [FaucetController::class, 'balance'])
+            ->middleware('throttle:60,1');
+        Route::get('/recent', [FaucetController::class, 'recent'])
+            ->middleware('throttle:60,1');
+    });
 
     Route::prefix('{coin}')
         ->where(['coin' => 'yenten|koto|tidecoin|sugarchain'])

@@ -65,6 +65,10 @@
                 <li><code class="text-green-400">GET</code> <code>/health</code> — all active coins, block height, online flag</li>
                 <li><code class="text-green-400">GET</code> <code>/{coin}/status</code> — blockchain + network summary for one coin</li>
                 <li><code class="text-amber-400">POST</code> <code>/{coin}/rpc</code> — JSON-RPC proxy (whitelisted methods only)</li>
+                <li><code class="text-amber-400">POST</code> <code>/faucet/claim</code> — KOTO gamified faucet claim (server must enable <code class="text-gray-400">FAUCET_ENABLED</code>)</li>
+                <li><code class="text-green-400">GET</code> <code>/faucet/status</code> — per-activity availability for optional <code class="text-gray-400">?wallet=</code></li>
+                <li><code class="text-green-400">GET</code> <code>/faucet/balance</code> — book balance + daily paid stats</li>
+                <li><code class="text-green-400">GET</code> <code>/faucet/recent</code> — last paid claims (truncated addresses)</li>
             </ul>
             <p class="text-sm text-isekai-muted mt-4">Coin slugs: <code class="text-gray-400">yenten</code>, <code class="text-gray-400">koto</code>, <code class="text-gray-400">tidecoin</code>.</p>
         </section>
@@ -87,6 +91,11 @@
             <pre class="isekai-code-block text-gray-300 text-xs overflow-x-auto">curl -X POST https://api.isekai-pool.com/api/v1/yenten/rpc \
   -H "Content-Type: application/json" \
   -d '{"method":"getblockcount","params":[]}'</pre>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-lg font-bold mb-3">KOTO faucet (optional)</h2>
+            <p class="text-sm text-isekai-muted mb-3">When the operator enables the faucet, <code class="text-gray-400">POST /faucet/claim</code> accepts JSON: <code class="text-gray-400">wallet_address</code>, <code class="text-gray-400">activity_slug</code>, <code class="text-gray-400">turnstile_token</code> (Cloudflare Turnstile). Optional header <code class="text-gray-400">Idempotency-Key</code>. Returns <code class="text-gray-400">txid</code> on success or a structured error. Disabled deployments respond with HTTP 503.</p>
         </section>
 
         <section class="mb-10">

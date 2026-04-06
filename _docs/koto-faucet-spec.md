@@ -30,13 +30,15 @@ Players discover the network → Some become miners → Pool grows
 
 | Layer | Tech |
 |-------|------|
-| Backend | Laravel 11 (existing isekai-pool-api repo) |
+| Backend | Laravel 11 (`api/` in isekai-pool-api — add `livewire/livewire` when implementing; not in `composer.json` yet) |
 | Frontend | Livewire 3 + Alpine.js |
 | CSS | Shizen Design System (csskitsune.com) + dark theme |
 | Rate limiting | Redis (already installed for zny-nomp) |
 | Captcha | Cloudflare Turnstile (free) |
-| Payouts | KOTO RPC via `koto-cli sendtoaddress` |
-| Cross-site auth | Signed URL tokens (no accounts needed) |
+| Payouts | KOTO JSON-RPC `sendtoaddress` (same units as wallet: decimal KOTO strings) |
+| Cross-site auth | Short-lived **server-issued** tokens only (see Cross-Site Integration) |
+
+**Deployment:** Faucet routes ship in the same Laravel app (`api/`). `koto.isekai-pool.com` is an extra vhost (or route host) pointing at that app; `api.isekai-pool.com` remains the JSON API host. Document shared `.env` (RPC, Turnstile, Redis) per environment.
 
 ---
 
@@ -67,7 +69,7 @@ Schema::create('faucet_balance', function (Blueprint $table) {
     $table->decimal('balance', 16, 8);     // current faucet wallet balance
     $table->decimal('total_paid', 16, 8);  // all-time total paid out
     $table->integer('total_claims');        // all-time claim count
-    $table->timestamp('last_sync');         // last RPC balance check
+    $table->timestamp('last_sync')->nullable(); // last RPC balance check
 });
 ```
 
@@ -87,10 +89,20 @@ Each activity has a slug, reward amount, cooldown, and source site.
 | `shrine_puzzle` | Shrine Sudoku | 2.0 KOTO | 24h | shrinepuzzle.com |
 | `map_explore` | JapanInPixels Map Challenge | 1.0 KOTO | 24h | japaninpixels.com |
 | `coffee_quiz` | Japanese Coffee Quiz | 0.5 KOTO | 24h | kohibou.com |
-| `daily_bonus` | All activities completed | 2.0 KOTO | 24h | any |
+| `daily_bonus` | All activities completed | 1.5 KOTO | 24h | any |
 
-**Max daily earnings per wallet: ~10.5 KOTO** (if completing everything)
-**At current price (~$0.000037): ~$0.0004/day** — trivial cost, meaningful engagement
+**Routine daily maximum (activities + `daily_bonus` only): 10.0 KOTO** — sum of the grid above (8.5) + daily bonus (1.5). This matches the per-wallet **routine** cap in Anti-Abuse.
+
+**At current price (~$0.000037): ~$0.00037/day** for a full routine clear — trivial cost, meaningful engagement.
+
+### Earning limits (routine vs bonuses)
+
+| Bucket | What counts | Daily cap |
+|--------|-------------|-----------|
+| **Routine** | Standard activity slugs + `daily_bonus` | **10.0 KOTO** per wallet (midnight JST reset) |
+| **Bonuses** | Streak rewards, one-time milestones, referral, weekly leaderboard prizes | **Does not count** toward the 10.0 KOTO routine cap |
+
+**Safety valve (operator-tunable):** enforce a **hard ceiling** on *all* faucet-paid KOTO per wallet per calendar day (e.g. **25 KOTO** including bonuses) so streak + milestone + leaderboard cannot be abused in combination. Tune from telemetry.
 
 ---
 
@@ -155,7 +167,7 @@ Other Japan Empire Network sites embed a lightweight earn widget:
 <div id="koto-earn-widget" data-activity="yokai_match" data-site="yokai"></div>
 ```
 
-The widget renders a mini game inline. On completion it POSTs to the KOTO faucet API with a signed token. User claims their KOTO without leaving the partner site.
+The widget renders a mini game inline. On completion, the **partner backend** (or a faucet callback URL) verifies the game result, then requests a **short-lived completion token** from the faucet API (HMAC or JWT signed **only with server secrets**). The browser POSTs to `POST /api/v1/faucet/claim` with `turnstile_token`, wallet, activity slug, and **that token** — never a client-side signature. User claims KOTO without leaving the partner site.
 
 ---
 
@@ -165,7 +177,9 @@ Add to existing `isekai-pool-api`:
 
 ```
 POST /api/v1/faucet/claim
-Body: { wallet_address, activity_slug, turnstile_token, score, site_token }
+Headers: Idempotency-Key: <uuid>   (optional; return same response if retried)
+Body: { wallet_address, activity_slug, turnstile_token, score, completion_token }
+       // completion_token = server-issued token for partner/widget flows; omit on first-party /earn only if policy allows
 Returns: { success, txid, amount, next_claim_at }
 
 GET  /api/v1/faucet/status?wallet=k1xxx
@@ -191,8 +205,11 @@ Returns: [ { wallet_short, activity, amount, txid, time } ] // last 20, wallet t
    b. IP cooldown (Redis: ip:{ip}:{activity} → TTL 24h)
    c. Wallet cooldown (Redis: wallet:{address}:{activity} → TTL 24h)
    d. Faucet balance > reward amount
-   e. Daily cap not exceeded (Redis: daily:total → TTL resets at midnight JST)
-5. All checks pass → queue payout job
+   e. Routine daily cap: if this payout is routine, Redis `daily:wallet:routine:{address}` ≤ 10.0 KOTO (midnight JST)
+   f. Optional hard daily ceiling: all payouts `daily:wallet:all:{address}` ≤ operator max (e.g. 25 KOTO)
+   g. Global daily outflow: `daily:total` ≤ 100 KOTO (resets midnight JST)
+   h. Idempotency: same `Idempotency-Key` → return prior result without double pay
+5. All checks pass → queue payout job (claim row `pending` with unique constraint or idempotency store)
 6. Laravel job calls: koto-cli sendtoaddress {wallet} {amount}
 7. Store txid + mark claim paid
 8. Return success response with txid
@@ -202,29 +219,37 @@ Returns: [ { wallet_short, activity, amount, txid, time } ] // last 20, wallet t
 
 ## Payout Job (Laravel Queue)
 
+Use **decimal KOTO** everywhere RPC does (same as `faucet_claims.amount` and wallet RPC). Do not mix satoshi integers in cache unless you standardize one representation app-wide.
+
 ```php
 class ProcessFaucetPayout implements ShouldQueue
 {
     public function handle(): void
     {
-        // Call KOTO RPC via HTTP
+        $amount = (string) $this->claim->amount; // decimal string for RPC
+
         $response = Http::post('http://127.0.0.1:' . config('koto.rpc_port'), [
             'jsonrpc' => '1.0',
             'method'  => 'sendtoaddress',
-            'params'  => [$this->claim->wallet_address, $this->claim->amount],
+            'params'  => [$this->claim->wallet_address, $amount],
         ])->withBasicAuth(config('koto.rpc_user'), config('koto.rpc_pass'));
 
         $txid = $response->json('result');
-        
-        $this->claim->update(['txid' => $txid, 'status' => 'paid']);
-        
-        // Update faucet balance cache
-        Cache::decrement('faucet:balance', $this->claim->amount * 1e8);
+
+        DB::transaction(function () use ($txid) {
+            $this->claim->update(['txid' => $txid, 'status' => 'paid']);
+            $row = FaucetBalance::query()->lockForUpdate()->first();
+            $row->decrement('balance', $this->claim->amount);
+            $row->increment('total_paid', $this->claim->amount);
+            $row->increment('total_claims');
+        });
+
+        // Optional: refresh Cache::put('faucet:balance', ...) from DB or RPC after sync job
     }
 }
 ```
 
-Use Laravel's database queue driver (already have MySQL). Worker runs as systemd service.
+Use Laravel's database queue driver (already have MySQL). Worker runs as systemd service. **Reconcile** `faucet_balance.balance` periodically with on-chain `getbalance` for the faucet wallet; alert on mismatch.
 
 ---
 
@@ -234,11 +259,12 @@ Use Laravel's database queue driver (already have MySQL). Worker runs as systemd
 |------|----------------|
 | Per-IP per-activity 24h cooldown | Redis key: `ip:{hash}:{activity}` TTL 86400 |
 | Per-wallet per-activity 24h cooldown | Redis key: `wallet:{address}:{activity}` TTL 86400 |
-| Max 10 KOTO per wallet per day | Redis key: `daily:wallet:{address}` TTL resets midnight JST |
-| Max 100 KOTO total per day | Redis key: `daily:total` TTL resets midnight JST |
+| Max **10.0 KOTO** routine per wallet per day | Redis: increment `daily:wallet:routine:{address}` by payout amount; reset midnight JST (activities + `daily_bonus` only) |
+| Max **~25 KOTO** all-sources per wallet per day (optional) | Redis: `daily:wallet:all:{address}` includes bonuses; tunable |
+| Max **100 KOTO** global faucet outflow per day | Redis key: `daily:total` TTL resets midnight JST |
 | Cloudflare Turnstile on every claim | Server-side verification before payout |
-| Valid KOTO address format | Regex: `^(k1|jz)[a-zA-Z0-9]{38,}$` |
-| Minimum faucet balance | Refuse claims if balance < 10 KOTO |
+| Valid KOTO address format | Regex: `^(k1|jz)[a-zA-Z0-9]{38,}$` (adjust if chain changes prefix/length) |
+| Minimum faucet balance | Refuse claims if balance < next payout + safety margin (e.g. **10 KOTO** floor) |
 | VPN/proxy detection | Cloudflare handles at edge |
 
 ---
@@ -282,14 +308,16 @@ Follow Shizen Design System (csskitsune.com) dark theme:
 | Milestone | Reward |
 |-----------|--------|
 | First claim ever | +0.5 KOTO welcome bonus |
-| Complete all activities in one day | +2 KOTO daily master bonus |
+| Complete all activities in one day | +2 KOTO daily master bonus (one-time per account; separate from recurring `daily_bonus` slug) |
 | 30-day streak | +10 KOTO loyalty bonus |
 | Refer a new wallet (1st claim) | +1 KOTO referral bonus |
+
+Streak rewards, leaderboard prizes, and the milestones in the table count toward the optional **hard daily ceiling** (e.g. 25 KOTO) but **not** toward the **10.0 KOTO routine** cap.
 
 ### Leaderboard
 - Top 10 earners this week (wallet truncated: `k1abc...xyz`)
 - Resets every Monday JST
-- Winner gets +5 KOTO bonus
+- Winner gets +5 KOTO bonus (weekly; counts as bonus bucket, not routine)
 - Shown publicly on earn hub — social proof + competition
 
 ---
@@ -306,12 +334,11 @@ Follow Shizen Design System (csskitsune.com) dark theme:
 | kohibou.com | Japanese Coffee Quiz | Embedded JS widget |
 
 **Widget token system:**
-Each partner site gets a signed site token. Claims from partner sites include this token. Prevents spoofing — only legitimate widget completions trigger payouts.
+Each partner receives a **server-side** API key or HMAC secret (stored only on partner server + faucet server). Flow: (1) User finishes game in widget → (2) partner backend calls faucet `POST /api/v1/faucet/partner/nonce` or similar with activity + wallet hash → (3) faucet returns **one-time `completion_token`** (JWT or opaque id, TTL ~5 minutes) → (4) widget POSTs claim with that token + Turnstile. **Never** sign or mint payout authorization in browser JavaScript.
 
-```javascript
-// Widget generates a signed completion token on the client
-// Server verifies: site_token + activity_hash + timestamp + wallet
-// Valid for 5 minutes only
+```text
+// Client: only passes through opaque completion_token from partner API
+// Faucet: verifies token signature, activity, wallet binding, expiry, single-use
 ```
 
 ---
@@ -346,6 +373,20 @@ Post in:
 
 ---
 
+## Legal & compliance (brief)
+
+Publish **Terms** for the earn hub: faucet rewards are promotional, no guarantee of value, void where prohibited, age/geography limits if required, and that the operator may pause or cap payouts. This is not legal advice — have a real review before launch if you scale traffic or paid promotion.
+
+---
+
+## Operations
+
+- **Wallet:** Hot wallet for faucet only; limit balance; monitor `listtransactions` / block explorer for anomalies.
+- **Alerts:** RPC errors, queue backlog, `daily:total` approaching cap, reconciliation drift between DB and chain balance.
+- **Backups:** DB migrations for `faucet_claims` + ability to replay failed jobs after fixing RPC.
+
+---
+
 ## Launch Checklist
 
 - [ ] KOTO pool live and mining (zny-nomp setup complete)
@@ -361,5 +402,8 @@ Post in:
 - [ ] Streak system working
 - [ ] Leaderboard working
 - [ ] Faucet balance public and updating
+- [ ] On-chain vs DB reconciliation job + alerts
+- [ ] Idempotency on `POST /api/v1/faucet/claim` tested
+- [ ] Earn hub Terms / eligibility copy published
 - [ ] Mobile responsive (Shizen Design System handles this)
 - [ ] Announce in KOTO community channels
