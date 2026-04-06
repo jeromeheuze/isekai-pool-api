@@ -47,4 +47,14 @@ return [
     /** GET /faucet/balance?sync_rpc=1 — refresh book balance from KOTO getbalance (trusted ops only). */
     'allow_balance_rpc_sync' => env('FAUCET_ALLOW_BALANCE_RPC_SYNC', false),
 
+    /**
+     * Periodically set faucet_balance.balance from getbalance (RPC wallet = hot wallet).
+     * Skips while any claim is pending so reserved book balance is not overwritten.
+     * Requires cron: * * * * * php /path/to/artisan schedule:run
+     */
+    'auto_sync_balance' => filter_var(env('FAUCET_AUTO_SYNC_BALANCE', 'true'), FILTER_VALIDATE_BOOLEAN),
+
+    /** How often schedule:run triggers sync (1–59 minutes). */
+    'sync_balance_interval_minutes' => max(1, min(59, (int) env('FAUCET_SYNC_BALANCE_INTERVAL_MINUTES', 5))),
+
 ];
