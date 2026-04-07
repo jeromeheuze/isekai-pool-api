@@ -139,6 +139,12 @@
                     </select>
                 </div>
                 <div id="turnstile-mount" class="min-h-[65px]"></div>
+                <p id="turnstile-error-hint" class="hidden text-xs text-amber-400/95 leading-relaxed border border-amber-500/25 rounded-lg p-3 bg-amber-500/5">
+                    <strong class="text-amber-300">Turnstile blocked (error 110200 = domain not authorized).</strong>
+                    In Cloudflare → <span class="text-gray-400">Turnstile</span> → your widget → <strong class="text-gray-300">Hostnames</strong>, add
+                    <code class="text-gray-500">isekai-pool.com</code> and <code class="text-gray-500">www.isekai-pool.com</code>, save, wait a minute, then reload.
+                    If it still fails, try a private window or disable strict JS extensions (e.g. SES/Lockdown) for this site — they break Cloudflare challenges.
+                </p>
                 <button type="button" id="claim-btn" disabled class="px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition disabled:opacity-40 disabled:pointer-events-none">
                     Submit claim
                 </button>
@@ -295,11 +301,23 @@
                 mount.innerHTML = '';
                 turnstileWidgetId = null;
                 loadTurnstileScript(function () {
+                    var errHint = document.getElementById('turnstile-error-hint');
+                    if (errHint) errHint.classList.add('hidden');
                     turnstileWidgetId = window.turnstile.render(mount, {
                         sitekey: siteKey,
-                        theme: 'dark'
+                        theme: 'dark',
+                        'error-callback': function () {
+                            if (errHint) errHint.classList.remove('hidden');
+                            if (btn) btn.disabled = true;
+                        },
+                        'expired-callback': function () {
+                            if (btn) btn.disabled = true;
+                        },
+                        callback: function () {
+                            if (btn) btn.disabled = false;
+                        }
                     });
-                    if (btn) btn.disabled = false;
+                    if (btn) btn.disabled = true;
                 });
             }
 
