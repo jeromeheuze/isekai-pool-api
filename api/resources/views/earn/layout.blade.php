@@ -103,5 +103,6 @@
         @yield('content')
     </div>
     @include('partials.analytics-tracker')
+    @stack('scripts')
 </body>
 </html>

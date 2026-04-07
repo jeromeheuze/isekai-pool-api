@@ -52,6 +52,9 @@
 @if (!empty($turnstileSiteKey))
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 @endif
+@endpush
+
+@push('scripts')
 <script>
 (function () {
     var cfg = document.getElementById('earn-activity-config');
