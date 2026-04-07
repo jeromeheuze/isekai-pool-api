@@ -161,14 +161,6 @@
             });
     }
 
-    var kanjiQuestions = [
-        { q: 'What does 水 mean?', options: ['fire', 'water', 'tree'], answer: 1 },
-        { q: 'What does 日 mean?', options: ['sun/day', 'moon', 'mountain'], answer: 0 },
-        { q: 'What does 山 mean?', options: ['river', 'mountain', 'gold'], answer: 1 },
-        { q: 'What does 人 mean?', options: ['person', 'sword', 'rain'], answer: 0 },
-        { q: 'What does 火 mean?', options: ['water', 'fire', 'earth'], answer: 1 }
-    ];
-
     var retroQuestions = [
         { q: 'Nintendo launched the Famicom in which year?', options: ['1981', '1983', '1987'], answer: 1 },
         { q: 'Which company created the Mega Drive?', options: ['SEGA', 'SNK', 'NEC'], answer: 0 },
@@ -482,7 +474,11 @@
             return;
         }
         if (slug === 'kanji_quiz') {
-            renderQuiz(kanjiQuestions, 4, 'Kanji quiz passed.');
+            var host = el('activity-container');
+            if (host) {
+                host.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">Kanji Quiz uses a dedicated page. <a href="/earn/kanji">Open kanji quiz</a>.</p>';
+            }
+            setActivityDone(false, 'Open the kanji quiz page.');
             return;
         }
         if (slug === 'retro_trivia') {

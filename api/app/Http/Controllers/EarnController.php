@@ -93,9 +93,31 @@ class EarnController extends Controller
         ]));
     }
 
+    /**
+     * @return array<int, array{q: string, options: array<int, string>, answer: int}>
+     */
+    private function kanjiQuizQuestions(): array
+    {
+        return [
+            ['q' => 'What does 水 mean?', 'options' => ['fire', 'water', 'tree'], 'answer' => 1],
+            ['q' => 'What does 日 mean?', 'options' => ['sun/day', 'moon', 'mountain'], 'answer' => 0],
+            ['q' => 'What does 山 mean?', 'options' => ['river', 'mountain', 'gold'], 'answer' => 1],
+            ['q' => 'What does 人 mean?', 'options' => ['person', 'sword', 'rain'], 'answer' => 0],
+            ['q' => 'What does 火 mean?', 'options' => ['water', 'fire', 'earth'], 'answer' => 1],
+        ];
+    }
+
     public function kanji(): View
     {
-        return $this->renderActivity('kanji_quiz');
+        $meta = $this->activityMeta('kanji_quiz');
+
+        return view('earn.kanji', array_merge($meta, [
+            'apiBase' => config('earn.api_base'),
+            'turnstileSiteKey' => config('faucet.turnstile.site_key'),
+            'rewardKoto' => config('faucet.activities.kanji_quiz.reward'),
+            'explorerTxBase' => 'https://explorer.isekai-pool.com/tx/',
+            'kanjiQuestions' => $this->kanjiQuizQuestions(),
+        ]));
     }
 
     public function retro(): View
