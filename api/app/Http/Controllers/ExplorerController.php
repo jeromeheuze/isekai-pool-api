@@ -37,7 +37,7 @@ class ExplorerController extends Controller
                 $miner = 'Unknown';
                 if (is_string($coinbaseTxid)) {
                     try {
-                        $cb = $rpc->call('getrawtransaction', [$coinbaseTxid, true]);
+                        $cb = $rpc->call('getrawtransaction', [$coinbaseTxid, 1]);
                         if (is_array($cb)) {
                             $miner = ExplorerMiner::labelFromTransaction($cb);
                         }
@@ -301,14 +301,14 @@ class ExplorerController extends Controller
     }
 
     /**
-     * Without txindex, getrawtransaction(txid, true) only works in mempool; confirmed txs need blockhash.
+     * Without txindex, getrawtransaction(txid, 1) only works in mempool; confirmed txs need blockhash.
      *
      * @return array<string, mixed>
      */
     private function fetchRawTransactionWithBlockScan(RpcService $rpc, string $txidLower): array
     {
         try {
-            $raw = $rpc->call('getrawtransaction', [$txidLower, true]);
+            $raw = $rpc->call('getrawtransaction', [$txidLower, 1]);
             if (is_array($raw)) {
                 return $raw;
             }
@@ -354,7 +354,7 @@ class ExplorerController extends Controller
                     continue;
                 }
 
-                $raw = $rpc->call('getrawtransaction', [$txidLower, true, $blockHash]);
+                $raw = $rpc->call('getrawtransaction', [$txidLower, 1, $blockHash]);
                 if (! is_array($raw)) {
                     throw new RuntimeException('getrawtransaction returned invalid payload after block match');
                 }

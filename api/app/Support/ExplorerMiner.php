@@ -33,7 +33,7 @@ final class ExplorerMiner
     }
 
     /**
-     * @param  array<string, mixed>  $tx  Verbose transaction (getrawtransaction …, true) or embedded getblock …, 2 tx
+     * @param  array<string, mixed>  $tx  Verbose transaction (getrawtransaction …, 1) or embedded getblock …, 2 tx
      */
     public static function labelFromTransaction(array $tx): string
     {
