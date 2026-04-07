@@ -264,7 +264,7 @@ class ExplorerController extends Controller
             }
         }
 
-        if (preg_match('/^(k1|jz)[a-zA-Z0-9]{38,}$/', $query)) {
+        if (preg_match('/^(k1|jz)[a-zA-Z0-9]{30,128}$/', $query)) {
             return redirect()->route('explorer.address', ['address' => $query]);
         }
 

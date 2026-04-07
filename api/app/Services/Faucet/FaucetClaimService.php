@@ -212,7 +212,8 @@ class FaucetClaimService
 
     private function isValidKotoAddress(string $address): bool
     {
-        return (bool) preg_match('/^(k1|jz)[a-zA-Z0-9]{38,}$/', $address);
+        // k1 transparent Bech32 is typically 35 chars total (k1 + 33); jz shielded is much longer.
+        return (bool) preg_match('/^(k1|jz)[a-zA-Z0-9]{30,128}$/', $address);
     }
 
     private function assertCooldowns(string $wallet, string $activity, string $ip): void
