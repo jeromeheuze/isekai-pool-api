@@ -8,7 +8,6 @@ use App\Support\KotoAddress;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use RuntimeException;
 use Throwable;
@@ -139,8 +138,7 @@ class ExplorerController extends Controller
 
         try {
             $raw = $this->rememberForeverRawTransaction($rpc, $coin, $txidLower);
-        } catch (Throwable $e) {
-            Log::error('Explorer tx error: '.$e->getMessage(), ['txid' => $txidLower]);
+        } catch (Throwable) {
             abort(404);
         }
 
