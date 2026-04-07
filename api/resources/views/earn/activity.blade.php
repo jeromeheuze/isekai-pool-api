@@ -262,73 +262,6 @@
         });
     }
 
-    function renderYokaiMatch() {
-        var host = el('activity-container');
-        if (!host) return;
-        host.innerHTML =
-            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Click one yokai from each pair. Match all 4 pairs.</p>' +
-            '<div id="match-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.5rem;"></div>' +
-            '<p id="match-state" class="muted" style="margin:0.7rem 0 0;font-size:12px;">0/4 matched.</p>';
-        var pairs = [
-            ['Kappa', 'river imp'],
-            ['Tengu', 'mountain spirit'],
-            ['Rokurokubi', 'long-neck yokai'],
-            ['Nurarihyon', 'old visitor yokai']
-        ];
-        var cards = [];
-        for (var i = 0; i < pairs.length; i++) {
-            cards.push({ key: i, label: pairs[i][0] });
-            cards.push({ key: i, label: pairs[i][1] });
-        }
-        cards.sort(function () { return Math.random() - 0.5; });
-        var grid = el('match-grid');
-        var state = el('match-state');
-        if (!grid || !state) return;
-        var first = null;
-        var matched = 0;
-        cards.forEach(function (c, idx) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'btn btn-ghost';
-            b.style.textAlign = 'left';
-            b.dataset.key = String(c.key);
-            b.dataset.idx = String(idx);
-            b.textContent = c.label;
-            b.addEventListener('click', function () {
-                if (b.disabled) return;
-                if (first === null) {
-                    first = b;
-                    b.style.borderColor = '#7c6af7';
-                    return;
-                }
-                if (first === b) return;
-                if (first.dataset.key === b.dataset.key) {
-                    first.disabled = true;
-                    b.disabled = true;
-                    first.style.opacity = '0.65';
-                    b.style.opacity = '0.65';
-                    matched += 1;
-                    state.textContent = matched + '/4 matched.';
-                    first = null;
-                    if (matched === 4) {
-                        setActivityDone(true, 'Yokai match complete. You can claim now.', {
-                            matches: [[0, 0], [1, 1], [2, 2], [3, 3]]
-                        });
-                    }
-                    return;
-                }
-                var prev = first;
-                first = null;
-                prev.style.borderColor = '';
-                b.style.borderColor = '#f87171';
-                setTimeout(function () {
-                    b.style.borderColor = '';
-                }, 350);
-            });
-            grid.appendChild(b);
-        });
-    }
-
     function renderShrinePuzzle() {
         var host = el('activity-container');
         if (!host) return;
@@ -486,7 +419,11 @@
             return;
         }
         if (slug === 'yokai_match') {
-            renderYokaiMatch();
+            var host = el('activity-container');
+            if (host) {
+                host.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">Yokai Match uses a dedicated page. <a href="/earn/yokai-match">Open yokai match</a>.</p>';
+            }
+            setActivityDone(false, 'Open the yokai match page.');
             return;
         }
         if (slug === 'yokai_quiz') {

@@ -127,7 +127,14 @@ class EarnController extends Controller
 
     public function yokaiMatch(): View
     {
-        return $this->renderActivity('yokai_match');
+        $meta = $this->activityMeta('yokai_match');
+
+        return view('earn.yokai-match', array_merge($meta, [
+            'apiBase' => config('earn.api_base'),
+            'turnstileSiteKey' => config('faucet.turnstile.site_key'),
+            'rewardKoto' => config('faucet.activities.yokai_match.reward'),
+            'explorerTxBase' => 'https://explorer.isekai-pool.com/tx/',
+        ]));
     }
 
     public function yokaiQuiz(): View
