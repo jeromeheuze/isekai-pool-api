@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="/favicon-32x32.png?v=2" sizes="32x32" />
     <link rel="icon" type="image/png" href="/favicon-16x16.png?v=2" sizes="16x16" />
     <title>KOTO Faucet | isekai-pool.com</title>
-    <meta name="description" content="Public KOTO rewards API and live faucet stats. Full earn hub (games, quizzes) planned at koto.isekai-pool.com/earn.">
+    <meta name="description" content="Public KOTO rewards API and live faucet stats. Earn hub at isekai-pool.com/earn.">
     <link rel="canonical" href="https://isekai-pool.com/faucet.html">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://isekai-pool.com/faucet.html">
@@ -58,6 +58,7 @@
                 <a href="/" class="hover:text-white transition">Home</a>
                 <a href="/coins.html" class="hover:text-white transition">Coins</a>
                 <a href="/faucet.html" class="text-white">KOTO Faucet</a>
+                <a href="/earn" class="hover:text-white transition">Earn KOTO</a>
                 <a href="/koto-network.html" class="hover:text-white transition">KOTO Network</a>
                 <a href="/guide.html" class="hover:text-white transition">Mining Guide</a>
                 <a href="/status.html" class="hover:text-white transition">Node Status</a>
@@ -153,12 +154,15 @@
         </section>
 
         <section class="mb-10">
-            <h2 class="text-lg font-bold text-white mb-3">Planned on <span class="text-violet-400">koto.isekai-pool.com</span></h2>
-            <p class="text-sm text-isekai-muted mb-5 max-w-2xl">Roadmap from the earn spec: interactive hub at <code class="text-gray-500">/earn</code> (Laravel + Livewire), not static HTML here.</p>
+            <h2 class="text-lg font-bold text-white mb-3">Earn hub <span class="text-isekai-muted font-normal text-base">(Laravel)</span></h2>
+            <p class="text-sm text-isekai-muted mb-5 max-w-2xl">
+                Live: <a href="/earn" class="text-isekai-accent hover:underline">isekai-pool.com/earn</a>
+                — balance, wallet field, activity links (shrine / kanji / retro stubs).
+            </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-isekai-card border border-isekai-border rounded-xl p-5">
                     <h3 class="font-bold text-white mb-2">Earn hub</h3>
-                    <p class="text-sm text-isekai-muted leading-relaxed">Hero, live balance, wallet field (localStorage), activity grid with cooldowns, Turnstile on claims.</p>
+                    <p class="text-sm text-isekai-muted leading-relaxed">Hero, live balance, wallet field (localStorage), activity grid; Turnstile on claim POSTs.</p>
                 </div>
                 <div class="bg-isekai-card border border-isekai-border rounded-xl p-5">
                     <h3 class="font-bold text-white mb-2">Activities</h3>

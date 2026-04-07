@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EarnController;
 use App\Http\Controllers\ExplorerController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,13 @@ if ($domain = config('explorer.domain')) {
         $explorerInner();
     });
 }
+
+Route::prefix('earn')->group(function () {
+    Route::get('/', [EarnController::class, 'index'])->name('earn.index');
+    Route::get('/shrine', [EarnController::class, 'shrine'])->name('earn.shrine');
+    Route::get('/kanji', [EarnController::class, 'kanji'])->name('earn.kanji');
+    Route::get('/retro', [EarnController::class, 'retro'])->name('earn.retro');
+});
 
 Route::get('/', function () {
     return view('welcome');
