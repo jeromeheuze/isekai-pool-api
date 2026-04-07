@@ -27,6 +27,14 @@
         'coffee_quiz' => ['title' => 'Coffee Quiz', 'desc' => 'Japanese coffee culture — 4/5 to pass.', 'accent' => 'teal'],
         'daily_bonus' => ['title' => 'Daily Bonus', 'desc' => 'Quick daily check-in for extra KOTO.', 'accent' => 'violet'],
     ];
+
+    $earnIconStroke = static fn (string $accent): string => match ($accent) {
+        'violet' => '#7c6af7',
+        'teal' => '#1D9E75',
+        'amber' => '#f0c040',
+        'coral' => '#D85A30',
+        default => '#7c6af7',
+    };
 @endphp
 
 @section('content')
@@ -74,6 +82,7 @@
                 $hubPath = $hubPaths[$slug] ?? null;
                 $card = $earnCardMeta[$slug] ?? ['title' => $slug, 'desc' => 'Complete the activity, then claim.', 'accent' => 'violet'];
                 $accent = $card['accent'];
+                $stroke = $earnIconStroke($accent);
             @endphp
             <article class="earn-hub-card earn-hub-card--accent-{{ $accent }}" data-earn-slug="{{ $slug }}">
                 <span class="earn-hub-card__strip" aria-hidden="true"></span>
@@ -81,31 +90,73 @@
                     <div class="earn-hub-card__top">
                         <span class="earn-hub-card__reward">{{ $reward }} KOTO</span>
                         <div class="earn-hub-card__icon" aria-hidden="true">
-                            @switch($accent)
-                                @case('violet')
-                                    <svg viewBox="0 0 32 32" width="28" height="28"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 26V20c0-4 4-6 12-6s12 2 12 6v6"/><path d="M10 26v-3M22 26v-3"/><path d="M16 14v12"/><path d="M8 17c2-4 6-5 8-5s6 1 8 5"/><path d="M2 14h28"/></g></svg>
+                            @switch($slug)
+                                @case('shrine_visit')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 20V15.5c0-2.8 3.2-4.5 8-4.5s8 1.7 8 4.5V20" />
+                                        <path d="M7.5 20v-2.5M16.5 20v-2.5" />
+                                        <path d="M12 9.5V20" />
+                                        <path d="M6 11c1.2-2.8 3.5-3.5 6-3.5s4.8.7 6 3.5" />
+                                        <path d="M2 9.5h20" />
+                                        <path d="M5 7.5h14" />
+                                    </svg>
                                     @break
-                                @case('teal')
-                                    @if (str_contains($slug, 'kanji'))
-                                        <svg viewBox="0 0 32 32" width="28" height="28"><text x="4" y="24" font-size="20" fill="currentColor" font-family="serif" font-weight="700">漢</text></svg>
-                                    @elseif (str_contains($slug, 'coffee'))
-                                        <svg viewBox="0 0 32 32" width="28" height="28"><path fill="currentColor" d="M8 10h12v2H8zm2 4h10c0 4-2 7-5 8v4h4v2H9v-6c-3-1-5-4-5-8h6zm12 0h2c2 0 3 1 3 3s-1 3-3 3h-2v-6z"/></svg>
-                                    @else
-                                        <svg viewBox="0 0 32 32" width="28" height="28"><path fill="currentColor" d="M16 4c-2 0-3 2-4 5l-1 3H9l-2 4h18l-2-4h-2l-1-3c-1-3-2-5-4-5zm-6 18c0 4 3 7 6 7s6-3 6-7v-2H10v2z"/><ellipse cx="11" cy="11" rx="2" ry="3" fill="currentColor"/><ellipse cx="21" cy="11" rx="2" ry="3" fill="currentColor"/></svg>
-                                    @endif
+                                @case('kanji_quiz')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="4.75" y="4.75" width="14.5" height="14.5" rx="1.25" />
+                                        <text x="12" y="16.5" text-anchor="middle" font-size="10" font-family="ui-serif, Georgia, 'Noto Serif JP', serif" fill="none" stroke="{{ $stroke }}" stroke-width="1.25">漢</text>
+                                    </svg>
                                     @break
-                                @case('amber')
-                                    @if ($slug === 'map_explore')
-                                        <svg viewBox="0 0 32 32" width="28" height="28"><path fill="currentColor" d="M16 4C11 4 7 8 7 13c0 6 9 15 9 15s9-9 9-15c0-5-4-9-9-9zm0 12a4 4 0 110-8 4 4 0 010 8z"/></svg>
-                                    @else
-                                        <svg viewBox="0 0 32 32" width="28" height="28"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8 24l4-8 4 4 4-12 4 16"/><circle cx="8" cy="24" r="2" fill="currentColor"/><circle cx="16" cy="20" r="2" fill="currentColor"/><circle cx="20" cy="16" r="2" fill="currentColor"/><circle cx="24" cy="28" r="2" fill="currentColor"/></svg>
-                                    @endif
+                                @case('yokai_match')
+                                @case('yokai_quiz')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 20c-1.8 0-3-1.2-2.5-3 .4-1.5 1.2-3 .8-5-.5-2.5-3-4-4.5-4.5-1.8-.8-3.8-.5-5.5 1-2 3.5-3 5.5-3.5" />
+                                        <path d="M12 20c1.8 0 3-1.2 2.5-3-.4-1.5-1.2-3-.8-5 .5-2.5 3-4 4.5-4.5 1.8-.8 3.8-.5 5.5 1 2 3.5 3 5.5 3.5" />
+                                        <path d="M12 4.5c.8-.8 2-1.2 3.2-1" />
+                                    </svg>
                                     @break
-                                @case('coral')
-                                    <svg viewBox="0 0 32 32" width="28" height="28"><path fill="currentColor" d="M10 22c-2-2-3-5-3-8 0-6 4-10 9-10s9 4 9 10c0 3-1 6-3 8l2 6-7-3-2 2-2-2-7 3 2-6zm6-14a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                                @case('retro_trivia')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="8" width="18" height="9" rx="2.5" />
+                                        <path d="M7.5 11.5v3M6 13h3" />
+                                        <circle cx="16" cy="12.5" r="0.9" fill="none" />
+                                        <circle cx="18.5" cy="12.5" r="0.9" fill="none" />
+                                        <path d="M9 20v-2M15 20v-2" />
+                                    </svg>
+                                    @break
+                                @case('shrine_puzzle')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round">
+                                        @foreach ([[7,7],[12,7],[17,7],[7,12],[12,12],[17,12],[7,17],[12,17],[17,17]] as $pt)
+                                            <circle cx="{{ $pt[0] }}" cy="{{ $pt[1] }}" r="1.35" fill="none" />
+                                        @endforeach
+                                    </svg>
+                                    @break
+                                @case('map_explore')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 21s7-5.2 7-10a7 7 0 10-14 0c0 4.8 7 10 7 10z" />
+                                        <circle cx="12" cy="11" r="2.25" fill="none" />
+                                    </svg>
+                                    @break
+                                @case('coffee_quiz')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M6 7.5h11v8.5c0 1.9-1.1 3-2.8 3H8.8C7.1 19 6 17.9 6 16V7.5z" />
+                                        <path d="M17 9.5h1.8c1 0 1.7.8 1.7 1.8s-.7 1.7-1.7 1.7H17" />
+                                        <path d="M8 21.5h8" />
+                                    </svg>
+                                    @break
+                                @case('daily_bonus')
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 19V15.5c0-1.6 1.8-2.6 5-2.6s5 1 5 2.6V19" />
+                                        <path d="M4 19v-1.2M8 19v-1.2" />
+                                        <path d="M7 11.5V19" />
+                                        <path d="M3.5 13c.8-1.5 2-2 3.5-2s2.7.5 3.5 2" />
+                                        <path d="M1 11.5h12" />
+                                        <path d="M2.5 10h9" />
+                                        <path d="M17 4l1.2 2.2 2.3.6-2.3.6L17 10l-1.2-2.2-2.3-.6 2.3-.6z" />
+                                    </svg>
                                     @break
                                 @default
-                                    <svg viewBox="0 0 32 32" width="28" height="28"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ $stroke }}" stroke-width="1.5"><circle cx="12" cy="12" r="9" /></svg>
                             @endswitch
                         </div>
                     </div>
@@ -237,8 +288,8 @@
         white-space: nowrap;
     }
     .earn-hub-card__icon {
-        color: rgba(229, 231, 235, 0.85);
-        opacity: 0.9;
+        flex-shrink: 0;
+        line-height: 0;
     }
     .earn-hub-card__name {
         font-size: 15px;
