@@ -129,5 +129,6 @@
         @endif
         @yield('content')
     </div>
+    @include('partials.analytics-tracker')
 </body>
 </html>

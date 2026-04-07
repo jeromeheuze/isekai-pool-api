@@ -169,5 +169,6 @@
                 </div>
             </div>
         </div>
+        @include('partials.analytics-tracker')
     </body>
 </html>

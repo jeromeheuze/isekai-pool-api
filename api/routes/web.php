@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\EarnController;
 use App\Http\Controllers\ExplorerController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,10 @@ Route::prefix('earn')->group(function () {
     Route::get('/kanji', [EarnController::class, 'kanji'])->name('earn.kanji');
     Route::get('/retro', [EarnController::class, 'retro'])->name('earn.retro');
 });
+
+Route::get('/a.gif', [AnalyticsController::class, 'collect'])->name('analytics.collect');
+Route::get('/transparency/analytics', [AnalyticsController::class, 'dashboard'])->name('transparency.analytics');
+Route::get('/transparency/analytics.json', [AnalyticsController::class, 'dashboardJson'])->name('transparency.analytics.json');
 
 Route::get('/', function () {
     return view('welcome');
