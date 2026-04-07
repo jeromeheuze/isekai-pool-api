@@ -161,13 +161,6 @@
             });
     }
 
-    var retroQuestions = [
-        { q: 'Nintendo launched the Famicom in which year?', options: ['1981', '1983', '1987'], answer: 1 },
-        { q: 'Which company created the Mega Drive?', options: ['SEGA', 'SNK', 'NEC'], answer: 0 },
-        { q: 'Which game popularized side-scrolling platformers?', options: ['Super Mario Bros.', 'Pac-Man', 'Tetris'], answer: 0 },
-        { q: 'PC Engine was known as what in NA?', options: ['Master System', 'TurboGrafx-16', 'Neo Geo'], answer: 1 },
-        { q: 'Which studio made Street Fighter II?', options: ['Konami', 'Taito', 'Capcom'], answer: 2 }
-    ];
     var coffeeQuestions = [
         { q: 'Which brew method uses paper filter and gravity?', options: ['Pour-over', 'Espresso', 'Cold brew'], answer: 0 },
         { q: 'Espresso extraction usually takes about...', options: ['5 seconds', '25-35 seconds', '2 minutes'], answer: 1 },
@@ -408,7 +401,11 @@
             return;
         }
         if (slug === 'retro_trivia') {
-            renderQuiz(retroQuestions, 4, 'Retro trivia passed.');
+            var host = el('activity-container');
+            if (host) {
+                host.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">Retro Game Trivia uses a dedicated page. <a href="/earn/retro">Open retro trivia</a>.</p>';
+            }
+            setActivityDone(false, 'Open the retro trivia page.');
             return;
         }
         if (slug === 'yokai_match') {

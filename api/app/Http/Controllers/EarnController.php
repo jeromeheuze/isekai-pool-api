@@ -120,9 +120,42 @@ class EarnController extends Controller
         ]));
     }
 
+    /**
+     * @return array<int, array{q: string, options: array<int, string>, answer: int}>
+     */
+    private function retroQuizQuestions(): array
+    {
+        return [
+            ['q' => 'Nintendo launched the Famicom in which year?', 'options' => ['1981', '1983', '1987'], 'answer' => 1],
+            ['q' => 'Which company created the Mega Drive?', 'options' => ['SEGA', 'SNK', 'NEC'], 'answer' => 0],
+            ['q' => 'Which game popularized side-scrolling platformers?', 'options' => ['Super Mario Bros.', 'Pac-Man', 'Tetris'], 'answer' => 0],
+            ['q' => 'PC Engine was known as what in NA?', 'options' => ['Master System', 'TurboGrafx-16', 'Neo Geo'], 'answer' => 1],
+            ['q' => 'Which studio made Street Fighter II?', 'options' => ['Konami', 'Taito', 'Capcom'], 'answer' => 2],
+        ];
+    }
+
+    /**
+     * Decorative CRT-style tags per question (visual only).
+     *
+     * @return array<int, string>
+     */
+    private function retroQuizWatermarks(): array
+    {
+        return ['FC', '16-BIT', 'SMB', 'TG16', 'ARCADE'];
+    }
+
     public function retro(): View
     {
-        return $this->renderActivity('retro_trivia');
+        $meta = $this->activityMeta('retro_trivia');
+
+        return view('earn.retro', array_merge($meta, [
+            'apiBase' => config('earn.api_base'),
+            'turnstileSiteKey' => config('faucet.turnstile.site_key'),
+            'rewardKoto' => config('faucet.activities.retro_trivia.reward'),
+            'explorerTxBase' => 'https://explorer.isekai-pool.com/tx/',
+            'retroQuestions' => $this->retroQuizQuestions(),
+            'retroWatermarks' => $this->retroQuizWatermarks(),
+        ]));
     }
 
     public function yokaiMatch(): View
