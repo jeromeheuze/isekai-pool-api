@@ -77,6 +77,20 @@
         { q: 'PC Engine was known as what in NA?', options: ['Master System', 'TurboGrafx-16', 'Neo Geo'], answer: 1 },
         { q: 'Which studio made Street Fighter II?', options: ['Konami', 'Taito', 'Capcom'], answer: 2 }
     ];
+    var yokaiQuestions = [
+        { q: 'Which yokai is known for a long neck at night?', options: ['Rokurokubi', 'Kappa', 'Tengu'], answer: 0 },
+        { q: 'Kappa are commonly associated with what place?', options: ['Mountains', 'Rivers', 'Deserts'], answer: 1 },
+        { q: 'Tengu are often depicted with what?', options: ['Long nose', 'Three eyes', 'Fish tail'], answer: 0 },
+        { q: 'Zashiki-warashi are said to bring...', options: ['Bad weather', 'Good fortune', 'Earthquakes'], answer: 1 },
+        { q: 'Nurarihyon is often portrayed as a...', options: ['Child spirit', 'Old man yokai', 'Fox yokai'], answer: 1 }
+    ];
+    var coffeeQuestions = [
+        { q: 'Which brew method uses paper filter and gravity?', options: ['Pour-over', 'Espresso', 'Cold brew'], answer: 0 },
+        { q: 'Espresso extraction usually takes about...', options: ['5 seconds', '25-35 seconds', '2 minutes'], answer: 1 },
+        { q: 'Arabica generally has what vs Robusta?', options: ['More caffeine', 'Less caffeine', 'Same caffeine always'], answer: 1 },
+        { q: 'A common latte ratio is...', options: ['Mostly milk + espresso', 'Only espresso', 'Only foam'], answer: 0 },
+        { q: 'Fresh coffee flavor is best preserved by...', options: ['Open bowl storage', 'Airtight container', 'Warm sunlight shelf'], answer: 1 }
+    ];
 
     function el(id) { return document.getElementById(id); }
 
@@ -174,6 +188,185 @@
         });
     }
 
+    function renderYokaiMatch() {
+        var host = el('activity-container');
+        if (!host) return;
+        host.innerHTML =
+            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Click one yokai from each pair. Match all 4 pairs.</p>' +
+            '<div id="match-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.5rem;"></div>' +
+            '<p id="match-state" class="muted" style="margin:0.7rem 0 0;font-size:12px;">0/4 matched.</p>';
+        var pairs = [
+            ['Kappa', 'river imp'],
+            ['Tengu', 'mountain spirit'],
+            ['Rokurokubi', 'long-neck yokai'],
+            ['Nurarihyon', 'old visitor yokai']
+        ];
+        var cards = [];
+        for (var i = 0; i < pairs.length; i++) {
+            cards.push({ key: i, label: pairs[i][0] });
+            cards.push({ key: i, label: pairs[i][1] });
+        }
+        cards.sort(function () { return Math.random() - 0.5; });
+        var grid = el('match-grid');
+        var state = el('match-state');
+        if (!grid || !state) return;
+        var first = null;
+        var matched = 0;
+        cards.forEach(function (c, idx) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn btn-ghost';
+            b.style.textAlign = 'left';
+            b.dataset.key = String(c.key);
+            b.dataset.idx = String(idx);
+            b.textContent = c.label;
+            b.addEventListener('click', function () {
+                if (b.disabled) return;
+                if (first === null) {
+                    first = b;
+                    b.style.borderColor = '#7c6af7';
+                    return;
+                }
+                if (first === b) return;
+                if (first.dataset.key === b.dataset.key) {
+                    first.disabled = true;
+                    b.disabled = true;
+                    first.style.opacity = '0.65';
+                    b.style.opacity = '0.65';
+                    matched += 1;
+                    state.textContent = matched + '/4 matched.';
+                    first = null;
+                    if (matched === 4) {
+                        setActivityDone(true, 'Yokai match complete. You can claim now.');
+                    }
+                    return;
+                }
+                var prev = first;
+                first = null;
+                prev.style.borderColor = '';
+                b.style.borderColor = '#f87171';
+                setTimeout(function () {
+                    b.style.borderColor = '';
+                }, 350);
+            });
+            grid.appendChild(b);
+        });
+    }
+
+    function renderShrinePuzzle() {
+        var host = el('activity-container');
+        if (!host) return;
+        host.innerHTML =
+            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Arrange shrine ritual steps in the correct order, then verify.</p>' +
+            '<ol id="puzzle-list" style="margin:0;padding-left:1.1rem;"></ol>' +
+            '<button id="verify-puzzle" class="btn btn-ghost" style="margin-top:0.7rem;">Verify order</button>' +
+            '<p id="puzzle-state" class="muted" style="margin:0.7rem 0 0;font-size:12px;">Not solved.</p>';
+        var steps = ['Bow', 'Cleanse hands', 'Offer prayer', 'Final bow'];
+        var order = [0, 1, 2, 3].sort(function () { return Math.random() - 0.5; });
+        var list = el('puzzle-list');
+        var state = el('puzzle-state');
+        var verify = el('verify-puzzle');
+        if (!list || !state || !verify) return;
+        order.forEach(function (idx) {
+            var li = document.createElement('li');
+            li.style.marginBottom = '0.45rem';
+            var label = document.createElement('span');
+            label.textContent = steps[idx];
+            label.style.marginRight = '0.4rem';
+            var up = document.createElement('button');
+            up.type = 'button';
+            up.className = 'btn btn-ghost';
+            up.style.padding = '0.2rem 0.45rem';
+            up.textContent = '↑';
+            up.addEventListener('click', function () {
+                var prev = li.previousElementSibling;
+                if (prev) list.insertBefore(li, prev);
+            });
+            var down = document.createElement('button');
+            down.type = 'button';
+            down.className = 'btn btn-ghost';
+            down.style.padding = '0.2rem 0.45rem';
+            down.style.marginLeft = '0.3rem';
+            down.textContent = '↓';
+            down.addEventListener('click', function () {
+                var next = li.nextElementSibling;
+                if (next) list.insertBefore(next, li);
+            });
+            li.dataset.step = steps[idx];
+            li.appendChild(label);
+            li.appendChild(up);
+            li.appendChild(down);
+            list.appendChild(li);
+        });
+        verify.addEventListener('click', function () {
+            var items = Array.prototype.map.call(list.querySelectorAll('li'), function (li) {
+                return li.dataset.step;
+            });
+            var ok = items.join('|') === steps.join('|');
+            if (ok) {
+                state.textContent = 'Solved.';
+                setActivityDone(true, 'Shrine puzzle solved. You can claim now.');
+            } else {
+                state.textContent = 'Order is not correct yet.';
+                setActivityDone(false, 'Reorder the steps and verify again.');
+            }
+        });
+    }
+
+    function renderMapExplore() {
+        var host = el('activity-container');
+        if (!host) return;
+        host.innerHTML =
+            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Click checkpoints in order: 1 → 2 → 3 → 4.</p>' +
+            '<div id="map-points" style="display:flex;flex-wrap:wrap;gap:0.45rem;"></div>' +
+            '<p id="map-state" class="muted" style="margin:0.7rem 0 0;font-size:12px;">Start at checkpoint 1.</p>';
+        var points = el('map-points');
+        var state = el('map-state');
+        if (!points || !state) return;
+        var next = 1;
+        for (var i = 1; i <= 4; i++) {
+            (function (n) {
+                var b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'btn btn-ghost';
+                b.textContent = 'Checkpoint ' + n;
+                b.addEventListener('click', function () {
+                    if (n !== next) {
+                        state.textContent = 'Wrong checkpoint. Follow order 1 → 2 → 3 → 4.';
+                        return;
+                    }
+                    b.disabled = true;
+                    b.style.opacity = '0.65';
+                    next += 1;
+                    if (next === 5) {
+                        state.textContent = 'All checkpoints explored.';
+                        setActivityDone(true, 'Map exploration complete. You can claim now.');
+                    } else {
+                        state.textContent = 'Great. Next: checkpoint ' + next + '.';
+                    }
+                });
+                points.appendChild(b);
+            })(i);
+        }
+    }
+
+    function renderDailyBonus() {
+        var host = el('activity-container');
+        if (!host) return;
+        host.innerHTML =
+            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Click to check in for today. Faucet cooldown/caps still apply server-side.</p>' +
+            '<button id="daily-check-in" class="btn btn-ghost">Check in</button>' +
+            '<p id="daily-state" class="muted" style="margin:0.7rem 0 0;font-size:12px;">Not checked in.</p>';
+        var btn = el('daily-check-in');
+        var state = el('daily-state');
+        if (!btn || !state) return;
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            state.textContent = 'Checked in.';
+            setActivityDone(true, 'Daily bonus unlocked. You can claim now.');
+        });
+    }
+
     function renderActivity() {
         if (slug === 'shrine_visit') {
             renderShrineActivity();
@@ -185,6 +378,30 @@
         }
         if (slug === 'retro_trivia') {
             renderQuiz(retroQuestions, 4, 'Retro trivia passed.');
+            return;
+        }
+        if (slug === 'yokai_match') {
+            renderYokaiMatch();
+            return;
+        }
+        if (slug === 'yokai_quiz') {
+            renderQuiz(yokaiQuestions, 4, 'Yokai quiz passed.');
+            return;
+        }
+        if (slug === 'shrine_puzzle') {
+            renderShrinePuzzle();
+            return;
+        }
+        if (slug === 'map_explore') {
+            renderMapExplore();
+            return;
+        }
+        if (slug === 'coffee_quiz') {
+            renderQuiz(coffeeQuestions, 4, 'Coffee quiz passed.');
+            return;
+        }
+        if (slug === 'daily_bonus') {
+            renderDailyBonus();
             return;
         }
 

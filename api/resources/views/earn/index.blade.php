@@ -7,6 +7,12 @@
         'shrine_visit' => '/earn/shrine',
         'kanji_quiz' => '/earn/kanji',
         'retro_trivia' => '/earn/retro',
+        'yokai_match' => '/earn/yokai-match',
+        'yokai_quiz' => '/earn/yokai-quiz',
+        'shrine_puzzle' => '/earn/shrine-puzzle',
+        'map_explore' => '/earn/map-explore',
+        'coffee_quiz' => '/earn/coffee-quiz',
+        'daily_bonus' => '/earn/daily-bonus',
     ];
 @endphp
 

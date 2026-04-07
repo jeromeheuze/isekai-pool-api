@@ -27,6 +27,36 @@ class EarnController extends Controller
                 'slug' => 'retro_trivia',
                 'intro' => 'Classic JP retro trivia. Score 4/5 or better to unlock claim.',
             ],
+            'yokai_match' => [
+                'title' => 'Yokai match',
+                'slug' => 'yokai_match',
+                'intro' => 'Match all yokai pairs to unlock claim.',
+            ],
+            'yokai_quiz' => [
+                'title' => 'Yokai quiz',
+                'slug' => 'yokai_quiz',
+                'intro' => 'Answer yokai folklore trivia. Score 4/5 or better.',
+            ],
+            'shrine_puzzle' => [
+                'title' => 'Shrine puzzle',
+                'slug' => 'shrine_puzzle',
+                'intro' => 'Put shrine steps in the correct order to unlock claim.',
+            ],
+            'map_explore' => [
+                'title' => 'Map explore',
+                'slug' => 'map_explore',
+                'intro' => 'Visit all map checkpoints in order to unlock claim.',
+            ],
+            'coffee_quiz' => [
+                'title' => 'Coffee quiz',
+                'slug' => 'coffee_quiz',
+                'intro' => 'Quick coffee culture quiz. Score 4/5 or better.',
+            ],
+            'daily_bonus' => [
+                'title' => 'Daily bonus',
+                'slug' => 'daily_bonus',
+                'intro' => 'One quick daily check-in action to claim bonus.',
+            ],
             default => [
                 'title' => 'Activity',
                 'slug' => $slug,
@@ -64,5 +94,35 @@ class EarnController extends Controller
     public function retro(): View
     {
         return $this->renderActivity('retro_trivia');
+    }
+
+    public function yokaiMatch(): View
+    {
+        return $this->renderActivity('yokai_match');
+    }
+
+    public function yokaiQuiz(): View
+    {
+        return $this->renderActivity('yokai_quiz');
+    }
+
+    public function shrinePuzzle(): View
+    {
+        return $this->renderActivity('shrine_puzzle');
+    }
+
+    public function mapExplore(): View
+    {
+        return $this->renderActivity('map_explore');
+    }
+
+    public function coffeeQuiz(): View
+    {
+        return $this->renderActivity('coffee_quiz');
+    }
+
+    public function dailyBonus(): View
+    {
+        return $this->renderActivity('daily_bonus');
     }
 }

@@ -35,6 +35,12 @@ Route::prefix('earn')->group(function () {
     Route::get('/shrine', [EarnController::class, 'shrine'])->name('earn.shrine');
     Route::get('/kanji', [EarnController::class, 'kanji'])->name('earn.kanji');
     Route::get('/retro', [EarnController::class, 'retro'])->name('earn.retro');
+    Route::get('/yokai-match', [EarnController::class, 'yokaiMatch'])->name('earn.yokai_match');
+    Route::get('/yokai-quiz', [EarnController::class, 'yokaiQuiz'])->name('earn.yokai_quiz');
+    Route::get('/shrine-puzzle', [EarnController::class, 'shrinePuzzle'])->name('earn.shrine_puzzle');
+    Route::get('/map-explore', [EarnController::class, 'mapExplore'])->name('earn.map_explore');
+    Route::get('/coffee-quiz', [EarnController::class, 'coffeeQuiz'])->name('earn.coffee_quiz');
+    Route::get('/daily-bonus', [EarnController::class, 'dailyBonus'])->name('earn.daily_bonus');
 });
 
 Route::get('/a.gif', [AnalyticsController::class, 'collect'])->name('analytics.collect');
