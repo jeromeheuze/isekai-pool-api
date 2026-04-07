@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use RuntimeException;
 use Throwable;
 
 class ExplorerController extends Controller
@@ -131,13 +132,12 @@ class ExplorerController extends Controller
             abort(404);
         }
 
+        $txidLower = strtolower($txid);
         $rpc = $this->rpc();
         $coin = config('explorer.coin');
 
         try {
-            $raw = Cache::rememberForever("explorer:{$coin}:tx:{$txid}", function () use ($rpc, $txid) {
-                return $rpc->call('getrawtransaction', [$txid, true]);
-            });
+            $raw = $this->rememberForeverRawTransaction($rpc, $coin, $txidLower);
         } catch (Throwable) {
             abort(404);
         }
@@ -182,7 +182,7 @@ class ExplorerController extends Controller
 
         return view('explorer.tx', [
             'tx' => $raw,
-            'txid' => $txid,
+            'txid' => $txidLower,
             'height' => $height,
             'isCoinbase' => $isCoinbase,
             'isShielded' => $isShielded,
@@ -244,6 +244,7 @@ class ExplorerController extends Controller
         }
 
         $rpc = $this->rpc();
+        $coin = config('explorer.coin');
 
         if (ctype_digit($query)) {
             return redirect()->route('explorer.block', ['heightOrHash' => $query]);
@@ -256,9 +257,9 @@ class ExplorerController extends Controller
                 return redirect()->route('explorer.block', ['heightOrHash' => $query]);
             } catch (Throwable) {
                 try {
-                    $rpc->call('getrawtransaction', [$query, true]);
+                    $this->rememberForeverRawTransaction($rpc, $coin, strtolower($query));
 
-                    return redirect()->route('explorer.tx', ['txid' => $query]);
+                    return redirect()->route('explorer.tx', ['txid' => strtolower($query)]);
                 } catch (Throwable) {
                     return redirect()->route('explorer.home')->with('error', 'No block or transaction found for that hash.');
                 }
@@ -285,5 +286,75 @@ class ExplorerController extends Controller
         }
 
         return $s;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function rememberForeverRawTransaction(RpcService $rpc, string $coin, string $txidLower): array
+    {
+        return Cache::rememberForever("explorer:{$coin}:tx:{$txidLower}", function () use ($rpc, $txidLower) {
+            return $this->fetchRawTransactionWithBlockScan($rpc, $txidLower);
+        });
+    }
+
+    /**
+     * Without txindex, getrawtransaction(txid, true) only works in mempool; confirmed txs need blockhash.
+     *
+     * @return array<string, mixed>
+     */
+    private function fetchRawTransactionWithBlockScan(RpcService $rpc, string $txidLower): array
+    {
+        try {
+            $raw = $rpc->call('getrawtransaction', [$txidLower, true]);
+            if (is_array($raw)) {
+                return $raw;
+            }
+        } catch (Throwable) {
+            // fall through to block scan
+        }
+
+        $depth = (int) config('explorer.tx_lookup_block_scan_depth', 2500);
+        if ($depth <= 0) {
+            throw new RuntimeException('getrawtransaction failed and block scan disabled');
+        }
+
+        $tip = (int) $rpc->call('getblockcount', []);
+        $min = max(0, $tip - $depth);
+
+        for ($h = $tip; $h >= $min; $h--) {
+            try {
+                $blockHash = $rpc->call('getblockhash', [$h]);
+                if (! is_string($blockHash)) {
+                    continue;
+                }
+                $block = $rpc->call('getblock', [$blockHash, 1]);
+                if (! is_array($block)) {
+                    continue;
+                }
+                $txs = $block['tx'] ?? [];
+                if (! is_array($txs)) {
+                    continue;
+                }
+                $found = false;
+                foreach ($txs as $t) {
+                    $id = is_string($t) ? $t : (is_array($t) && isset($t['txid']) ? (string) $t['txid'] : '');
+                    if ($id !== '' && strtolower($id) === $txidLower) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if ($found) {
+                    $raw = $rpc->call('getrawtransaction', [$txidLower, true, $blockHash]);
+                    if (is_array($raw)) {
+                        return $raw;
+                    }
+                }
+            } catch (Throwable) {
+                continue;
+            }
+        }
+
+        throw new RuntimeException('Transaction not found in scanned block range');
     }
 }
