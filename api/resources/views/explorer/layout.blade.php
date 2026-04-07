@@ -119,6 +119,7 @@
                 <a href="{{ route('explorer.home') }}">Explorer home</a>
                 <a href="https://isekai-pool.com/koto.html">KOTO mining</a>
                 <a href="https://www.reddit.com/r/KotoCoin/" target="_blank" rel="noopener">Reddit</a>
+                <a href="https://api.isekai-pool.com/transparency/analytics" target="_blank" rel="noopener">Public Analytics</a>
                 <a href="https://isekai-pool.com/">isekai-pool.com</a>
             </div>
         </div>

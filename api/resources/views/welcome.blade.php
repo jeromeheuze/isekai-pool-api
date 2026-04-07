@@ -165,6 +165,7 @@
                     <footer class="py-16 text-center text-sm text-black dark:text-white/70">
                         Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
                         · <a href="https://www.reddit.com/r/KotoCoin/" class="underline hover:text-black dark:hover:text-white" target="_blank" rel="noopener">r/KotoCoin</a>
+                        · <a href="https://api.isekai-pool.com/transparency/analytics" class="underline hover:text-black dark:hover:text-white" target="_blank" rel="noopener">Public Analytics</a>
                     </footer>
                 </div>
             </div>

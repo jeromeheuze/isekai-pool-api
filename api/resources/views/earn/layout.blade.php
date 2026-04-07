@@ -94,6 +94,7 @@
                 <a href="/earn/retro">Retro</a>
                 <a href="/faucet.html">Faucet (full test)</a>
                 <a href="https://explorer.isekai-pool.com/">Explorer</a>
+                <a href="https://api.isekai-pool.com/transparency/analytics" target="_blank" rel="noopener">Public Analytics</a>
                 <a href="https://www.reddit.com/r/KotoCoin/" target="_blank" rel="noopener">Reddit</a>
             </div>
         </div>
