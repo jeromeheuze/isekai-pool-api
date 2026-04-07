@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'KOTO Explorer') — isekai-pool.com</title>
+    <link rel="icon" href="https://isekai-pool.com/favicon.ico?v=2" sizes="any" />
+    <link rel="icon" type="image/png" href="https://isekai-pool.com/favicon-32x32.png?v=2" sizes="32x32" />
+    <link rel="icon" type="image/png" href="https://isekai-pool.com/favicon-16x16.png?v=2" sizes="16x16" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
