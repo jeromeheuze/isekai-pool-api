@@ -31,6 +31,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('faucet')->group(function () {
         Route::post('/claim', [FaucetController::class, 'claim'])
             ->middleware('throttle:12,1');
+        Route::post('/activity-session', [FaucetController::class, 'activitySession'])
+            ->middleware('throttle:30,1');
+        Route::post('/activity-complete', [FaucetController::class, 'activityComplete'])
+            ->middleware('throttle:20,1');
         Route::get('/status', [FaucetController::class, 'status'])
             ->middleware('throttle:60,1');
         Route::get('/balance', [FaucetController::class, 'balance'])

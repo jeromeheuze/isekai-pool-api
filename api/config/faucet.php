@@ -44,6 +44,18 @@ return [
         'site_key' => env('TURNSTILE_SITE_KEY'),
     ],
 
+    /**
+     * Earn hub: require POST /faucet/activity-complete (Turnstile + proof) before /faucet/claim
+     * when source_site is isekai-pool. Disable for local/tests via FAUCET_REQUIRE_COMPLETION_TOKEN=false.
+     */
+    'require_completion_token' => filter_var(env('FAUCET_REQUIRE_COMPLETION_TOKEN', true), FILTER_VALIDATE_BOOLEAN),
+
+    /** HMAC secret for completion_token; falls back to hashed APP_KEY if unset. */
+    'completion_token_secret' => env('FAUCET_COMPLETION_TOKEN_SECRET'),
+
+    /** Signed completion token lifetime (minutes). */
+    'completion_token_ttl_minutes' => max(1, min(120, (int) env('FAUCET_COMPLETION_TOKEN_TTL_MINUTES', 15))),
+
     /** GET /faucet/balance?sync_rpc=1 — refresh book balance from KOTO getbalance (trusted ops only). */
     'allow_balance_rpc_sync' => env('FAUCET_ALLOW_BALANCE_RPC_SYNC', false),
 

@@ -43,7 +43,7 @@
         <button id="claim-btn" class="btn" disabled style="margin-top:0.8rem;">Claim reward</button>
         <p id="claim-result" class="muted" style="margin:0.8rem 0 0;font-size:12px;">Not ready.</p>
         <p class="muted" style="margin:0.5rem 0 0;font-size:12px;">
-            Endpoint: <code>POST {{ $apiBase }}/faucet/claim</code>
+            Flow: <code>POST {{ $apiBase }}/faucet/activity-complete</code> then <code>POST {{ $apiBase }}/faucet/claim</code>
         </p>
     </div>
 @endsection
@@ -61,6 +61,7 @@
     var walletKey = 'isekai_earn_wallet';
     var activityDone = false;
     var turnstileToken = '';
+    var proofPayload = null;
 
     var kanjiQuestions = [
         { q: 'What does 水 mean?', options: ['fire', 'water', 'tree'], answer: 1 },
@@ -94,8 +95,14 @@
 
     function el(id) { return document.getElementById(id); }
 
-    function setActivityDone(done, message) {
+    function setActivityDone(done, message, proof) {
         activityDone = !!done;
+        if (done && proof) {
+            proofPayload = proof;
+        }
+        if (!done) {
+            proofPayload = null;
+        }
         var state = el('activity-state');
         if (state) {
             state.textContent = message || (done ? 'Activity complete. Claim unlocked pending Turnstile.' : 'Complete this activity to unlock claim.');
@@ -124,18 +131,35 @@
         if (!startBtn || !timerEl) return;
         startBtn.addEventListener('click', function () {
             startBtn.disabled = true;
-            var left = 8;
-            timerEl.textContent = '... ' + left + 's';
-            var t = setInterval(function () {
-                left -= 1;
-                if (left <= 0) {
-                    clearInterval(t);
-                    timerEl.textContent = 'Complete.';
-                    setActivityDone(true, 'Shrine visit complete. You can claim now.');
-                    return;
-                }
-                timerEl.textContent = '... ' + left + 's';
-            }, 1000);
+            timerEl.textContent = 'Starting session...';
+            fetch(API + '/faucet/activity-session', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ activity_slug: 'shrine_visit' })
+            }).then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+                .then(function (res) {
+                    if (!res.ok || !res.data.session_id) {
+                        timerEl.textContent = 'Could not start session. Refresh and try again.';
+                        startBtn.disabled = false;
+                        return;
+                    }
+                    var sessionId = res.data.session_id;
+                    var left = 8;
+                    timerEl.textContent = '... ' + left + 's';
+                    var t = setInterval(function () {
+                        left -= 1;
+                        if (left <= 0) {
+                            clearInterval(t);
+                            timerEl.textContent = 'Complete.';
+                            setActivityDone(true, 'Shrine visit complete. You can claim now.', { session_id: sessionId });
+                            return;
+                        }
+                        timerEl.textContent = '... ' + left + 's';
+                    }, 1000);
+                }).catch(function () {
+                    timerEl.textContent = 'Network error starting session.';
+                    startBtn.disabled = false;
+                });
         });
     }
 
@@ -181,7 +205,12 @@
             }
             scoreEl.textContent = 'Score: ' + score + '/' + questions.length;
             if (score >= passScore) {
-                setActivityDone(true, doneMessage + ' Score: ' + score + '/' + questions.length + '.');
+                var ans = [];
+                for (var ai = 0; ai < questions.length; ai++) {
+                    var chk = document.querySelector('input[name="quiz-' + ai + '"]:checked');
+                    ans.push(chk ? parseInt(chk.value, 10) : -1);
+                }
+                setActivityDone(true, doneMessage + ' Score: ' + score + '/' + questions.length + '.', { answers: ans });
             } else {
                 setActivityDone(false, 'Need ' + passScore + '/' + questions.length + ' to claim. You scored ' + score + '.');
             }
@@ -237,7 +266,9 @@
                     state.textContent = matched + '/4 matched.';
                     first = null;
                     if (matched === 4) {
-                        setActivityDone(true, 'Yokai match complete. You can claim now.');
+                        setActivityDone(true, 'Yokai match complete. You can claim now.', {
+                            matches: [[0, 0], [1, 1], [2, 2], [3, 3]]
+                        });
                     }
                     return;
                 }
@@ -305,7 +336,9 @@
             var ok = items.join('|') === steps.join('|');
             if (ok) {
                 state.textContent = 'Solved.';
-                setActivityDone(true, 'Shrine puzzle solved. You can claim now.');
+                setActivityDone(true, 'Shrine puzzle solved. You can claim now.', {
+                    order: ['Bow', 'Cleanse hands', 'Offer prayer', 'Final bow']
+                });
             } else {
                 state.textContent = 'Order is not correct yet.';
                 setActivityDone(false, 'Reorder the steps and verify again.');
@@ -340,7 +373,7 @@
                     next += 1;
                     if (next === 5) {
                         state.textContent = 'All checkpoints explored.';
-                        setActivityDone(true, 'Map exploration complete. You can claim now.');
+                        setActivityDone(true, 'Map exploration complete. You can claim now.', { sequence: [1, 2, 3, 4] });
                     } else {
                         state.textContent = 'Great. Next: checkpoint ' + next + '.';
                     }
@@ -362,8 +395,27 @@
         if (!btn || !state) return;
         btn.addEventListener('click', function () {
             btn.disabled = true;
-            state.textContent = 'Checked in.';
-            setActivityDone(true, 'Daily bonus unlocked. You can claim now.');
+            state.textContent = 'Starting check-in...';
+            fetch(API + '/faucet/activity-session', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ activity_slug: 'daily_bonus' })
+            }).then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+                .then(function (res) {
+                    if (!res.ok || !res.data.session_id) {
+                        state.textContent = 'Could not start check-in.';
+                        btn.disabled = false;
+                        return;
+                    }
+                    var sessionId = res.data.session_id;
+                    setTimeout(function () {
+                        state.textContent = 'Checked in.';
+                        setActivityDone(true, 'Daily bonus unlocked. You can claim now.', { session_id: sessionId });
+                    }, 1100);
+                }).catch(function () {
+                    state.textContent = 'Network error.';
+                    btn.disabled = false;
+                });
         });
     }
 
@@ -419,29 +471,67 @@
             if (result) result.textContent = 'Enter wallet first.';
             return;
         }
-        var payload = {
-            wallet_address: wallet,
-            activity_slug: slug,
-            turnstile_token: turnstileToken,
-            source_site: 'isekai-pool'
-        };
+        if (!activityDone || !proofPayload) {
+            if (result) result.textContent = 'Finish the activity first.';
+            return;
+        }
+        if (hasTurnstile && !turnstileToken) {
+            if (result) result.textContent = 'Complete Turnstile verification first.';
+            return;
+        }
 
         var idem = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + '-' + String(Math.random()).slice(2);
-        if (result) result.textContent = 'Submitting claim...';
+        if (result) result.textContent = 'Verifying activity...';
 
-        fetch(API + '/faucet/claim', {
+        fetch(API + '/faucet/activity-complete', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Idempotency-Key': idem
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                wallet_address: wallet,
+                activity_slug: slug,
+                turnstile_token: turnstileToken,
+                proof: proofPayload
+            })
         }).then(function (r) {
             return r.json().then(function (data) {
                 return { status: r.status, data: data };
             });
         }).then(function (res) {
+            var data = res.data || {};
+            if (res.status < 200 || res.status >= 400 || data.error) {
+                if (result) result.textContent = 'Activity verification failed: ' + (data.error || res.status);
+                return;
+            }
+            if (!data.completion_token) {
+                if (result) result.textContent = 'No completion token returned.';
+                return;
+            }
+            if (result) result.textContent = 'Submitting claim...';
+            return fetch(API + '/faucet/claim', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Idempotency-Key': idem
+                },
+                body: JSON.stringify({
+                    wallet_address: wallet,
+                    activity_slug: slug,
+                    turnstile_token: '',
+                    completion_token: data.completion_token,
+                    source_site: 'isekai-pool'
+                })
+            });
+        }).then(function (r) {
+            if (!r || !r.json) return null;
+            return r.json().then(function (data) {
+                return { status: r.status, data: data };
+            });
+        }).then(function (res) {
+            if (!res) return;
             var data = res.data || {};
             if (data.error) {
                 if (result) result.textContent = 'Claim failed: ' + data.error;
@@ -458,7 +548,7 @@
             }
             if (result) result.textContent = 'Unexpected response.';
         }).catch(function () {
-            if (result) result.textContent = 'Network error while submitting claim.';
+            if (result) result.textContent = 'Network error while submitting.';
         });
     }
 

@@ -6,12 +6,14 @@ use App\FaucetClaimStatus;
 use App\Http\Controllers\Controller;
 use App\Models\FaucetBalance;
 use App\Models\FaucetClaim;
+use App\Services\Faucet\FaucetActivityCompletionService;
 use App\Services\Faucet\FaucetClaimService;
 use App\Services\Faucet\KotoFaucetWalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 use Throwable;
 
 class FaucetController extends Controller
@@ -29,6 +31,55 @@ class FaucetController extends Controller
         }
 
         return response()->json($result, $status);
+    }
+
+    public function activitySession(Request $request, FaucetActivityCompletionService $sessions): JsonResponse
+    {
+        if (! config('faucet.enabled')) {
+            return response()->json(['error' => 'Faucet is disabled'], 503);
+        }
+
+        $validated = $request->validate([
+            'activity_slug' => ['required', 'string', 'max:64'],
+        ]);
+
+        try {
+            $sessionId = $sessions->createSession($validated['activity_slug']);
+        } catch (RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['session_id' => $sessionId]);
+    }
+
+    public function activityComplete(Request $request, FaucetActivityCompletionService $completion): JsonResponse
+    {
+        if (! config('faucet.enabled')) {
+            return response()->json(['error' => 'Faucet is disabled'], 503);
+        }
+
+        $validated = $request->validate([
+            'wallet_address' => ['required', 'string', 'max:128'],
+            'activity_slug' => ['required', 'string', 'max:64'],
+            'turnstile_token' => ['nullable', 'string', 'max:4096'],
+            'proof' => ['required', 'array'],
+        ]);
+
+        try {
+            $token = $completion->completeActivity(
+                $request,
+                $validated['wallet_address'],
+                $validated['activity_slug'],
+                $validated['proof']
+            );
+        } catch (RuntimeException $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'completion_token' => $token,
+        ]);
     }
 
     public function status(Request $request): JsonResponse

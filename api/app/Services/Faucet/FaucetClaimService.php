@@ -17,7 +17,8 @@ use RuntimeException;
 class FaucetClaimService
 {
     public function __construct(
-        private TurnstileVerifier $turnstile
+        private TurnstileVerifier $turnstile,
+        private FaucetActivityCompletionService $activityCompletion
     ) {}
 
     /**
@@ -34,7 +35,7 @@ class FaucetClaimService
             'activity_slug' => ['required', 'string', 'max:64'],
             'turnstile_token' => ['nullable', 'string', 'max:4096'],
             'source_site' => ['sometimes', 'string', 'max:64'],
-            'completion_token' => ['nullable', 'string', 'max:512'],
+            'completion_token' => ['nullable', 'string', 'max:2048'],
         ]);
 
         $wallet = $validated['wallet_address'];
@@ -58,12 +59,19 @@ class FaucetClaimService
 
         $ip = $request->ip() ?? '0.0.0.0';
 
-        if (! $this->turnstile->verify($validated['turnstile_token'] ?? null, $ip)) {
-            return ['success' => false, 'error' => 'Captcha verification failed'];
-        }
-
         if (($validated['completion_token'] ?? null) && $sourceSite !== 'isekai-pool') {
             return ['success' => false, 'error' => 'Partner completion tokens are not yet enabled'];
+        }
+
+        $isIsekaiPool = $sourceSite === 'isekai-pool';
+        $requireCompletion = $isIsekaiPool && config('faucet.require_completion_token');
+
+        if ($requireCompletion) {
+            if (! $this->activityCompletion->verifyToken($validated['completion_token'] ?? null, $wallet, $activity)) {
+                return ['success' => false, 'error' => 'Invalid or expired activity completion'];
+            }
+        } elseif (! $this->turnstile->verify($validated['turnstile_token'] ?? null, $ip)) {
+            return ['success' => false, 'error' => 'Captcha verification failed'];
         }
 
         $idempotencyKey = $request->header('Idempotency-Key');
