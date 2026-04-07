@@ -8,6 +8,7 @@ use App\Support\KotoAddress;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use RuntimeException;
 use Throwable;
@@ -138,7 +139,8 @@ class ExplorerController extends Controller
 
         try {
             $raw = $this->rememberForeverRawTransaction($rpc, $coin, $txidLower);
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            Log::error('Explorer tx error: '.$e->getMessage(), ['txid' => $txidLower]);
             abort(404);
         }
 
@@ -314,47 +316,102 @@ class ExplorerController extends Controller
             // fall through to block scan
         }
 
-        $depth = (int) config('explorer.tx_lookup_block_scan_depth', 2500);
+        $depth = (int) config('explorer.tx_lookup_block_scan_depth', 50000);
         if ($depth <= 0) {
             throw new RuntimeException('getrawtransaction failed and block scan disabled');
+        }
+
+        $maxSeconds = (int) config('explorer.tx_lookup_max_seconds', 300);
+        if ($maxSeconds > 0) {
+            set_time_limit($maxSeconds);
         }
 
         $tip = (int) $rpc->call('getblockcount', []);
         $min = max(0, $tip - $depth);
 
         for ($h = $tip; $h >= $min; $h--) {
+            $blockHash = null;
             try {
                 $blockHash = $rpc->call('getblockhash', [$h]);
-                if (! is_string($blockHash)) {
-                    continue;
-                }
-                $block = $rpc->call('getblock', [$blockHash, 1]);
-                if (! is_array($block)) {
-                    continue;
-                }
-                $txs = $block['tx'] ?? [];
-                if (! is_array($txs)) {
-                    continue;
-                }
-                $found = false;
-                foreach ($txs as $t) {
-                    $id = is_string($t) ? $t : (is_array($t) && isset($t['txid']) ? (string) $t['txid'] : '');
-                    if ($id !== '' && strtolower($id) === $txidLower) {
-                        $found = true;
-                        break;
-                    }
-                }
-                if ($found) {
-                    $raw = $rpc->call('getrawtransaction', [$txidLower, true, $blockHash]);
-                    if (is_array($raw)) {
-                        return $raw;
-                    }
-                }
             } catch (Throwable) {
                 continue;
+            }
+            if (! is_string($blockHash)) {
+                continue;
+            }
+
+            try {
+                $block = $rpc->call('getblock', [$blockHash, 1]);
+            } catch (Throwable) {
+                continue;
+            }
+            if (! is_array($block)) {
+                continue;
+            }
+
+            foreach ($this->txidsInBlock($rpc, $blockHash, $block) as $candidate) {
+                if (strtolower($candidate) !== $txidLower) {
+                    continue;
+                }
+
+                $raw = $rpc->call('getrawtransaction', [$txidLower, true, $blockHash]);
+                if (! is_array($raw)) {
+                    throw new RuntimeException('getrawtransaction returned invalid payload after block match');
+                }
+
+                return $raw;
             }
         }
 
         throw new RuntimeException('Transaction not found in scanned block range');
+    }
+
+    /**
+     * Txids listed in a block. Uses verbosity 1; if the node omits `tx` but the block has txs,
+     * falls back to verbosity 2 for that block only.
+     *
+     * @return list<string>
+     */
+    private function txidsInBlock(RpcService $rpc, string $blockHash, array $block): array
+    {
+        $txs = $block['tx'] ?? [];
+        $ids = [];
+        if (is_array($txs) && $txs !== []) {
+            foreach ($txs as $t) {
+                if (is_string($t)) {
+                    $ids[] = $t;
+                } elseif (is_array($t) && isset($t['txid'])) {
+                    $ids[] = (string) $t['txid'];
+                }
+            }
+
+            return $ids;
+        }
+
+        $nTx = (int) ($block['nTx'] ?? count($ids));
+        if ($nTx <= 0) {
+            return [];
+        }
+
+        try {
+            $full = $rpc->call('getblock', [$blockHash, 2]);
+        } catch (Throwable) {
+            return [];
+        }
+        if (! is_array($full)) {
+            return [];
+        }
+        $fullTxs = $full['tx'] ?? [];
+        if (! is_array($fullTxs)) {
+            return [];
+        }
+        $out = [];
+        foreach ($fullTxs as $t) {
+            if (is_array($t) && isset($t['txid'])) {
+                $out[] = (string) $t['txid'];
+            }
+        }
+
+        return $out;
     }
 }
