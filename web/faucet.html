@@ -113,6 +113,39 @@
             <a id="faucet-wallet-explorer" href="#" target="_blank" rel="noopener" class="inline-block mt-3 text-sm text-isekai-accent hover:underline">View on explorer →</a>
         </section>
 
+        <section id="claim-test-section" class="hidden mb-10 bg-isekai-card border border-isekai-border rounded-xl p-5 md:p-6">
+            <h2 class="text-sm font-bold text-isekai-muted uppercase tracking-wider mb-2">Test claim</h2>
+            <p class="text-xs text-isekai-muted mb-4 leading-relaxed">
+                Sends a real <code class="text-gray-500">POST /api/v1/faucet/claim</code>. Payouts run in a <strong class="text-gray-400">queue job</strong> — on the VPS run
+                <code class="text-gray-500">php artisan queue:work</code> (or use <code class="text-gray-500">QUEUE_CONNECTION=sync</code> only for debugging).
+            </p>
+            <div class="space-y-4 max-w-lg">
+                <div>
+                    <label for="claim-wallet" class="block text-xs text-isekai-muted mb-1">KOTO wallet</label>
+                    <input id="claim-wallet" type="text" autocomplete="off" placeholder="k1… or jz…" class="w-full bg-isekai-bg border border-isekai-border rounded-lg px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600 focus:border-violet-500/50 focus:outline-none font-mono" />
+                </div>
+                <div>
+                    <label for="claim-activity" class="block text-xs text-isekai-muted mb-1">Activity</label>
+                    <select id="claim-activity" class="w-full bg-isekai-bg border border-isekai-border rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-violet-500/50 focus:outline-none">
+                        <option value="shrine_visit">shrine_visit (0.5)</option>
+                        <option value="kanji_quiz">kanji_quiz (1.0)</option>
+                        <option value="yokai_match">yokai_match (1.5)</option>
+                        <option value="yokai_quiz">yokai_quiz (1.0)</option>
+                        <option value="retro_trivia">retro_trivia (1.0)</option>
+                        <option value="shrine_puzzle">shrine_puzzle (2.0)</option>
+                        <option value="map_explore">map_explore (1.0)</option>
+                        <option value="coffee_quiz">coffee_quiz (0.5)</option>
+                        <option value="daily_bonus">daily_bonus (1.5)</option>
+                    </select>
+                </div>
+                <div id="turnstile-mount" class="min-h-[65px]"></div>
+                <button type="button" id="claim-btn" disabled class="px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition disabled:opacity-40 disabled:pointer-events-none">
+                    Submit claim
+                </button>
+                <pre id="claim-result" class="hidden text-xs text-gray-300 bg-isekai-bg border border-isekai-border rounded-lg p-3 overflow-x-auto whitespace-pre-wrap font-mono"></pre>
+            </div>
+        </section>
+
         <section class="mb-10">
             <h2 class="text-lg font-bold text-white mb-3">Planned on <span class="text-violet-400">koto.isekai-pool.com</span></h2>
             <p class="text-sm text-isekai-muted mb-5 max-w-2xl">Roadmap from the earn spec: interactive hub at <code class="text-gray-500">/earn</code> (Laravel + Livewire), not static HTML here.</p>
@@ -236,6 +269,51 @@
                 } catch (e) { return iso; }
             }
 
+            var turnstileWidgetId = null;
+
+            function loadTurnstileScript(cb) {
+                if (window.turnstile) {
+                    cb();
+                    return;
+                }
+                var s = document.createElement('script');
+                s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+                s.async = true;
+                s.defer = true;
+                s.onload = cb;
+                document.head.appendChild(s);
+            }
+
+            function mountClaimTurnstile(siteKey) {
+                var mount = document.getElementById('turnstile-mount');
+                var btn = document.getElementById('claim-btn');
+                if (!mount || !siteKey) {
+                    if (mount) mount.innerHTML = '<p class="text-amber-400 text-sm">No Turnstile site key from API — set <code class="text-gray-500">TURNSTILE_SITE_KEY</code>.</p>';
+                    if (btn) btn.disabled = true;
+                    return;
+                }
+                mount.innerHTML = '';
+                turnstileWidgetId = null;
+                loadTurnstileScript(function () {
+                    turnstileWidgetId = window.turnstile.render(mount, {
+                        sitekey: siteKey,
+                        theme: 'dark'
+                    });
+                    if (btn) btn.disabled = false;
+                });
+            }
+
+            function showClaimTest(data) {
+                var sec = document.getElementById('claim-test-section');
+                if (!sec) return;
+                sec.classList.remove('hidden');
+                if (data && data.turnstile_site_key) {
+                    mountClaimTurnstile(data.turnstile_site_key);
+                } else {
+                    mountClaimTurnstile('');
+                }
+            }
+
             function loadBalance() {
                 var elApi = document.getElementById('stat-api');
                 fetch(API + '/faucet/balance', { method: 'GET', headers: { 'Accept': 'application/json' } })
@@ -267,6 +345,7 @@
                             var ex = document.getElementById('faucet-wallet-explorer');
                             ex.href = EXPLORER_ADDR + encodeURIComponent(data.faucet_wallet);
                         }
+                        showClaimTest(data);
                     })
                     .catch(function () {
                         elApi.innerHTML = '<span class="text-isekai-red">Unreachable</span>';
@@ -313,6 +392,49 @@
                         empty.textContent = 'Could not load recent payouts.';
                     });
             }
+
+            document.getElementById('claim-btn').addEventListener('click', function () {
+                var wallet = document.getElementById('claim-wallet').value.trim();
+                var activity = document.getElementById('claim-activity').value;
+                var out = document.getElementById('claim-result');
+                var token = (turnstileWidgetId != null && window.turnstile)
+                    ? window.turnstile.getResponse(turnstileWidgetId)
+                    : '';
+                if (!wallet) {
+                    out.classList.remove('hidden');
+                    out.textContent = 'Enter a valid KOTO wallet address.';
+                    return;
+                }
+                if (!token) {
+                    out.classList.remove('hidden');
+                    out.textContent = 'Complete the Turnstile challenge first.';
+                    return;
+                }
+                out.classList.remove('hidden');
+                out.textContent = 'Submitting…';
+                var body = { wallet_address: wallet, activity_slug: activity, turnstile_token: token };
+                var headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+                if (window.crypto && window.crypto.randomUUID) {
+                    headers['Idempotency-Key'] = window.crypto.randomUUID();
+                }
+                fetch(API + '/faucet/claim', { method: 'POST', headers: headers, body: JSON.stringify(body) })
+                    .then(function (r) {
+                        return r.json().then(function (j) {
+                            return { status: r.status, body: j };
+                        });
+                    })
+                    .then(function (x) {
+                        out.textContent = JSON.stringify(x.body, null, 2);
+                        if (x.status < 400 && window.turnstile && turnstileWidgetId != null) {
+                            window.turnstile.reset(turnstileWidgetId);
+                        }
+                        loadBalance();
+                        loadRecent();
+                    })
+                    .catch(function (e) {
+                        out.textContent = 'Request failed: ' + (e && e.message ? e.message : String(e));
+                    });
+            });
 
             loadBalance();
             loadRecent();
