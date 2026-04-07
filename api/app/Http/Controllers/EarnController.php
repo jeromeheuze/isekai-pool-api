@@ -137,9 +137,42 @@ class EarnController extends Controller
         ]));
     }
 
+    /**
+     * @return array<int, array{q: string, options: array<int, string>, answer: int}>
+     */
+    private function yokaiQuizQuestions(): array
+    {
+        return [
+            ['q' => 'Which yokai is known for a long neck at night?', 'options' => ['Rokurokubi', 'Kappa', 'Tengu'], 'answer' => 0],
+            ['q' => 'Kappa are commonly associated with what place?', 'options' => ['Mountains', 'Rivers', 'Deserts'], 'answer' => 1],
+            ['q' => 'Tengu are often depicted with what?', 'options' => ['Long nose', 'Three eyes', 'Fish tail'], 'answer' => 0],
+            ['q' => 'Zashiki-warashi are said to bring...', 'options' => ['Bad weather', 'Good fortune', 'Earthquakes'], 'answer' => 1],
+            ['q' => 'Nurarihyon is often portrayed as a...', 'options' => ['Child spirit', 'Old man yokai', 'Fox yokai'], 'answer' => 1],
+        ];
+    }
+
+    /**
+     * Japanese watermark per question index (Q1–Q5).
+     *
+     * @return array<int, string>
+     */
+    private function yokaiQuizWatermarks(): array
+    {
+        return ['轆轤首', '河童', '天狗', '座敷童', 'ぬらりひょん'];
+    }
+
     public function yokaiQuiz(): View
     {
-        return $this->renderActivity('yokai_quiz');
+        $meta = $this->activityMeta('yokai_quiz');
+
+        return view('earn.yokai-quiz', array_merge($meta, [
+            'apiBase' => config('earn.api_base'),
+            'turnstileSiteKey' => config('faucet.turnstile.site_key'),
+            'rewardKoto' => config('faucet.activities.yokai_quiz.reward'),
+            'explorerTxBase' => 'https://explorer.isekai-pool.com/tx/',
+            'yokaiQuestions' => $this->yokaiQuizQuestions(),
+            'yokaiWatermarks' => $this->yokaiQuizWatermarks(),
+        ]));
     }
 
     public function shrinePuzzle(): View

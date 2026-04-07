@@ -168,13 +168,6 @@
         { q: 'PC Engine was known as what in NA?', options: ['Master System', 'TurboGrafx-16', 'Neo Geo'], answer: 1 },
         { q: 'Which studio made Street Fighter II?', options: ['Konami', 'Taito', 'Capcom'], answer: 2 }
     ];
-    var yokaiQuestions = [
-        { q: 'Which yokai is known for a long neck at night?', options: ['Rokurokubi', 'Kappa', 'Tengu'], answer: 0 },
-        { q: 'Kappa are commonly associated with what place?', options: ['Mountains', 'Rivers', 'Deserts'], answer: 1 },
-        { q: 'Tengu are often depicted with what?', options: ['Long nose', 'Three eyes', 'Fish tail'], answer: 0 },
-        { q: 'Zashiki-warashi are said to bring...', options: ['Bad weather', 'Good fortune', 'Earthquakes'], answer: 1 },
-        { q: 'Nurarihyon is often portrayed as a...', options: ['Child spirit', 'Old man yokai', 'Fox yokai'], answer: 1 }
-    ];
     var coffeeQuestions = [
         { q: 'Which brew method uses paper filter and gravity?', options: ['Pour-over', 'Espresso', 'Cold brew'], answer: 0 },
         { q: 'Espresso extraction usually takes about...', options: ['5 seconds', '25-35 seconds', '2 minutes'], answer: 1 },
@@ -427,7 +420,11 @@
             return;
         }
         if (slug === 'yokai_quiz') {
-            renderQuiz(yokaiQuestions, 4, 'Yokai quiz passed.');
+            var host = el('activity-container');
+            if (host) {
+                host.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">Yokai Quiz uses a dedicated page. <a href="/earn/yokai-quiz">Open yokai quiz</a>.</p>';
+            }
+            setActivityDone(false, 'Open the yokai quiz page.');
             return;
         }
         if (slug === 'shrine_puzzle') {
