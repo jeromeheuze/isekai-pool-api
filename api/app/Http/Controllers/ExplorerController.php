@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\RpcService;
 use App\Support\ExplorerMiner;
+use App\Support\KotoAddress;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -264,7 +265,7 @@ class ExplorerController extends Controller
             }
         }
 
-        if (preg_match('/^(k1|jz)[a-zA-Z0-9]{30,128}$/', $query)) {
+        if (KotoAddress::isValid($query)) {
             return redirect()->route('explorer.address', ['address' => $query]);
         }
 

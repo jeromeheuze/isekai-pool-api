@@ -7,6 +7,7 @@ use App\FaucetPayoutBucket;
 use App\Jobs\ProcessFaucetPayout;
 use App\Models\FaucetBalance;
 use App\Models\FaucetClaim;
+use App\Support\KotoAddress;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -40,7 +41,7 @@ class FaucetClaimService
         $activity = $validated['activity_slug'];
         $sourceSite = $validated['source_site'] ?? 'isekai-pool';
 
-        if (! $this->isValidKotoAddress($wallet)) {
+        if (! KotoAddress::isValid($wallet)) {
             return ['success' => false, 'error' => 'Invalid KOTO address format'];
         }
 
@@ -208,12 +209,6 @@ class FaucetClaimService
         }
 
         return $last->created_at->copy()->addHours((int) config('faucet.cooldown_hours'));
-    }
-
-    private function isValidKotoAddress(string $address): bool
-    {
-        // k1 transparent Bech32 is typically 35 chars total (k1 + 33); jz shielded is much longer.
-        return (bool) preg_match('/^(k1|jz)[a-zA-Z0-9]{30,128}$/', $address);
     }
 
     private function assertCooldowns(string $wallet, string $activity, string $ip): void

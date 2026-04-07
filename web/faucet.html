@@ -442,7 +442,8 @@
                         });
                     })
                     .then(function (x) {
-                        out.textContent = JSON.stringify(x.body, null, 2);
+                        var body = x.body && typeof x.body === 'object' ? x.body : { raw: x.body };
+                        out.textContent = JSON.stringify(Object.assign({ http_status: x.status }, body), null, 2);
                         if (x.status < 400 && window.turnstile && turnstileWidgetId != null) {
                             window.turnstile.reset(turnstileWidgetId);
                         }
