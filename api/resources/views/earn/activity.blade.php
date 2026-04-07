@@ -25,7 +25,13 @@
         <p id="activity-state" class="muted" style="margin:0.75rem 0 0;font-size:12px;">Complete this activity to unlock claim.</p>
     </div>
 
-    <div class="card">
+    <div id="earn-claim-unavailable" class="card" style="display:none;border-color:rgba(248,113,113,0.35);background:rgba(248,113,113,0.06);">
+        <p style="margin:0;"><strong style="color:#fca5a5;">Claim not available for this wallet yet</strong></p>
+        <p id="earn-claim-unavailable-msg" class="muted" style="margin:0.5rem 0 0;font-size:12px;"></p>
+        <p class="muted" style="margin:0.6rem 0 0;font-size:11px;">You can still practice the activity. Claim unlocks after the cooldown from your last claim.</p>
+    </div>
+
+    <div id="earn-claim-section" class="card">
         <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">Claim</strong></p>
         <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">Activity slug</strong> <code class="muted">{{ $slug }}</code></p>
 
@@ -65,6 +71,95 @@
     var activityDone = false;
     var turnstileToken = '';
     var proofPayload = null;
+    var LAST_USED_KEY = 'isekai_earn_last_used_v1';
+    var claimAllowedFromApi = true;
+
+    function readLastUsedMap() {
+        try {
+            var raw = localStorage.getItem(LAST_USED_KEY);
+            var o = raw ? JSON.parse(raw) : {};
+            return o && typeof o === 'object' ? o : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function recordLastVisit() {
+        var w = (el('claim-wallet') && el('claim-wallet').value || '').trim();
+        if (!w || w.length < 20 || !slug) return;
+        try {
+            var m = readLastUsedMap();
+            if (!m[w]) m[w] = {};
+            m[w][slug] = new Date().toISOString();
+            localStorage.setItem(LAST_USED_KEY, JSON.stringify(m));
+        } catch (e) {}
+    }
+
+    function formatWhen(iso) {
+        if (!iso) return '—';
+        try {
+            return new Date(iso).toLocaleString();
+        } catch (e) {
+            return String(iso);
+        }
+    }
+
+    function fetchClaimAvailability() {
+        var section = el('earn-claim-section');
+        var blocked = el('earn-claim-unavailable');
+        var blockedMsg = el('earn-claim-unavailable-msg');
+        var w = (el('claim-wallet') && el('claim-wallet').value || '').trim();
+        if (!section) return;
+        if (!w || w.length < 20) {
+            claimAllowedFromApi = true;
+            section.style.display = '';
+            if (blocked) blocked.style.display = 'none';
+            updateClaimButton();
+            return;
+        }
+        fetch(API + '/faucet/status?wallet=' + encodeURIComponent(w), { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.error) {
+                    claimAllowedFromApi = true;
+                    section.style.display = '';
+                    if (blocked) blocked.style.display = 'none';
+                    updateClaimButton();
+                    return;
+                }
+                var acts = data.activities || [];
+                var mine = null;
+                for (var i = 0; i < acts.length; i++) {
+                    if (acts[i].slug === slug) {
+                        mine = acts[i];
+                        break;
+                    }
+                }
+                if (mine && mine.available === false) {
+                    claimAllowedFromApi = false;
+                    section.style.display = 'none';
+                    if (blocked) {
+                        blocked.style.display = '';
+                        if (blockedMsg) {
+                            blockedMsg.textContent = mine.next_claim_at
+                                ? ('Next eligible claim: ' + formatWhen(mine.next_claim_at) + ' (local time).')
+                                : 'This activity is on cooldown for your wallet.';
+                        }
+                    }
+                } else {
+                    claimAllowedFromApi = true;
+                    section.style.display = '';
+                    if (blocked) blocked.style.display = 'none';
+                }
+                updateClaimButton();
+            })
+            .catch(function () {
+                claimAllowedFromApi = true;
+                section.style.display = '';
+                if (blocked) blocked.style.display = 'none';
+                updateClaimButton();
+            });
+    }
 
     var kanjiQuestions = [
         { q: 'What does 水 mean?', options: ['fire', 'water', 'tree'], answer: 1 },
@@ -118,7 +213,7 @@
         if (!btn) return;
         var wallet = (el('claim-wallet') && el('claim-wallet').value || '').trim();
         var captchaOk = hasTurnstile ? !!turnstileToken : true;
-        btn.disabled = !(activityDone && wallet.length >= 20 && captchaOk);
+        btn.disabled = !(claimAllowedFromApi && activityDone && wallet.length >= 20 && captchaOk);
     }
 
     function renderShrineActivity() {
@@ -542,11 +637,13 @@
             }
             if (data.pending) {
                 if (result) result.textContent = 'Claim accepted and pending payout. Amount: ' + (data.amount || '—') + ' KOTO.';
+                fetchClaimAvailability();
                 return;
             }
             if (data.success) {
                 var tx = data.txid ? (' txid=' + data.txid) : '';
                 if (result) result.textContent = 'Claim paid. Amount: ' + (data.amount || '—') + ' KOTO.' + tx;
+                fetchClaimAvailability();
                 return;
             }
             if (result) result.textContent = 'Unexpected response.';
@@ -571,10 +668,15 @@
                 var saved = localStorage.getItem(walletKey);
                 if (saved) wallet.value = saved;
             } catch (e) {}
-            wallet.addEventListener('input', updateClaimButton);
+            wallet.addEventListener('input', function () {
+                updateClaimButton();
+                fetchClaimAvailability();
+            });
             wallet.addEventListener('change', function () {
                 try { localStorage.setItem(walletKey, wallet.value.trim()); } catch (e) {}
+                recordLastVisit();
                 updateClaimButton();
+                fetchClaimAvailability();
             });
         }
         var claimBtn = el('claim-btn');
@@ -582,6 +684,8 @@
             claimBtn.addEventListener('click', claim);
         }
         renderActivity();
+        recordLastVisit();
+        fetchClaimAvailability();
         updateClaimButton();
     });
 })();
