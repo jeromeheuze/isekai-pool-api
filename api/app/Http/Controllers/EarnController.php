@@ -6,6 +6,43 @@ use Illuminate\View\View;
 
 class EarnController extends Controller
 {
+    /**
+     * @return array{title:string,slug:string,intro:string}
+     */
+    private function activityMeta(string $slug): array
+    {
+        return match ($slug) {
+            'shrine_visit' => [
+                'title' => 'Daily shrine visit',
+                'slug' => 'shrine_visit',
+                'intro' => 'Pause for a short shrine moment, then claim your daily reward.',
+            ],
+            'kanji_quiz' => [
+                'title' => 'Kanji quiz',
+                'slug' => 'kanji_quiz',
+                'intro' => 'Answer 5 quick kanji questions. Score 4/5 or better to unlock claim.',
+            ],
+            'retro_trivia' => [
+                'title' => 'Retro game trivia',
+                'slug' => 'retro_trivia',
+                'intro' => 'Classic JP retro trivia. Score 4/5 or better to unlock claim.',
+            ],
+            default => [
+                'title' => 'Activity',
+                'slug' => $slug,
+                'intro' => 'Complete the activity, then claim your reward.',
+            ],
+        };
+    }
+
+    private function renderActivity(string $slug): View
+    {
+        return view('earn.activity', array_merge($this->activityMeta($slug), [
+            'apiBase' => config('earn.api_base'),
+            'turnstileSiteKey' => config('faucet.turnstile.site_key'),
+        ]));
+    }
+
     public function index(): View
     {
         return view('earn.index', [
@@ -16,31 +53,16 @@ class EarnController extends Controller
 
     public function shrine(): View
     {
-        return view('earn.activity', [
-            'title' => 'Daily shrine visit',
-            'slug' => 'shrine_visit',
-            'intro' => 'Torii animation + Turnstile + claim — full flow coming next.',
-            'apiBase' => config('earn.api_base'),
-        ]);
+        return $this->renderActivity('shrine_visit');
     }
 
     public function kanji(): View
     {
-        return view('earn.activity', [
-            'title' => 'Kanji quiz',
-            'slug' => 'kanji_quiz',
-            'intro' => 'Five JLPT-style questions — pass 4/5 to earn. Question bank TBD.',
-            'apiBase' => config('earn.api_base'),
-        ]);
+        return $this->renderActivity('kanji_quiz');
     }
 
     public function retro(): View
     {
-        return view('earn.activity', [
-            'title' => 'Retro game trivia',
-            'slug' => 'retro_trivia',
-            'intro' => 'Japanese retro games — trivia + links to The 725 Club. Coming soon.',
-            'apiBase' => config('earn.api_base'),
-        ]);
+        return $this->renderActivity('retro_trivia');
     }
 }
