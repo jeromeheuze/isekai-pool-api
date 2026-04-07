@@ -216,51 +216,6 @@
         btn.disabled = !(claimAllowedFromApi && activityDone && wallet.length >= 20 && captchaOk);
     }
 
-    function renderShrineActivity() {
-        var host = el('activity-container');
-        if (!host) return;
-        host.innerHTML =
-            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Focus for 8 seconds, then mark your shrine visit complete.</p>' +
-            '<button id="start-shrine" class="btn btn-ghost">Start shrine moment</button>' +
-            '<p id="shrine-timer" class="muted" style="margin:0.7rem 0 0;font-size:12px;">Not started.</p>';
-
-        var startBtn = el('start-shrine');
-        var timerEl = el('shrine-timer');
-        if (!startBtn || !timerEl) return;
-        startBtn.addEventListener('click', function () {
-            startBtn.disabled = true;
-            timerEl.textContent = 'Starting session...';
-            fetch(API + '/faucet/activity-session', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                body: JSON.stringify({ activity_slug: 'shrine_visit' })
-            }).then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
-                .then(function (res) {
-                    if (!res.ok || !res.data.session_id) {
-                        timerEl.textContent = 'Could not start session. Refresh and try again.';
-                        startBtn.disabled = false;
-                        return;
-                    }
-                    var sessionId = res.data.session_id;
-                    var left = 8;
-                    timerEl.textContent = '... ' + left + 's';
-                    var t = setInterval(function () {
-                        left -= 1;
-                        if (left <= 0) {
-                            clearInterval(t);
-                            timerEl.textContent = 'Complete.';
-                            setActivityDone(true, 'Shrine visit complete. You can claim now.', { session_id: sessionId });
-                            return;
-                        }
-                        timerEl.textContent = '... ' + left + 's';
-                    }, 1000);
-                }).catch(function () {
-                    timerEl.textContent = 'Network error starting session.';
-                    startBtn.disabled = false;
-                });
-        });
-    }
-
     function renderQuiz(questions, passScore, doneMessage) {
         var host = el('activity-container');
         if (!host) return;
@@ -519,7 +474,11 @@
 
     function renderActivity() {
         if (slug === 'shrine_visit') {
-            renderShrineActivity();
+            var host = el('activity-container');
+            if (host) {
+                host.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">Daily Shrine Visit uses a dedicated page. <a href="/earn/shrine">Open shrine visit</a>.</p>';
+            }
+            setActivityDone(false, 'Open the shrine visit page.');
             return;
         }
         if (slug === 'kanji_quiz') {

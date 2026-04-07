@@ -46,15 +46,15 @@
     {{-- Hero --}}
     <section class="earn-hub-hero" aria-labelledby="earn-hub-title">
         <div class="earn-hub-hero__torii" aria-hidden="true">
-            <svg viewBox="0 0 120 100" width="120" height="100" focusable="false">
-                <g fill="none" stroke="#7c6af7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 88V72c0-18 18-28 48-28s48 10 48 28v16" />
-                    <path d="M24 88V76M96 88V76" />
-                    <path d="M60 44v36" />
-                    <path d="M28 52c8-20 24-28 32-28s24 8 32 28" />
-                    <path d="M8 44h104" />
-                    <path d="M20 36h80" />
-                </g>
+            <svg width="80" height="72" viewBox="0 0 80 72" fill="none"
+                 xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 1rem; display:block;">
+                <rect x="6" y="10" width="68" height="5" rx="2" fill="#7c6af7"/>
+                <rect x="12" y="18" width="56" height="4" rx="2" fill="#7c6af7"/>
+                <rect x="14" y="22" width="4" height="46" rx="2" fill="#7c6af7"/>
+                <rect x="62" y="22" width="4" height="46" rx="2" fill="#7c6af7"/>
+                <rect x="20" y="22" width="2" height="30" rx="1" fill="#7c6af7" opacity="0.4"/>
+                <rect x="58" y="22" width="2" height="30" rx="1" fill="#7c6af7" opacity="0.4"/>
+                <rect x="36" y="0" width="8" height="14" rx="2" fill="#7c6af7"/>
             </svg>
         </div>
         <h1 id="earn-hub-title" class="earn-hub-hero__title">Earn KOTO</h1>

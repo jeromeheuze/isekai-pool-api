@@ -83,7 +83,14 @@ class EarnController extends Controller
 
     public function shrine(): View
     {
-        return $this->renderActivity('shrine_visit');
+        $meta = $this->activityMeta('shrine_visit');
+
+        return view('earn.shrine', array_merge($meta, [
+            'apiBase' => config('earn.api_base'),
+            'turnstileSiteKey' => config('faucet.turnstile.site_key'),
+            'rewardKoto' => config('faucet.activities.shrine_visit.reward'),
+            'explorerTxBase' => 'https://explorer.isekai-pool.com/tx/',
+        ]));
     }
 
     public function kanji(): View
