@@ -7,9 +7,13 @@ const wallet = ref('');
 const poolUrl = ref('stratum+tcp://koto.isekai-pool.com:3301');
 const threads = ref(4);
 const recommended = ref(4);
+/** Logical CPU count from os.cpus().length — max useful mining threads on this machine */
+const maxLogicalCpus = ref(64);
+const cpuModel = ref('');
 const mining = ref(false);
 const hashrate = ref(0);
 const shares = ref({ accepted: 0, rejected: 0 });
+const threadHashrates = ref([]);
 const logs = ref([]);
 const minerError = ref('');
 const paths = ref({
@@ -26,6 +30,7 @@ const restoreMsg = ref('');
 let unsubStats;
 let unsubLog;
 let unsubErr;
+let unsubClose;
 
 function fmtHash(h) {
   if (h >= 1e6) return `${(h / 1e6).toFixed(2)} MH/s`;
@@ -51,15 +56,19 @@ onMounted(async () => {
 
   const cpu = await api.getCpuInfo();
   recommended.value = cpu.recommended_threads;
+  maxLogicalCpus.value = Math.max(1, cpu.cores || 1);
+  cpuModel.value = cpu.model || '';
   if (!s.threads) {
     threads.value = cpu.recommended_threads;
   }
+  threads.value = Math.min(Math.max(1, threads.value), maxLogicalCpus.value);
 
   paths.value = await api.getMinerPaths();
 
   unsubStats = api.onMinerStats((s) => {
     hashrate.value = s.hashrate || 0;
     shares.value = { ...s.shares };
+    threadHashrates.value = Array.isArray(s.threads) ? s.threads.map((t) => ({ ...t })) : [];
   });
   unsubLog = api.onMinerLog((line) => {
     logs.value = [line, ...logs.value].slice(0, 40);
@@ -68,19 +77,25 @@ onMounted(async () => {
     minerError.value = msg;
     mining.value = false;
   });
+  unsubClose = api.onMinerClose(() => {
+    mining.value = false;
+  });
 });
 
 onUnmounted(() => {
   unsubStats?.();
   unsubLog?.();
   unsubErr?.();
+  unsubClose?.();
 });
 
 async function persist() {
+  const t = Math.min(Math.max(1, threads.value), maxLogicalCpus.value);
+  threads.value = t;
   await api.setSettings({
     wallet_address: wallet.value.trim(),
     pool_url: poolUrl.value.trim(),
-    threads: threads.value,
+    threads: t,
   });
 }
 
@@ -166,7 +181,8 @@ async function restoreMiner() {
         type="text"
         autocomplete="off"
         placeholder="k1…"
-        class="mt-1 w-full rounded-lg border border-slate-700 bg-kotominer-bg px-3 py-2 font-mono text-sm text-white placeholder:text-slate-600 focus:border-kotominer-violet focus:outline-none"
+        :disabled="mining"
+        class="mt-1 w-full rounded-lg border border-slate-700 bg-kotominer-bg px-3 py-2 font-mono text-sm text-white placeholder:text-slate-600 focus:border-kotominer-violet focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         @change="persist"
       />
 
@@ -174,22 +190,31 @@ async function restoreMiner() {
       <input
         v-model="poolUrl"
         type="text"
-        class="mt-1 w-full rounded-lg border border-slate-700 bg-kotominer-bg px-3 py-2 font-mono text-sm text-white focus:border-kotominer-violet focus:outline-none"
+        :disabled="mining"
+        class="mt-1 w-full rounded-lg border border-slate-700 bg-kotominer-bg px-3 py-2 font-mono text-sm text-white focus:border-kotominer-violet focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         @change="persist"
       />
 
       <label class="mt-4 block font-mono text-xs uppercase tracking-wide text-slate-500">
-        CPU threads (recommended {{ recommended }})
+        CPU threads
       </label>
+      <p v-if="cpuModel" class="mt-1 font-mono text-[11px] leading-snug text-slate-500">
+        {{ cpuModel }}
+      </p>
+      <p class="mt-1 font-mono text-[11px] text-slate-500">
+        Maximum (logical CPUs): <span class="text-kotominer-gold">{{ maxLogicalCpus }}</span>
+        · recommended: <span class="text-slate-400">{{ recommended }}</span>
+      </p>
       <input
         v-model.number="threads"
         type="range"
         min="1"
-        max="64"
-        class="mt-2 w-full accent-kotominer-violet"
+        :max="maxLogicalCpus"
+        :disabled="mining"
+        class="mt-2 w-full accent-kotominer-violet disabled:cursor-not-allowed disabled:opacity-50"
         @change="persist"
       />
-      <div class="font-mono text-sm text-kotominer-gold">{{ threads }} threads</div>
+      <div class="font-mono text-sm text-kotominer-gold">{{ threads }} / {{ maxLogicalCpus }} threads</div>
     </section>
 
     <div class="flex flex-wrap items-center gap-3">
@@ -215,6 +240,19 @@ async function restoreMiner() {
         shares {{ shares.accepted }} / {{ shares.rejected }}
       </span>
     </div>
+
+    <section
+      v-if="mining && threadHashrates.length > 0"
+      class="rounded-xl border border-slate-800 bg-kotominer-bg/50 p-4"
+    >
+      <h2 class="font-mono text-xs uppercase tracking-wide text-slate-500">Per-thread hashrate</h2>
+      <ul class="mt-2 grid max-h-56 grid-cols-2 gap-x-4 gap-y-1 overflow-y-auto font-mono text-[11px] text-slate-400 sm:grid-cols-3 md:grid-cols-4">
+        <li v-for="row in threadHashrates" :key="row.id" class="flex justify-between gap-2 border-b border-slate-800/60 py-0.5">
+          <span class="text-slate-500">thread {{ row.id }}</span>
+          <span class="shrink-0 text-kotominer-gold">{{ fmtHash(row.hashrate) }}</span>
+        </li>
+      </ul>
+    </section>
 
     <p v-if="minerError" class="rounded-lg border border-red-500/30 bg-red-500/10 p-3 font-mono text-xs text-red-300 whitespace-pre-wrap">
       {{ minerError }}

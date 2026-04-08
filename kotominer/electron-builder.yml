@@ -20,6 +20,9 @@ extraResources:
       - "**/*"
 
 win:
+  # Skip rcedit on the unpacked exe (avoids "Unable to commit changes" from AV/locks/UTF-8 in version strings).
+  # App/window icon still comes from BrowserWindow + NSIS installer branding from build/icon.ico.
+  signAndEditExecutable: false
   target:
     - nsis
   artifactName: ${productName}-Setup-${version}.${ext}

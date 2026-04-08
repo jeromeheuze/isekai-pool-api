@@ -2,7 +2,7 @@
   "name": "kotominer",
   "productName": "Kotominer",
   "version": "0.1.0",
-  "description": "GUI miner for KOTO — by isekai-pool.com",
+  "description": "GUI miner for KOTO - by isekai-pool.com",
   "main": "src/main/index.js",
   "type": "module",
   "author": "isekai-pool.com",
