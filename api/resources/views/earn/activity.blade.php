@@ -9,7 +9,7 @@
          data-has-turnstile="{{ !empty($turnstileSiteKey) ? '1' : '0' }}">
     </div>
     <p class="muted" style="margin-bottom:1rem;"><a href="/earn">← Earn hub</a></p>
-    @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz')
+    @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz' && $slug !== 'daily_bonus')
         <h1>{{ $title }}</h1>
         <p class="muted" style="max-width:40rem;">{{ $intro }}</p>
     @endif
@@ -22,7 +22,7 @@
     </div>
 
     <div class="card">
-        <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">@if ($slug === 'map_explore')Pilgrimage path@elseif ($slug === 'coffee_quiz')Kissaten quiz@else Activity challenge @endif</strong></p>
+        <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">@if ($slug === 'map_explore')Pilgrimage path@elseif ($slug === 'coffee_quiz')Kissaten quiz@elseif ($slug === 'daily_bonus')Daily reward@else Activity challenge @endif</strong></p>
         <div id="activity-container"></div>
         <p id="activity-state" class="muted" style="margin:0.75rem 0 0;font-size:12px;">Complete this activity to unlock claim.</p>
     </div>
@@ -35,7 +35,7 @@
 
     <div id="earn-claim-section" class="card">
         <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">Claim</strong></p>
-        @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz')
+        @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz' && $slug !== 'daily_bonus')
             <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">Activity slug</strong> <code class="muted">{{ $slug }}</code></p>
         @endif
 
@@ -50,9 +50,9 @@
             <p class="muted" style="margin:0 0 0.6rem;font-size:12px;">Turnstile site key is not configured on this environment.</p>
         @endif
 
-        <button type="button" id="claim-btn" class="btn{{ $slug === 'map_explore' ? ' btn-map-claim' : '' }}{{ $slug === 'coffee_quiz' ? ' btn-coffee-claim' : '' }}" disabled style="margin-top:0.8rem;position:relative;z-index:2;{{ ($slug === 'map_explore' || $slug === 'coffee_quiz') ? ' width:100%;' : '' }}">@if ($slug === 'map_explore')Claim 1 KOTO@elseif ($slug === 'coffee_quiz')Claim 0.5 KOTO@else Claim reward @endif</button>
+        <button type="button" id="claim-btn" class="btn{{ $slug === 'map_explore' ? ' btn-map-claim' : '' }}{{ $slug === 'coffee_quiz' ? ' btn-coffee-claim' : '' }}{{ $slug === 'daily_bonus' ? ' btn-daily-claim' : '' }}" disabled style="margin-top:0.8rem;position:relative;z-index:2;{{ ($slug === 'map_explore' || $slug === 'coffee_quiz' || $slug === 'daily_bonus') ? ' width:100%;' : '' }}">@if ($slug === 'map_explore')Claim 1 KOTO@elseif ($slug === 'coffee_quiz')Claim 0.5 KOTO@elseif ($slug === 'daily_bonus')<span style="display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;width:100%;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>Claim 1.5 KOTO</span>@else Claim reward @endif</button>
         <p id="claim-result" class="muted" style="margin:0.8rem 0 0;font-size:12px;">Not ready.</p>
-        @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz')
+        @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz' && $slug !== 'daily_bonus')
             <p class="muted" style="margin:0.5rem 0 0;font-size:12px;">
                 Flow: <code>POST {{ $apiBase }}/faucet/activity-complete</code> then <code>POST {{ $apiBase }}/faucet/claim</code>
             </p>
@@ -566,6 +566,256 @@
         }
         .btn-coffee-claim:disabled {
             background: #3d342c !important;
+            color: #9ca3af !important;
+            opacity: 0.85;
+            cursor: not-allowed;
+        }
+    </style>
+@endif
+@if ($slug === 'daily_bonus')
+    <style>
+        .db-header {
+            margin-bottom: 1.25rem;
+        }
+        .db-header__title-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin: 0 0 0.45rem;
+        }
+        .db-header__title-row h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #fff;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+        }
+        .db-header__sub {
+            margin: 0 0 0.5rem;
+            font-size: 13px;
+            color: #9ca3af;
+            max-width: 36rem;
+            line-height: 1.45;
+        }
+        .db-header__streak {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+        .db-hero {
+            text-align: center;
+            padding: 3rem 1rem;
+            position: relative;
+        }
+        .db-hero__star-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+        }
+        .db-star-hero {
+            width: 64px;
+            height: 64px;
+            animation: db-star-pulse 2s ease-in-out infinite;
+        }
+        @keyframes db-star-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        .db-star-hero.db-star-hero--done {
+            animation: none;
+            transform: scale(1);
+            opacity: 1;
+        }
+        .db-burst {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+        .db-spark {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 6px;
+            height: 6px;
+            margin: -3px 0 0 -3px;
+            background: #f0c040;
+            border-radius: 1px;
+            opacity: 0;
+            transform: rotate(var(--db-r, 0deg)) translateY(0);
+        }
+        .db-hero__star-wrap--burst .db-spark {
+            animation: db-spark-fly 0.65s ease-out forwards;
+        }
+        .db-spark:nth-child(1) { --db-r: 0deg; animation-delay: 0s; }
+        .db-spark:nth-child(2) { --db-r: 60deg; animation-delay: 0.03s; }
+        .db-spark:nth-child(3) { --db-r: 120deg; animation-delay: 0.06s; }
+        .db-spark:nth-child(4) { --db-r: 180deg; animation-delay: 0.09s; }
+        .db-spark:nth-child(5) { --db-r: 240deg; animation-delay: 0.12s; }
+        .db-spark:nth-child(6) { --db-r: 300deg; animation-delay: 0.15s; }
+        @keyframes db-spark-fly {
+            0% {
+                opacity: 1;
+                transform: rotate(var(--db-r, 0deg)) translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: rotate(var(--db-r, 0deg)) translateY(-48px) scale(0.2);
+            }
+        }
+        .db-hero__jp {
+            margin: 0 0 1.25rem;
+            font-size: 13px;
+            color: #5eead4;
+            opacity: 0.85;
+        }
+        .db-hero__jp--done {
+            color: #2dd4bf;
+            font-weight: 600;
+        }
+        .db-btn-checkin {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 10px;
+            background: #7c6af7;
+            color: #fff;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.15s ease;
+        }
+        .db-btn-checkin:hover:not(:disabled) {
+            filter: brightness(1.08);
+        }
+        .db-btn-checkin:disabled {
+            cursor: default;
+        }
+        .db-btn-checkin--done {
+            background: #0d9488 !important;
+            color: #ecfdf5 !important;
+        }
+        .db-week {
+            margin-top: 1.75rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid #1e2030;
+        }
+        .db-week__row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .db-week__cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 36px;
+        }
+        .db-week__dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #1e2030;
+            background: transparent;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .db-week__dot--past {
+            border-color: #7c6af7;
+            background: #7c6af7;
+        }
+        .db-week__dot--past::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            margin: -2px 0 0 -2px;
+            border-radius: 50%;
+            background: #fff;
+        }
+        .db-week__dot--future {
+            border-color: #1e2030;
+            background: #0d0f14;
+        }
+        .db-week__dot--today {
+            border-color: rgba(251, 191, 36, 0.85);
+            background: transparent;
+            animation: db-today-pulse 1.8s ease-in-out infinite;
+        }
+        .db-week__dot--today-checked {
+            border-color: #f0c040;
+            background: #f0c040;
+            animation: none;
+        }
+        .db-week__dot--today-checked::after {
+            display: none;
+        }
+        @keyframes db-today-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.35); }
+            50% { box-shadow: 0 0 0 5px rgba(251, 191, 36, 0); }
+        }
+        .db-week__label {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            color: #6b7280;
+        }
+        .db-reward-card {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            margin-top: 1.25rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            background: rgba(124, 106, 247, 0.1);
+            border: 1px solid rgba(124, 106, 247, 0.35);
+            font-size: 14px;
+            font-weight: 600;
+            color: #c4b5fd;
+            animation: db-reward-in 0.5s ease-out;
+        }
+        .db-reward-card--visible {
+            display: flex;
+        }
+        @keyframes db-reward-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-daily-claim {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            width: 100%;
+            background: #f0c040 !important;
+            color: #0d0f14 !important;
+            font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+            font-weight: 600;
+            border: none;
+        }
+        .btn-daily-claim:hover:not(:disabled) {
+            filter: brightness(1.06);
+            color: #0d0f14 !important;
+        }
+        .btn-daily-claim:disabled {
+            background: #3d3828 !important;
             color: #9ca3af !important;
             opacity: 0.85;
             cursor: not-allowed;
@@ -1091,39 +1341,201 @@
     }
 
     function renderDailyBonus() {
+        var STREAK_KEY = 'isekai_daily_bonus_streak_v1';
+        function pad2(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+        function ymd(d) {
+            return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+        }
+        function readStreak() {
+            try {
+                var raw = localStorage.getItem(STREAK_KEY);
+                var o = raw ? JSON.parse(raw) : null;
+                return o && typeof o === 'object' ? o : { lastYmd: '', count: 0 };
+            } catch (e) {
+                return { lastYmd: '', count: 0 };
+            }
+        }
+        function bumpStreak() {
+            var t = readStreak();
+            var today = ymd(new Date());
+            var y = new Date();
+            y.setDate(y.getDate() - 1);
+            var yesterday = ymd(y);
+            var count = 1;
+            if (t.lastYmd === today) {
+                count = t.count || 1;
+            } else if (t.lastYmd === yesterday) {
+                count = (t.count || 0) + 1;
+            }
+            try {
+                localStorage.setItem(STREAK_KEY, JSON.stringify({ lastYmd: today, count: count }));
+            } catch (e) {}
+            return count;
+        }
+
+        var ICON_STAR_HDR = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.03a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" stroke="#f0c040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_FLAME = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_STAR_OUT = '<svg class="db-star-hero" id="db-hero-star" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.03a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" stroke="#f0c040" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_STAR_FILL = '<svg class="db-star-hero db-star-hero--done" id="db-hero-star" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.03a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" fill="#f0c040" stroke="#f0c040" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_ZAP = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_CHECK_BTN = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_GIFT = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1" stroke="#a78bfa" stroke-width="2"/><path d="M12 8v13" stroke="#a78bfa" stroke-width="2"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" stroke="#a78bfa" stroke-width="2"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 4.8 0 0 1 12 8a4.8 4.8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" stroke="#a78bfa" stroke-width="2"/></svg>';
+
+        function weekRowHtml(checkedIn) {
+            var labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            var mondayOffset = (new Date().getDay() + 6) % 7;
+            var html = '<div class="db-week" id="db-week-root"><div class="db-week__row">';
+            for (var i = 0; i < 7; i++) {
+                var cls = 'db-week__dot';
+                if (i < mondayOffset) cls += ' db-week__dot--past';
+                else if (i > mondayOffset) cls += ' db-week__dot--future';
+                else cls += checkedIn ? ' db-week__dot--today-checked' : ' db-week__dot--today';
+                html += '<div class="db-week__cell"><div class="' + cls + '"></div><span class="db-week__label">' + labels[i] + '</span></div>';
+            }
+            html += '</div></div>';
+            return html;
+        }
+
         var host = el('activity-container');
         if (!host) return;
-        host.innerHTML =
-            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Click to check in for today. Faucet cooldown/caps still apply server-side.</p>' +
-            '<button id="daily-check-in" class="btn btn-ghost">Check in</button>' +
-            '<p id="daily-state" class="muted" style="margin:0.7rem 0 0;font-size:12px;">Not checked in.</p>';
+
+        var streak = readStreak();
+        var todayYmd = ymd(new Date());
+        var yest = new Date();
+        yest.setDate(yest.getDate() - 1);
+        var yesterdayYmd = ymd(yest);
+        var streakN = streak.count || 0;
+        var showStreakHdr = streakN >= 1 && streak.lastYmd && (streak.lastYmd === todayYmd || streak.lastYmd === yesterdayYmd);
+
+        var streakLine = '';
+        if (showStreakHdr) {
+            streakLine =
+                '<p class="db-header__streak" id="db-streak-line">' +
+                ICON_FLAME +
+                '<span id="db-streak-text">' +
+                streakN +
+                ' day streak</span></p>';
+        }
+
+        var html = '';
+        html += '<div class="db-daily-root">';
+        html += '<div class="db-header">';
+        html += '<div class="db-header__title-row">' + ICON_STAR_HDR + '<h2>Daily Bonus</h2></div>';
+        html += '<p class="db-header__sub">One quick check-in per day — show up and earn</p>';
+        html += streakLine;
+        html += '</div>';
+
+        html += '<div class="db-hero">';
+        html += '<div class="db-hero__star-wrap" id="db-star-wrap">';
+        html += '<div class="db-burst" id="db-burst" style="display:none;">';
+        for (var sp = 0; sp < 6; sp++) {
+            html += '<span class="db-spark"></span>';
+        }
+        html += '</div>';
+        html += ICON_STAR_OUT;
+        html += '</div>';
+        html += '<p class="db-hero__jp" id="db-hero-jp">今日のボーナス</p>';
+        html +=
+            '<button type="button" class="db-btn-checkin" id="daily-check-in">' +
+            ICON_ZAP +
+            ' Check in</button>';
+        html += '</div>';
+
+        html += weekRowHtml(false);
+
+        html +=
+            '<div class="db-reward-card" id="db-reward-card">' +
+            ICON_GIFT +
+            '<span>1.5 KOTO reward ready to claim</span></div>';
+
+        html += '<p id="daily-state" class="muted" style="margin:0.85rem 0 0;font-size:12px;text-align:center;"></p>';
+        html += '</div>';
+
+        host.innerHTML = html;
+
         var btn = el('daily-check-in');
         var state = el('daily-state');
-        if (!btn || !state) return;
+        var starWrap = el('db-star-wrap');
+        var burst = el('db-burst');
+        var heroJp = el('db-hero-jp');
+        var rewardCard = el('db-reward-card');
+        if (!btn) return;
+
+        function applyCheckedInUi(sessionId) {
+            var newN = bumpStreak();
+            var stEl = el('db-streak-line');
+            var stText = el('db-streak-text');
+            if (!stEl) {
+                var hdr = host.querySelector('.db-header');
+                if (hdr) {
+                    hdr.insertAdjacentHTML(
+                        'beforeend',
+                        '<p class="db-header__streak" id="db-streak-line">' +
+                            ICON_FLAME +
+                            '<span id="db-streak-text">' +
+                            newN +
+                            ' day streak</span></p>'
+                    );
+                }
+            } else if (stText) {
+                stText.textContent = newN + ' day streak';
+            }
+            var starEl = el('db-hero-star');
+            if (starEl) {
+                starEl.outerHTML = ICON_STAR_FILL;
+            }
+            if (starWrap) starWrap.classList.add('db-hero__star-wrap--burst');
+            if (burst) burst.style.display = '';
+            if (heroJp) {
+                heroJp.textContent = 'チェックイン完了';
+                heroJp.classList.add('db-hero__jp--done');
+            }
+            btn.classList.add('db-btn-checkin--done');
+            btn.disabled = true;
+            btn.innerHTML = ICON_CHECK_BTN + ' Checked in';
+            if (rewardCard) rewardCard.classList.add('db-reward-card--visible');
+            var wk = el('db-week-root');
+            if (wk) wk.outerHTML = weekRowHtml(true);
+            setActivityDone(true, 'Daily bonus unlocked. You can claim now.', { session_id: sessionId });
+        }
+
         btn.addEventListener('click', function () {
             btn.disabled = true;
-            state.textContent = 'Starting check-in...';
+            if (state) state.textContent = 'Starting check-in...';
             fetch(API + '/faucet/activity-session', {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                 body: JSON.stringify({ activity_slug: 'daily_bonus' })
-            }).then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+            })
+                .then(function (r) {
+                    return r.json().then(function (data) {
+                        return { ok: r.ok, data: data };
+                    });
+                })
                 .then(function (res) {
                     if (!res.ok || !res.data.session_id) {
-                        state.textContent = 'Could not start check-in.';
+                        if (state) state.textContent = 'Could not start check-in.';
                         btn.disabled = false;
+                        btn.innerHTML = ICON_ZAP + ' Check in';
                         return;
                     }
                     var sessionId = res.data.session_id;
                     setTimeout(function () {
-                        state.textContent = 'Checked in.';
-                        setActivityDone(true, 'Daily bonus unlocked. You can claim now.', { session_id: sessionId });
+                        if (state) state.textContent = '';
+                        applyCheckedInUi(sessionId);
                     }, 1100);
-                }).catch(function () {
-                    state.textContent = 'Network error.';
+                })
+                .catch(function () {
+                    if (state) state.textContent = 'Network error.';
                     btn.disabled = false;
+                    btn.innerHTML = ICON_ZAP + ' Check in';
                 });
         });
+
+        var actLine = el('activity-state');
+        if (actLine) actLine.textContent = 'Tap check-in to unlock today’s bonus.';
     }
 
     function renderActivity() {
