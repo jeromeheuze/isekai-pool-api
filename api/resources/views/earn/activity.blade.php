@@ -50,7 +50,7 @@
             <p class="muted" style="margin:0 0 0.6rem;font-size:12px;">Turnstile site key is not configured on this environment.</p>
         @endif
 
-        <button id="claim-btn" class="btn{{ $slug === 'map_explore' ? ' btn-map-claim' : '' }}{{ $slug === 'coffee_quiz' ? ' btn-coffee-claim' : '' }}" disabled style="margin-top:0.8rem;{{ ($slug === 'map_explore' || $slug === 'coffee_quiz') ? ' width:100%;' : '' }}">@if ($slug === 'map_explore')Claim 1 KOTO@elseif ($slug === 'coffee_quiz')Claim 0.5 KOTO@else Claim reward @endif</button>
+        <button type="button" id="claim-btn" class="btn{{ $slug === 'map_explore' ? ' btn-map-claim' : '' }}{{ $slug === 'coffee_quiz' ? ' btn-coffee-claim' : '' }}" disabled style="margin-top:0.8rem;position:relative;z-index:2;{{ ($slug === 'map_explore' || $slug === 'coffee_quiz') ? ' width:100%;' : '' }}">@if ($slug === 'map_explore')Claim 1 KOTO@elseif ($slug === 'coffee_quiz')Claim 0.5 KOTO@else Claim reward @endif</button>
         <p id="claim-result" class="muted" style="margin:0.8rem 0 0;font-size:12px;">Not ready.</p>
         @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz')
             <p class="muted" style="margin:0.5rem 0 0;font-size:12px;">
@@ -61,9 +61,6 @@
 @endsection
 
 @push('head')
-@if (!empty($turnstileSiteKey))
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-@endif
 @if ($slug === 'map_explore')
     <style>
         .map-explore-header {
@@ -326,7 +323,9 @@
             color: #0d0f14 !important;
         }
         .btn-map-claim:disabled {
-            opacity: 0.45;
+            background: #2d2f38 !important;
+            color: #9ca3af !important;
+            opacity: 0.85;
             cursor: not-allowed;
         }
     </style>
@@ -566,7 +565,9 @@
             color: #0d0f14 !important;
         }
         .btn-coffee-claim:disabled {
-            opacity: 0.45;
+            background: #3d342c !important;
+            color: #9ca3af !important;
+            opacity: 0.85;
             cursor: not-allowed;
         }
     </style>
@@ -1322,4 +1323,8 @@
     });
 })();
 </script>
+@if (!empty($turnstileSiteKey))
+{{-- Load after earn script so window.onEarnTurnstile exists before Turnstile initializes (avoids race with async head). --}}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+@endif
 @endpush
