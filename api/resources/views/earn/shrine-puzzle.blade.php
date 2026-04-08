@@ -322,7 +322,6 @@
 @push('scripts')
 <script>
 (function () {
-    // TODO: add drag-and-drop later; ↑/↓ reorder only for now.
     var EXPLORER_TX = @json($explorerTxBase);
     var cfg = document.getElementById('earn-activity-config');
     var API = cfg ? (cfg.getAttribute('data-api-base') || '') : '';
@@ -477,6 +476,45 @@
         if (failCard) failCard.setAttribute('hidden', 'hidden');
     }
 
+    function bindDragReorder(list) {
+        var dragged = null;
+        var cards = list.querySelectorAll('.sp-step-card');
+        for (var c = 0; c < cards.length; c++) {
+            (function (card) {
+                card.setAttribute('draggable', 'true');
+                card.addEventListener('dragstart', function (e) {
+                    dragged = card;
+                    card.classList.add('sp-step-card--dragging');
+                    try {
+                        e.dataTransfer.setData('text/plain', card.dataset.step || '');
+                    } catch (err) {}
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                card.addEventListener('dragend', function () {
+                    card.classList.remove('sp-step-card--dragging');
+                    dragged = null;
+                });
+                card.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                });
+                card.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    if (!dragged || dragged === card || !list.contains(dragged)) return;
+                    var rect = card.getBoundingClientRect();
+                    var mid = rect.top + rect.height / 2;
+                    if (e.clientY < mid) {
+                        list.insertBefore(dragged, card);
+                    } else {
+                        list.insertBefore(dragged, card.nextSibling);
+                    }
+                    refreshBadges(list);
+                    clearStepFeedback(list);
+                });
+            })(cards[c]);
+        }
+    }
+
     function initShrinePuzzle() {
         var list = el('puzzle-list');
         var verify = el('verify-puzzle');
@@ -515,6 +553,7 @@
             var up = document.createElement('button');
             up.type = 'button';
             up.className = 'sp-step-card__btn';
+            up.setAttribute('draggable', 'false');
             up.setAttribute('aria-label', 'Move step up');
             up.innerHTML = CHEV_UP;
             up.addEventListener('click', function () {
@@ -526,6 +565,7 @@
             var down = document.createElement('button');
             down.type = 'button';
             down.className = 'sp-step-card__btn';
+            down.setAttribute('draggable', 'false');
             down.setAttribute('aria-label', 'Move step down');
             down.innerHTML = CHEV_DN;
             down.addEventListener('click', function () {
@@ -545,6 +585,7 @@
         });
 
         refreshBadges(list);
+        bindDragReorder(list);
 
         verify.addEventListener('click', function () {
             var items = Array.prototype.map.call(list.querySelectorAll('li'), function (item) {
