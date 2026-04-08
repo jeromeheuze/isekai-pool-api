@@ -135,13 +135,13 @@ class EarnController extends Controller
     }
 
     /**
-     * Decorative CRT-style tags per question (visual only).
+     * Decorative watermark text per question (visual only; matches console/game theme).
      *
      * @return array<int, string>
      */
     private function retroQuizWatermarks(): array
     {
-        return ['FC', '16-BIT', 'SMB', 'TG16', 'ARCADE'];
+        return ['ファミコン', 'メガドライブ', 'マリオ', 'PCエンジン', 'ストリートファイター'];
     }
 
     public function retro(): View

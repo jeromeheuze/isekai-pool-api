@@ -26,7 +26,7 @@
             <h1 class="rt-header__title">Retro Game Trivia</h1>
             <span id="rt-q-pill" class="rt-q-pill">Q 1 / 5</span>
         </div>
-        <p class="rt-header__sub muted">Classic JP retro trivia — score 4/5 or better</p>
+        <p class="rt-header__sub muted">Classic JP retro trivia — score 4/5 or better to unlock claim</p>
         <div class="rt-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="rt-progress-bar">
             <div id="rt-progress-fill" class="rt-progress-fill"></div>
         </div>
@@ -42,12 +42,16 @@
 
         <div id="rt-pass-banner" class="rt-pass-banner" aria-hidden="true">
             <span class="rt-pass-banner__icon" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <path d="m9 11 3 3L22 4"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f0c040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
                 </svg>
             </span>
-            <p class="rt-pass-banner__text">HIGH SCORE — claim your reward below.</p>
+            <p class="rt-pass-banner__text">Insert coin — claim your reward below.</p>
         </div>
 
         <div id="rt-quiz-root">
@@ -59,18 +63,13 @@
                 @endforeach
             </div>
 
-            <div id="rt-cabinet" class="rt-cabinet">
-                <div class="rt-cabinet__label muted">PLAYER 1</div>
-                <div class="rt-screen">
-                    <div class="rt-scanlines" aria-hidden="true"></div>
-                    <div id="rt-step-wrap">
-                        <div class="rt-q-card">
-                            <span class="rt-q-card__watermark" id="rt-watermark" aria-hidden="true">FC</span>
-                            <p id="rt-q-text" class="rt-q-text"></p>
-                            <div id="rt-options" class="rt-options"></div>
-                            <button type="button" id="rt-next-btn" class="rt-next-btn" disabled>Next →</button>
-                        </div>
-                    </div>
+            <div id="rt-step-wrap">
+                <div class="rt-q-card">
+                    <div class="rt-q-card__crt" aria-hidden="true"></div>
+                    <span class="rt-q-card__watermark" id="rt-watermark" aria-hidden="true">ファミコン</span>
+                    <p id="rt-q-text" class="rt-q-text"></p>
+                    <div id="rt-options" class="rt-options"></div>
+                    <button type="button" id="rt-next-btn" class="rt-next-btn" disabled>Next →</button>
                 </div>
             </div>
 
@@ -80,15 +79,26 @@
 
                 <div id="rt-summary-pass-msg" class="rt-summary-msg rt-summary-msg--pass" hidden>
                     <span class="rt-summary-msg__icon" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f0c040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                            <path d="M4 22h16"/>
+                            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                        </svg>
                     </span>
-                    <span>Arcade knowledge confirmed</span>
+                    <span>Insert coin — reward unlocked</span>
                 </div>
                 <div id="rt-summary-fail-msg" class="rt-summary-msg rt-summary-msg--fail" hidden>
                     <span class="rt-summary-msg__icon" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="m15 9-6 6"/>
+                            <path d="m9 9 6 6"/>
+                        </svg>
                     </span>
-                    <span>Not quite — try again tomorrow</span>
+                    <span>Game over — try again tomorrow</span>
                 </div>
 
                 <button type="button" id="rt-submit-btn" class="rt-submit-btn">Submit answers</button>
@@ -98,11 +108,15 @@
 
         <div id="rt-fail-panel" class="rt-fail-panel" hidden>
             <div class="rt-fail-panel__icon" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m15 9-6 6"/>
+                    <path d="m9 9 6 6"/>
+                </svg>
             </div>
             <div>
-                <p class="rt-fail-panel__title">GAME OVER</p>
-                <p class="rt-fail-panel__body muted">Continue? You need 4/5 — try again tomorrow.</p>
+                <p class="rt-fail-panel__title">Game over</p>
+                <p class="rt-fail-panel__body muted">You need 4/5 — try again tomorrow.</p>
                 <p id="rt-fail-cooldown" class="rt-fail-panel__cooldown muted"></p>
             </div>
         </div>
@@ -160,11 +174,11 @@
         margin: 0;
         font-size: 1.5rem;
         font-weight: 700;
-        font-family: inherit;
+        font-family: ui-monospace, 'JetBrains Mono', monospace;
         flex: 1;
         min-width: 0;
         color: #fde8dc;
-        text-shadow: 0 0 24px rgba(216, 90, 48, 0.45), 0 0 48px rgba(232, 148, 58, 0.15);
+        text-shadow: 0 0 20px rgba(216, 90, 48, 0.35);
     }
     .rt-q-pill {
         font-size: 11px;
@@ -188,9 +202,8 @@
         height: 100%;
         width: 0%;
         border-radius: 2px;
-        background: linear-gradient(90deg, #D85A30 0%, #e8943a 55%, #f0b85a 100%);
+        background: #D85A30;
         transition: width 0.35s ease;
-        box-shadow: 0 0 10px rgba(216, 90, 48, 0.45);
     }
 
     .rt-wallet-wrap { margin-bottom: 1.25rem; }
@@ -210,7 +223,13 @@
         white-space: nowrap;
     }
 
-    .rt-challenge { margin-bottom: 1rem; overflow: hidden; border-color: #2a2118; background: linear-gradient(165deg, #141210 0%, #0d0c0a 100%); }
+    .rt-challenge {
+        margin-bottom: 1rem;
+        overflow: hidden;
+        border-color: #1e2330;
+        background: var(--card);
+        box-shadow: inset 0 0 0 1px rgba(216, 90, 48, 0.06), 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
 
     .rt-pass-banner {
         display: flex;
@@ -234,55 +253,33 @@
         padding: 1rem 1.1rem;
         border-color: rgba(232, 148, 58, 0.45);
     }
-    .rt-pass-banner__icon { flex-shrink: 0; color: #e8943a; }
+    .rt-pass-banner__icon { flex-shrink: 0; display: flex; align-items: center; }
     .rt-pass-banner__text { margin: 0; font-size: 15px; font-weight: 700; color: #fff7ed; letter-spacing: 0.02em; }
-
-    .rt-cabinet { margin-bottom: 0.5rem; }
-    .rt-cabinet__label {
-        font-size: 10px;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        margin-bottom: 0.4rem;
-        color: #a89a8a;
-    }
-    .rt-screen {
-        position: relative;
-        border-radius: 6px;
-        border: 3px solid #2a1810;
-        background: #0c0b09;
-        box-shadow:
-            inset 0 0 60px rgba(216, 90, 48, 0.06),
-            0 4px 24px rgba(0, 0, 0, 0.6),
-            0 0 0 1px rgba(232, 148, 58, 0.12);
-        overflow: hidden;
-    }
-    .rt-scanlines {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        z-index: 3;
-        background: repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.13) 2px,
-            rgba(0, 0, 0, 0.13) 4px
-        );
-        opacity: 0.65;
-    }
-    .rt-screen::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        z-index: 2;
-        background: radial-gradient(ellipse 80% 50% at 50% 40%, rgba(216, 90, 48, 0.07) 0%, transparent 55%);
-    }
 
     .rt-q-card {
         position: relative;
         padding: 1.5rem;
+        overflow: hidden;
+        border-radius: 8px;
+        border: 1px solid #1e2030;
+        border-left: 3px solid #D85A30;
+        background: #111318;
+        z-index: 0;
+    }
+    .rt-q-card__crt {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
         z-index: 1;
+        border-radius: 8px;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.11) 2px,
+            rgba(0, 0, 0, 0.11) 4px
+        );
+        opacity: 0.4;
     }
     .rt-q-card__watermark {
         position: absolute;
@@ -290,24 +287,25 @@
         bottom: 0;
         font-size: 80px;
         line-height: 1;
-        font-weight: 800;
-        color: rgba(216, 90, 48, 0.06);
-        font-family: inherit;
-        letter-spacing: -0.05em;
+        font-weight: 700;
+        color: rgba(216, 90, 48, 0.05);
+        font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', ui-sans-serif, sans-serif;
+        letter-spacing: -0.02em;
         pointer-events: none;
         user-select: none;
+        z-index: 0;
     }
     .rt-q-text {
         position: relative;
         margin: 0 0 1.1rem;
         font-size: 15px;
-        color: #fff8f0;
+        color: #fff;
         font-family: inherit;
         line-height: 1.45;
         max-width: 100%;
-        text-shadow: 0 0 1px rgba(216, 90, 48, 0.25);
+        z-index: 2;
     }
-    .rt-options { margin-bottom: 1rem; }
+    .rt-options { position: relative; z-index: 2; margin-bottom: 1rem; }
     .rt-opt {
         display: flex;
         align-items: center;
@@ -318,22 +316,21 @@
         text-align: left;
         font-family: inherit;
         font-size: 13px;
-        color: #9a8f88;
+        color: #888;
         cursor: pointer;
-        border: 1px solid #2a2420;
+        border: 1px solid #1e2030;
         border-radius: 6px;
-        background: #0d0b09;
-        transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        background: #0d0f14;
+        transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
     .rt-opt:hover {
-        border-color: rgba(216, 90, 48, 0.55);
-        color: #fff8f0;
+        border-color: rgba(216, 90, 48, 0.5);
+        color: #fff;
     }
     .rt-opt.is-selected {
         border-color: #D85A30;
-        background: rgba(40, 18, 10, 0.85);
-        color: #fff8f0;
-        box-shadow: inset 3px 0 0 0 #e8943a;
+        background: #1a0e0a;
+        color: #fff;
     }
     .rt-opt__dot {
         flex-shrink: 0;
@@ -345,27 +342,30 @@
     .rt-opt.is-selected .rt-opt__dot { opacity: 1; }
     .rt-opt__label { flex: 1; min-width: 0; }
     .rt-next-btn {
+        position: relative;
+        z-index: 2;
         display: block;
         width: 100%;
         margin-top: 0.25rem;
         padding: 0.6rem 1rem;
         border-radius: 6px;
-        border: 1px solid #c44d28;
-        background: linear-gradient(180deg, rgba(216, 90, 48, 0.25) 0%, rgba(80, 32, 16, 0.6) 100%);
-        color: #ffd8b8;
+        border: 1px solid #D85A30;
+        background: #2a1810;
+        color: #a89a90;
         font-family: inherit;
         font-size: 13px;
         font-weight: 700;
         cursor: pointer;
         letter-spacing: 0.04em;
-        transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-        box-shadow: 0 0 16px rgba(216, 90, 48, 0.15);
+        transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
     }
-    .rt-next-btn:hover:not(:disabled) {
-        background: linear-gradient(180deg, rgba(232, 148, 58, 0.3) 0%, rgba(100, 40, 20, 0.7) 100%);
+    .rt-next-btn:not(:disabled) {
+        background: #D85A30;
         color: #fff;
+        border-color: #D85A30;
     }
-    .rt-next-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+    .rt-next-btn:hover:not(:disabled) { filter: brightness(1.06); }
+    .rt-next-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .rt-summary { text-align: center; padding: 0.75rem 0 0; }
     .rt-summary__label { margin: 0 0 0.35rem; font-size: 12px; }
@@ -373,11 +373,11 @@
         margin: 0 0 1rem;
         font-size: 48px;
         font-weight: 700;
-        color: #f0c040;
-        font-family: inherit;
+        font-family: ui-monospace, 'JetBrains Mono', monospace;
         line-height: 1.1;
-        text-shadow: 0 0 24px rgba(240, 192, 64, 0.35);
     }
+    .rt-summary__score--pass { color: #f0c040; text-shadow: 0 0 20px rgba(240, 192, 64, 0.25); }
+    .rt-summary__score--fail { color: #D85A30; text-shadow: none; }
     .rt-summary-msg {
         display: flex;
         align-items: center;
@@ -387,8 +387,8 @@
         font-size: 14px;
         font-weight: 600;
     }
-    .rt-summary-msg--pass { color: #fb923c; }
-    .rt-summary-msg--fail { color: #fcd34d; }
+    .rt-summary-msg--pass { color: #fde68a; }
+    .rt-summary-msg--fail { color: #fca5a5; }
     .rt-summary-msg__icon { display: flex; flex-shrink: 0; }
     .rt-submit-btn {
         width: 100%;
@@ -450,17 +450,17 @@
         padding: 0.7rem 1rem;
         border-radius: 8px;
         border: none;
-        background: linear-gradient(180deg, #D85A30 0%, #b84520 100%);
+        background: #D85A30;
         color: #fff8f0;
-        font-family: inherit;
+        font-family: ui-monospace, 'JetBrains Mono', monospace;
         font-size: 14px;
         font-weight: 700;
         cursor: pointer;
         letter-spacing: 0.03em;
         transition: filter 0.15s ease, opacity 0.15s ease;
-        box-shadow: 0 4px 16px rgba(216, 90, 48, 0.35);
+        box-shadow: 0 4px 16px rgba(216, 90, 48, 0.3);
     }
-    .rt-claim-btn:hover:not(:disabled) { filter: brightness(1.08); }
+    .rt-claim-btn:hover:not(:disabled) { filter: brightness(1.07); }
     .rt-claim-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
     .rt-claim-result { margin: 0.85rem 0 0; min-height: 1.25rem; }
     .rt-tx-wrap a { color: #fb923c; word-break: break-all; }
@@ -687,9 +687,8 @@
     function showStep() {
         var stepWrap = el('rt-step-wrap');
         var summary = el('rt-summary');
-        var cabinet = el('rt-cabinet');
         if (summary) summary.setAttribute('hidden', 'hidden');
-        if (cabinet) cabinet.removeAttribute('hidden');
+        if (stepWrap) stepWrap.removeAttribute('hidden');
 
         var q = questions[currentIdx];
         var wm = el('rt-watermark');
@@ -711,15 +710,20 @@
     }
 
     function showSummary() {
-        var cabinet = el('rt-cabinet');
+        var stepWrap = el('rt-step-wrap');
         var summary = el('rt-summary');
         var scoreEl = el('rt-summary-score');
         var passMsg = el('rt-summary-pass-msg');
         var failMsg = el('rt-summary-fail-msg');
-        if (cabinet) cabinet.setAttribute('hidden', 'hidden');
+        if (stepWrap) stepWrap.setAttribute('hidden', 'hidden');
         if (summary) summary.removeAttribute('hidden');
         var sc = computeScore();
-        if (scoreEl) scoreEl.textContent = sc + ' / ' + questions.length;
+        if (scoreEl) {
+            scoreEl.textContent = sc + ' / ' + questions.length;
+            scoreEl.classList.remove('rt-summary__score--pass', 'rt-summary__score--fail');
+            if (sc >= passScore) scoreEl.classList.add('rt-summary__score--pass');
+            else scoreEl.classList.add('rt-summary__score--fail');
+        }
         if (passMsg && failMsg) {
             if (sc >= passScore) {
                 passMsg.removeAttribute('hidden');
