@@ -44,9 +44,10 @@ resources/
 
 Electron detects `process.platform` + `process.arch` and uses the correct binary automatically.
 
-Source binaries from:
-- `github.com/crypto-jeronimo/cpuminer-koto` releases (optimized)
-- Fall back to `github.com/KotoDevelopers/cpuminer-yescrypt` if needed
+**Source binaries (ship as `cpuminer-koto` / `cpuminer-koto.exe` in `resources/`):**
+
+1. **Official — [KotoDevelopers/cpuminer-yescrypt releases](https://github.com/KotoDevelopers/cpuminer-yescrypt/releases)** — download the Windows x64 zip (e.g. `KotoMiner_Win_x64.zip` on some tags), extract the miner, **rename** to `cpuminer-koto.exe` if the release uses `minerd.exe` or another name.
+2. **Optional — [crypto-jeronimo/cpuminer-koto](https://github.com/crypto-jeronimo/cpuminer-koto)** — optimized builds; align filename with Kotominer’s expected name.
 
 ---
 
@@ -565,6 +566,7 @@ Subtle particle/firefly animation on splash screen only (not while mining — pe
 
 ## Notes for Cursor
 
+- **Scaffold in repo:** `kotominer/` at the workspace root (Electron main + Vue/Vite renderer + `miner-restore` hook). Run `npm install` and `npm run dev` inside that folder.
 - Primary dev target is Windows x64 (Alienware Aurora R16, i9-14900F, 24 cores)
 - Use Electron 28+ with contextIsolation enabled
 - IPC between main/renderer via ipcMain/ipcRenderer with preload script
