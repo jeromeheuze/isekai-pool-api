@@ -9,7 +9,7 @@
          data-has-turnstile="{{ !empty($turnstileSiteKey) ? '1' : '0' }}">
     </div>
     <p class="muted" style="margin-bottom:1rem;"><a href="/earn">← Earn hub</a></p>
-    @if ($slug !== 'map_explore')
+    @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz')
         <h1>{{ $title }}</h1>
         <p class="muted" style="max-width:40rem;">{{ $intro }}</p>
     @endif
@@ -22,7 +22,7 @@
     </div>
 
     <div class="card">
-        <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">{{ $slug === 'map_explore' ? 'Pilgrimage path' : 'Activity challenge' }}</strong></p>
+        <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">@if ($slug === 'map_explore')Pilgrimage path@elseif ($slug === 'coffee_quiz')Kissaten quiz@else Activity challenge @endif</strong></p>
         <div id="activity-container"></div>
         <p id="activity-state" class="muted" style="margin:0.75rem 0 0;font-size:12px;">Complete this activity to unlock claim.</p>
     </div>
@@ -35,7 +35,7 @@
 
     <div id="earn-claim-section" class="card">
         <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">Claim</strong></p>
-        @if ($slug !== 'map_explore')
+        @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz')
             <p style="margin:0 0 0.75rem;"><strong style="color:#fff;">Activity slug</strong> <code class="muted">{{ $slug }}</code></p>
         @endif
 
@@ -50,9 +50,9 @@
             <p class="muted" style="margin:0 0 0.6rem;font-size:12px;">Turnstile site key is not configured on this environment.</p>
         @endif
 
-        <button id="claim-btn" class="btn{{ $slug === 'map_explore' ? ' btn-map-claim' : '' }}" disabled style="margin-top:0.8rem;{{ $slug === 'map_explore' ? ' width:100%;' : '' }}">{{ $slug === 'map_explore' ? 'Claim 1 KOTO' : 'Claim reward' }}</button>
+        <button id="claim-btn" class="btn{{ $slug === 'map_explore' ? ' btn-map-claim' : '' }}{{ $slug === 'coffee_quiz' ? ' btn-coffee-claim' : '' }}" disabled style="margin-top:0.8rem;{{ ($slug === 'map_explore' || $slug === 'coffee_quiz') ? ' width:100%;' : '' }}">@if ($slug === 'map_explore')Claim 1 KOTO@elseif ($slug === 'coffee_quiz')Claim 0.5 KOTO@else Claim reward @endif</button>
         <p id="claim-result" class="muted" style="margin:0.8rem 0 0;font-size:12px;">Not ready.</p>
-        @if ($slug !== 'map_explore')
+        @if ($slug !== 'map_explore' && $slug !== 'coffee_quiz')
             <p class="muted" style="margin:0.5rem 0 0;font-size:12px;">
                 Flow: <code>POST {{ $apiBase }}/faucet/activity-complete</code> then <code>POST {{ $apiBase }}/faucet/claim</code>
             </p>
@@ -331,6 +331,246 @@
         }
     </style>
 @endif
+@if ($slug === 'coffee_quiz')
+    <style>
+        .coffee-quiz { max-width: 40rem; }
+        .coffee-quiz-header { margin-bottom: 1.15rem; }
+        .coffee-quiz-header__title-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin: 0 0 0.45rem;
+        }
+        .coffee-quiz-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #fff;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+        }
+        .coffee-quiz-sub {
+            margin: 0 0 0.85rem;
+            font-size: 13px;
+            color: #a8a29e;
+            line-height: 1.45;
+            max-width: 36rem;
+        }
+        .coffee-quiz-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .coffee-quiz-progress-track {
+            flex: 1;
+            min-width: 120px;
+            height: 3px;
+            border-radius: 2px;
+            background: #1e2030;
+            overflow: hidden;
+        }
+        .coffee-quiz-progress-fill {
+            height: 100%;
+            width: 20%;
+            background: #c8956c;
+            border-radius: 2px;
+            transition: width 0.35s ease;
+        }
+        .coffee-quiz-pill {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            border: 1px solid rgba(200, 149, 108, 0.55);
+            color: #d6b89a;
+            background: rgba(200, 149, 108, 0.06);
+        }
+        .coffee-q-card {
+            position: relative;
+            overflow: hidden;
+            background: #111318;
+            border: 1px solid #1e2030;
+            border-left: 3px solid #c8956c;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        .coffee-q-watermark {
+            position: absolute;
+            right: -0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 80px;
+            font-weight: 700;
+            line-height: 1;
+            color: #c8956c;
+            opacity: 0.06;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .coffee-q-text {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 1.1rem;
+            font-size: 15px;
+            font-weight: 600;
+            color: #f3f4f6;
+            line-height: 1.45;
+            padding-right: 2rem;
+        }
+        .coffee-q-options {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .coffee-sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        .coffee-opt {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.65rem 1rem;
+            border-radius: 999px;
+            border: 1px solid #1e2030;
+            background: #0d0f14;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .coffee-opt:hover {
+            border-color: rgba(200, 149, 108, 0.5);
+        }
+        .coffee-opt--selected {
+            border-color: #c8956c;
+            background: #1a1208;
+            color: #fff;
+        }
+        .coffee-opt__dot {
+            display: none;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+        }
+        .coffee-opt--selected .coffee-opt__dot {
+            display: flex;
+        }
+        .coffee-opt__icon {
+            display: block;
+        }
+        .coffee-opt__label {
+            font-size: 13px;
+            color: #d1d5db;
+        }
+        .coffee-opt--selected .coffee-opt__label {
+            color: #fff;
+        }
+        .coffee-btn-next {
+            margin-top: 1.25rem;
+            width: 100%;
+            padding: 0.55rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: #c8956c;
+            color: #0d0f14;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.15s ease, opacity 0.15s ease;
+        }
+        .coffee-btn-next:hover:not(:disabled) {
+            filter: brightness(1.06);
+        }
+        .coffee-btn-next:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .coffee-quiz-results { margin-top: 0.5rem; }
+        .coffee-results-head {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.65rem;
+            padding: 1rem 0 1.25rem;
+        }
+        .coffee-results-head__score {
+            font-size: 1.75rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+        }
+        .coffee-results-head__score--pass { color: #f0c040; }
+        .coffee-results-head__score--fail { color: #c8956c; }
+        .coffee-results-head__msg {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            max-width: 22rem;
+            line-height: 1.45;
+        }
+        .coffee-results-head__msg--pass { color: #e7e5e4; }
+        .coffee-results-head__msg--fail { color: #a8a29e; }
+        .coffee-results-banner {
+            width: 100%;
+            margin-top: 0.25rem;
+            padding: 1rem 1.15rem;
+            border-radius: 8px;
+            background: #1a1208;
+            border: 1px solid rgba(200, 149, 108, 0.45);
+            text-align: center;
+            font-size: 13px;
+            color: #d6b89a;
+            animation: coffee-banner-in 0.65s ease-out;
+        }
+        @keyframes coffee-banner-in {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .coffee-results-fail-box {
+            margin-top: 0.75rem;
+            padding: 0.9rem 1rem;
+            border-radius: 8px;
+            background: rgba(180, 83, 9, 0.08);
+            border: 1px solid rgba(217, 119, 6, 0.28);
+        }
+        .coffee-results-fail-box p {
+            margin: 0;
+            font-size: 12px;
+            color: #d6b89a;
+            line-height: 1.5;
+        }
+        .coffee-results-fail-box p + p {
+            margin-top: 0.45rem;
+        }
+        .btn-coffee-claim {
+            width: 100%;
+            background: #c8956c !important;
+            color: #0d0f14 !important;
+            font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+            font-weight: 600;
+            border: none;
+        }
+        .btn-coffee-claim:hover:not(:disabled) {
+            filter: brightness(1.06);
+            color: #0d0f14 !important;
+        }
+        .btn-coffee-claim:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+    </style>
+@endif
 @endpush
 
 @push('scripts')
@@ -519,6 +759,192 @@
                 setActivityDone(false, 'Need ' + passScore + '/' + questions.length + ' to claim. You scored ' + score + '.');
             }
         });
+    }
+
+    function renderCoffeeQuiz() {
+        var questions = coffeeQuestions;
+        var passScore = 4;
+        var doneMessage = 'Coffee quiz passed.';
+        var WATERMARKS = ['ドリップ', 'エスプレッソ', 'アラビカ', 'カフェラテ', '保存'];
+
+        var ICON_COFFEE_HDR = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 2v2" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v2" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 0 0 0 4h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2v2" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_COFFEE_PASS = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 2v2" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v2" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 0 0 0 4h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2v2" stroke="#c8956c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var ICON_CIRCLE_DOT = '<svg class="coffee-opt__icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="#c8956c" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#c8956c" stroke="none"/></svg>';
+        var ICON_X = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="#c8956c" stroke-width="2"/><path d="m15 9-6 6" stroke="#c8956c" stroke-width="2" stroke-linecap="round"/><path d="m9 9 6 6" stroke="#c8956c" stroke-width="2" stroke-linecap="round"/></svg>';
+
+        var host = el('activity-container');
+        if (!host) return;
+
+        var html = '';
+        html += '<div class="coffee-quiz">';
+        html += '<div class="coffee-quiz-header">';
+        html += '<div class="coffee-quiz-header__title-row">' + ICON_COFFEE_HDR + '<h2 class="coffee-quiz-title">Coffee Quiz</h2></div>';
+        html += '<p class="coffee-quiz-sub">Five questions about coffee culture — score 4/5 or better</p>';
+        html += '<div class="coffee-quiz-progress-row">';
+        html += '<div class="coffee-quiz-progress-track"><div class="coffee-quiz-progress-fill" id="coffee-progress-fill"></div></div>';
+        html += '<span class="coffee-quiz-pill" id="coffee-q-pill">Q 1 / 5</span>';
+        html += '</div></div>';
+        html += '<div id="coffee-quiz-stage"></div>';
+        html += '<div id="coffee-quiz-results" class="coffee-quiz-results" hidden></div>';
+        html += '</div>';
+
+        host.innerHTML = html;
+
+        var step = 0;
+        var answers = [null, null, null, null, null];
+        var stage = el('coffee-quiz-stage');
+        var resultsEl = el('coffee-quiz-results');
+        var fillEl = el('coffee-progress-fill');
+        var pillEl = el('coffee-q-pill');
+
+        function updateProgress() {
+            var pct = ((step + 1) / 5) * 100;
+            if (fillEl) fillEl.style.width = pct + '%';
+            if (pillEl) pillEl.textContent = 'Q ' + (step + 1) + ' / 5';
+        }
+
+        function getSelected() {
+            var r = document.querySelector('#coffee-quiz-stage input[name="coffee-cur"]:checked');
+            return r ? parseInt(r.value, 10) : null;
+        }
+
+        function updateOptClasses() {
+            if (!stage) return;
+            var sel = getSelected();
+            var labels = stage.querySelectorAll('.coffee-opt');
+            for (var i = 0; i < labels.length; i++) {
+                var lab = labels[i];
+                var v = parseInt(lab.getAttribute('data-opt'), 10);
+                lab.classList.toggle('coffee-opt--selected', sel !== null && sel === v);
+            }
+        }
+
+        function renderStep() {
+            if (!stage) return;
+            var q = questions[step];
+            var wm = WATERMARKS[step];
+            var inner = '';
+            inner += '<div class="coffee-q-card">';
+            inner += '<span class="coffee-q-watermark" aria-hidden="true">' + wm + '</span>';
+            inner += '<p class="coffee-q-text">' + q.q + '</p>';
+            inner += '<div class="coffee-q-options" role="radiogroup" aria-label="Choose an answer">';
+            for (var j = 0; j < q.options.length; j++) {
+                inner += '<label class="coffee-opt" data-opt="' + j + '">';
+                inner += '<input type="radio" name="coffee-cur" value="' + j + '" class="coffee-sr-only">';
+                inner += '<span class="coffee-opt__dot" aria-hidden="true">' + ICON_CIRCLE_DOT + '</span>';
+                inner += '<span class="coffee-opt__label">' + q.options[j] + '</span>';
+                inner += '</label>';
+            }
+            inner += '</div>';
+            inner += '<button type="button" class="coffee-btn-next" id="coffee-next-btn" disabled>Next →</button>';
+            inner += '</div>';
+            stage.innerHTML = inner;
+
+            var nextBtn = el('coffee-next-btn');
+            var inputs = stage.querySelectorAll('input[name="coffee-cur"]');
+            for (var ii = 0; ii < inputs.length; ii++) {
+                inputs[ii].addEventListener('change', function () {
+                    updateOptClasses();
+                    if (nextBtn) nextBtn.disabled = getSelected() === null;
+                });
+            }
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function () {
+                    var sel = getSelected();
+                    if (sel === null) return;
+                    answers[step] = sel;
+                    if (step < 4) {
+                        step += 1;
+                        renderStep();
+                    } else {
+                        gradeCoffee();
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function gradeCoffee() {
+            var score = 0;
+            for (var i = 0; i < questions.length; i++) {
+                if (answers[i] === questions[i].answer) score += 1;
+            }
+            if (fillEl) fillEl.style.width = '100%';
+            if (stage) stage.style.display = 'none';
+            if (resultsEl) resultsEl.removeAttribute('hidden');
+
+            var pass = score >= passScore;
+            var ansProof = [];
+            for (var ai = 0; ai < answers.length; ai++) {
+                ansProof.push(answers[ai]);
+            }
+
+            if (pass) {
+                resultsEl.className = 'coffee-quiz-results coffee-quiz-results--pass';
+                resultsEl.innerHTML =
+                    '<div class="coffee-results-head">' +
+                    ICON_COFFEE_PASS +
+                    '<div class="coffee-results-head__score coffee-results-head__score--pass">' + score + '/5</div>' +
+                    '<p class="coffee-results-head__msg coffee-results-head__msg--pass">Barista approved — reward unlocked</p>' +
+                    '</div>' +
+                    '<div class="coffee-results-banner">Reward unlocked — complete Turnstile below to claim.</div>';
+                setActivityDone(true, doneMessage + ' Score: ' + score + '/' + questions.length + '.', { answers: ansProof });
+            } else {
+                resultsEl.className = 'coffee-quiz-results coffee-quiz-results--fail';
+                resultsEl.innerHTML =
+                    '<div class="coffee-results-head">' +
+                    ICON_X +
+                    '<div class="coffee-results-head__score coffee-results-head__score--fail">' + score + '/5</div>' +
+                    '<p class="coffee-results-head__msg coffee-results-head__msg--fail">Not quite — steep yourself in coffee lore and try tomorrow</p>' +
+                    '</div>' +
+                    '<div class="coffee-results-fail-box">' +
+                    '<p id="coffee-fail-cooldown">Checking cooldown…</p>' +
+                    '</div>';
+                setActivityDone(false, 'Need ' + passScore + '/' + questions.length + ' to claim. You scored ' + score + '.');
+                fetchCoffeeFailCooldown();
+            }
+        }
+
+        function fetchCoffeeFailCooldown() {
+            var coolP = el('coffee-fail-cooldown');
+            if (!coolP) return;
+            var w = (el('claim-wallet') && el('claim-wallet').value || '').trim();
+            if (!w || w.length < 20 || !API) {
+                coolP.textContent = 'Enter your wallet above to see the next eligible claim time.';
+                fetchClaimAvailability();
+                return;
+            }
+            fetch(API + '/faucet/status?wallet=' + encodeURIComponent(w), { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.error || !data.activities) {
+                        coolP.textContent = 'Cooldown applies — try again when the faucet allows.';
+                        fetchClaimAvailability();
+                        return;
+                    }
+                    var mine = null;
+                    for (var i = 0; i < data.activities.length; i++) {
+                        if (data.activities[i].slug === 'coffee_quiz') {
+                            mine = data.activities[i];
+                            break;
+                        }
+                    }
+                    if (mine && mine.next_claim_at) {
+                        coolP.textContent = 'Next eligible claim: ' + formatWhen(mine.next_claim_at) + ' (local time).';
+                    } else {
+                        coolP.textContent = 'Steep yourself in coffee lore — come back after the daily window resets.';
+                    }
+                    fetchClaimAvailability();
+                })
+                .catch(function () {
+                    coolP.textContent = 'Try again after the cooldown.';
+                    fetchClaimAvailability();
+                });
+        }
+
+        renderStep();
+        var actState = el('activity-state');
+        if (actState) actState.textContent = 'Five questions — 4/5 or better unlocks claim.';
     }
 
     function renderMapExplore() {
@@ -753,7 +1179,7 @@
             return;
         }
         if (slug === 'coffee_quiz') {
-            renderQuiz(coffeeQuestions, 4, 'Coffee quiz passed.');
+            renderCoffeeQuiz();
             return;
         }
         if (slug === 'daily_bonus') {
