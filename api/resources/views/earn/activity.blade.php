@@ -248,68 +248,6 @@
         });
     }
 
-    function renderShrinePuzzle() {
-        var host = el('activity-container');
-        if (!host) return;
-        host.innerHTML =
-            '<p class="muted" style="margin:0 0 0.6rem;font-size:13px;">Arrange shrine ritual steps in the correct order, then verify.</p>' +
-            '<ol id="puzzle-list" style="margin:0;padding-left:1.1rem;"></ol>' +
-            '<button id="verify-puzzle" class="btn btn-ghost" style="margin-top:0.7rem;">Verify order</button>' +
-            '<p id="puzzle-state" class="muted" style="margin:0.7rem 0 0;font-size:12px;">Not solved.</p>';
-        var steps = ['Bow', 'Cleanse hands', 'Offer prayer', 'Final bow'];
-        var order = [0, 1, 2, 3].sort(function () { return Math.random() - 0.5; });
-        var list = el('puzzle-list');
-        var state = el('puzzle-state');
-        var verify = el('verify-puzzle');
-        if (!list || !state || !verify) return;
-        order.forEach(function (idx) {
-            var li = document.createElement('li');
-            li.style.marginBottom = '0.45rem';
-            var label = document.createElement('span');
-            label.textContent = steps[idx];
-            label.style.marginRight = '0.4rem';
-            var up = document.createElement('button');
-            up.type = 'button';
-            up.className = 'btn btn-ghost';
-            up.style.padding = '0.2rem 0.45rem';
-            up.textContent = '↑';
-            up.addEventListener('click', function () {
-                var prev = li.previousElementSibling;
-                if (prev) list.insertBefore(li, prev);
-            });
-            var down = document.createElement('button');
-            down.type = 'button';
-            down.className = 'btn btn-ghost';
-            down.style.padding = '0.2rem 0.45rem';
-            down.style.marginLeft = '0.3rem';
-            down.textContent = '↓';
-            down.addEventListener('click', function () {
-                var next = li.nextElementSibling;
-                if (next) list.insertBefore(next, li);
-            });
-            li.dataset.step = steps[idx];
-            li.appendChild(label);
-            li.appendChild(up);
-            li.appendChild(down);
-            list.appendChild(li);
-        });
-        verify.addEventListener('click', function () {
-            var items = Array.prototype.map.call(list.querySelectorAll('li'), function (li) {
-                return li.dataset.step;
-            });
-            var ok = items.join('|') === steps.join('|');
-            if (ok) {
-                state.textContent = 'Solved.';
-                setActivityDone(true, 'Shrine puzzle solved. You can claim now.', {
-                    order: ['Bow', 'Cleanse hands', 'Offer prayer', 'Final bow']
-                });
-            } else {
-                state.textContent = 'Order is not correct yet.';
-                setActivityDone(false, 'Reorder the steps and verify again.');
-            }
-        });
-    }
-
     function renderMapExplore() {
         var host = el('activity-container');
         if (!host) return;
@@ -425,7 +363,11 @@
             return;
         }
         if (slug === 'shrine_puzzle') {
-            renderShrinePuzzle();
+            var host = el('activity-container');
+            if (host) {
+                host.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">Shrine Puzzle uses a dedicated page. <a href="/earn/shrine-puzzle">Open shrine puzzle</a>.</p>';
+            }
+            setActivityDone(false, 'Open the shrine puzzle page.');
             return;
         }
         if (slug === 'map_explore') {

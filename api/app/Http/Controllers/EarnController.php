@@ -210,7 +210,14 @@ class EarnController extends Controller
 
     public function shrinePuzzle(): View
     {
-        return $this->renderActivity('shrine_puzzle');
+        $meta = $this->activityMeta('shrine_puzzle');
+
+        return view('earn.shrine-puzzle', array_merge($meta, [
+            'apiBase' => config('earn.api_base'),
+            'turnstileSiteKey' => config('faucet.turnstile.site_key'),
+            'rewardKoto' => config('faucet.activities.shrine_puzzle.reward'),
+            'explorerTxBase' => 'https://explorer.isekai-pool.com/tx/',
+        ]));
     }
 
     public function mapExplore(): View
