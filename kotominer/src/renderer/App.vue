@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
+import logoUrl from '../../build/icon.png';
 
 const nav = [
   { to: '/', label: 'Mine', icon: '⛩' },
@@ -36,7 +37,9 @@ async function restartToUpdate() {
     <aside
       class="flex w-44 shrink-0 flex-col border-r border-slate-800/80 bg-kotominer-card px-3 py-4"
     >
-      <div class="mb-6 px-1 font-mono text-xs text-slate-500">by isekai-pool.com</div>
+      <div class="mb-6 flex justify-center px-1">
+        <img :src="logoUrl" alt="Kotominer" class="h-11 w-auto max-w-[9.5rem] object-contain opacity-95" />
+      </div>
       <nav class="flex flex-col gap-0.5">
         <RouterLink
           v-for="item in nav"
