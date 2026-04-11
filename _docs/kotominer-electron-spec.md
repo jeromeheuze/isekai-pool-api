@@ -259,7 +259,7 @@ Step by step — from zero to mining in 5 minutes.
 
 ### 5. Faucet (WebView)
 
-Embedded WebView pointing to `koto.isekai-pool.com/earn`.
+Embedded WebView pointing to `api.isekai-pool.com/earn`.
 
 - Full earn hub inside the app
 - Wallet address pre-filled from Mining screen settings
@@ -445,8 +445,8 @@ This is your direct marketing channel inside the miner.
   },
   {
     "title": "KOTO Faucet now live",
-    "body": "Earn KOTO daily at koto.isekai-pool.com/earn",
-    "url": "https://koto.isekai-pool.com/earn",
+    "body": "Earn KOTO daily at api.isekai-pool.com/earn",
+    "url": "https://api.isekai-pool.com/earn",
     "date": "2026-04-04"
   }
 ]

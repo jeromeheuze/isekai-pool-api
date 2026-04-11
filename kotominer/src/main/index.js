@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { createAppTray } from './tray.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -7,6 +8,8 @@ import { MinerProcess, tryRestoreMiner } from './miner.js';
 import { getCPUInfo, getCPUTemp } from './hardware.js';
 import { getMinerSelectionMeta, clearMinerSelectionCache } from './miner-resolve.js';
 import { initUpdater } from './updater.js';
+import { killOrphanMinerProcesses } from './miner-kill-orphans.js';
+import { runPoolBenchmarkSuite } from './miner-benchmark.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /** Repo root (kotominer/) in dev; inside asar the packaged app may not include build/ — window icon still set by installer on Windows. */
@@ -37,6 +40,9 @@ const store = new Store({
 
 let mainWindow = null;
 const miner = new MinerProcess();
+let appTray = { refresh: () => {}, destroy: () => {} };
+let allowQuit = false;
+let benchmarkAbort = false;
 
 function createWindow() {
   const preloadPath = path.join(__dirname, '../preload/preload.cjs');
@@ -54,6 +60,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
+      webviewTag: true,
     },
     title: 'Kotominer',
     show: false,
@@ -73,13 +80,21 @@ function createWindow() {
     return { action: 'deny' };
   });
 
+  mainWindow.on('close', (e) => {
+    if (!allowQuit && store.get('minimize_to_tray')) {
+      e.preventDefault();
+      mainWindow?.hide();
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
-function wireMinerEvents() {
+function wireMinerEvents(bumpTray) {
   miner.on('stats', (s) => {
+    bumpTray?.();
     mainWindow?.webContents.send('miner:stats', s);
   });
   miner.on('log', (line) => {
@@ -89,12 +104,15 @@ function wireMinerEvents() {
     mainWindow?.webContents.send('miner:error', err.message || String(err));
   });
   miner.on('close', (code) => {
+    appTray.refresh();
     mainWindow?.webContents.send('miner:close', code);
   });
   miner.on('started', () => {
+    appTray.refresh();
     mainWindow?.webContents.send('miner:started');
   });
   miner.on('stopped', () => {
+    appTray.refresh();
     mainWindow?.webContents.send('miner:stopped');
   });
 }
@@ -131,35 +149,158 @@ function registerIpc() {
     return { ok: true };
   });
 
+  ipcMain.handle('miner:status', () => miner.getStatusForRenderer());
+
+  ipcMain.handle('miner:killAll', async () => {
+    try {
+      miner.forceStop();
+      await killOrphanMinerProcesses();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  });
+
+  ipcMain.handle('miner:benchmarkCancel', () => {
+    benchmarkAbort = true;
+    return { ok: true };
+  });
+
+  ipcMain.handle('miner:benchmarkRun', async (_e, payload) => {
+    if (miner.isRunning()) {
+      return { ok: false, error: 'Stop mining before running a benchmark.' };
+    }
+    benchmarkAbort = false;
+    const wc = mainWindow?.webContents;
+    if (!wc) {
+      return { ok: false, error: 'Window not ready.' };
+    }
+
+    const {
+      pool_url,
+      wallet_address,
+      threads,
+      warmupSec = 12,
+      measureSec = 35,
+    } = payload || {};
+
+    if (!pool_url || !wallet_address || typeof threads !== 'number' || threads < 1) {
+      return { ok: false, error: 'Pool URL, wallet, and thread count are required.' };
+    }
+
+    const send = (msg) => {
+      try {
+        wc.send('miner:benchmark-progress', msg);
+      } catch {
+        /* window gone */
+      }
+    };
+
+    return runPoolBenchmarkSuite({
+      pool_url: String(pool_url).trim(),
+      wallet_address: String(wallet_address).trim(),
+      threads,
+      warmupSec: Math.min(120, Math.max(5, Number(warmupSec) || 12)),
+      measureSec: Math.min(180, Math.max(15, Number(measureSec) || 35)),
+      send,
+      shouldAbort: () => benchmarkAbort,
+    });
+  });
+
   ipcMain.handle('shell:openExternal', (_e, url) => {
     shell.openExternal(url);
   });
+
+  ipcMain.handle('app:quitAndInstall', () => {
+    allowQuit = true;
+    import('electron-updater')
+      .then(({ autoUpdater }) => {
+        autoUpdater.quitAndInstall(false, true);
+      })
+      .catch(() => {});
+    return { ok: true };
+  });
 }
 
-app.whenReady().then(() => {
-  wireMinerEvents();
-  registerIpc();
-  initUpdater(app);
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
 
+  app.whenReady().then(() => {
   const cpu = getCPUInfo();
   if (store.get('threads') == null) {
     store.set('threads', cpu.recommended_threads);
   }
 
+  function onTrayQuit() {
+    allowQuit = true;
+    try {
+      appTray.destroy();
+    } catch {
+      /* ignore */
+    }
+    miner.stop();
+    app.quit();
+  }
+
+  const iconPath = resolveWindowIcon();
+  appTray = createAppTray({
+    iconPath,
+    getWindow: () => mainWindow,
+    miner,
+    onQuit: onTrayQuit,
+  });
+  let trayDebounce = null;
+  const bumpTray = () => {
+    clearTimeout(trayDebounce);
+    trayDebounce = setTimeout(() => appTray.refresh(), 400);
+  };
+
+  wireMinerEvents(bumpTray);
+  registerIpc();
+
   createWindow();
+  initUpdater(app, mainWindow);
+
+  mainWindow?.webContents.once('did-finish-load', () => {
+    if (!store.get('auto_start')) return;
+    const w = store.get('wallet_address');
+    const pool = store.get('pool_url');
+    const threads = store.get('threads');
+    if (!w || typeof threads !== 'number' || threads < 1) return;
+    if (!miner.isBinaryPresent()) return;
+    miner.start({ pool_url: pool, wallet_address: w, threads, solo: false });
+  });
+
+  bumpTray();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
-});
+  });
+}
 
 app.on('window-all-closed', () => {
-  miner.stop();
   if (process.platform !== 'darwin') {
-    app.quit();
+    if (!store.get('minimize_to_tray')) {
+      miner.stop();
+      app.quit();
+    }
   }
 });
 
 app.on('before-quit', () => {
   miner.stop();
+  try {
+    appTray.destroy();
+  } catch {
+    /* ignore */
+  }
 });

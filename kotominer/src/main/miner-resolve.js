@@ -8,7 +8,8 @@ import { getBundledResourcesDir, getUserDataMinerPath, platformArchDir } from '.
  * Order: fastest / newest ISA first (see resources/win32-x64/README.txt from KotoDevelopers zip).
  * Probing falls through on illegal-instruction crashes or failed help.
  */
-const WIN_MINERD_ORDER = [
+/** Exported for pool benchmark (run each build against stratum). */
+export const WIN_MINERD_ORDER = [
   'minerd-avx2-sha.exe',
   'minerd-avx2.exe',
   'minerd-xop.exe',
@@ -24,7 +25,7 @@ const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 /**
  * Run miner with -h; cwd must be exe dir so Windows loads libcurl next to the exe.
  */
-function probeMinerHelp(exePath) {
+export function probeMinerHelp(exePath) {
   const cwd = path.dirname(exePath);
   if (!fs.existsSync(exePath)) return false;
 

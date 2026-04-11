@@ -1,23 +1,30 @@
 <script setup>
-function openEarn() {
-  window.kotominer.openExternal('https://koto.isekai-pool.com/earn');
+const api = window.kotominer;
+
+function openBrowser() {
+  api.openExternal('https://api.isekai-pool.com/earn');
 }
 </script>
 
 <template>
-  <div class="mx-auto max-w-lg space-y-4 text-center">
-    <h2 class="font-mono text-lg text-white">Earn hub</h2>
-    <p class="text-sm text-slate-400">
-      The spec embeds the full earn hub in a BrowserView. This scaffold opens the hub in your default browser (same as
-      “Open in Browser” in the spec).
+  <div class="mx-auto flex h-[calc(100vh-8rem)] max-w-4xl flex-col space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h2 class="font-mono text-lg text-white">Earn hub</h2>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-600 px-3 py-1.5 font-mono text-xs text-slate-300 hover:bg-slate-800"
+        @click="openBrowser"
+      >
+        Open in browser
+      </button>
+    </div>
+    <p class="text-xs text-slate-500">
+      Embedded view of api.isekai-pool.com/earn. If the page stays blank, use “Open in browser” (some networks block embedding).
     </p>
-    <button
-      type="button"
-      class="rounded-xl bg-kotominer-violet px-6 py-3 font-mono text-sm font-semibold text-white hover:brightness-110"
-      @click="openEarn"
-    >
-      Open koto.isekai-pool.com/earn
-    </button>
-    <p class="text-xs text-slate-600">Wallet from Kotominer can be pasted into the earn page when you arrive.</p>
+    <webview
+      class="min-h-0 flex-1 rounded-xl border border-slate-800 bg-kotominer-bg"
+      src="https://api.isekai-pool.com/earn"
+      allowpopups
+    />
   </div>
 </template>

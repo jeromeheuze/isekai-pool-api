@@ -11,6 +11,16 @@ contextBridge.exposeInMainWorld('kotominer', {
   restoreMiner: () => ipcRenderer.invoke('miner:restore'),
   minerStart: (cfg) => ipcRenderer.invoke('miner:start', cfg),
   minerStop: () => ipcRenderer.invoke('miner:stop'),
+  getMinerStatus: () => ipcRenderer.invoke('miner:status'),
+  minerKillAll: () => ipcRenderer.invoke('miner:killAll'),
+
+  minerBenchmarkRun: (payload) => ipcRenderer.invoke('miner:benchmarkRun', payload),
+  minerBenchmarkCancel: () => ipcRenderer.invoke('miner:benchmarkCancel'),
+  onBenchmarkProgress: (cb) => {
+    const fn = (_e, msg) => cb(msg);
+    ipcRenderer.on('miner:benchmark-progress', fn);
+    return () => ipcRenderer.removeListener('miner:benchmark-progress', fn);
+  },
 
   onMinerStats: (cb) => {
     const fn = (_e, s) => cb(s);
@@ -44,4 +54,17 @@ contextBridge.exposeInMainWorld('kotominer', {
   },
 
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
+
+  quitAndInstall: () => ipcRenderer.invoke('app:quitAndInstall'),
+
+  onUpdateAvailable: (cb) => {
+    const fn = (_e, payload) => cb(payload);
+    ipcRenderer.on('app:update-available', fn);
+    return () => ipcRenderer.removeListener('app:update-available', fn);
+  },
+  onUpdateDownloaded: (cb) => {
+    const fn = () => cb();
+    ipcRenderer.on('app:update-downloaded', fn);
+    return () => ipcRenderer.removeListener('app:update-downloaded', fn);
+  },
 });

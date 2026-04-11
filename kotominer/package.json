@@ -10,10 +10,12 @@
   "scripts": {
     "dev": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "build:renderer": "vite build",
+    "clean:release": "node ./scripts/clean-release.mjs",
     "build": "vite build && electron-builder"
   },
   "dependencies": {
-    "electron-store": "^10.0.0"
+    "electron-store": "^10.0.0",
+    "electron-updater": "^6.6.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

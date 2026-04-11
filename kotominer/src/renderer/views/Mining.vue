@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import HashrateSparkline from '../components/HashrateSparkline.vue';
+
+defineOptions({ name: 'Mining' });
 
 const api = window.kotominer;
 
@@ -27,10 +30,22 @@ const paths = ref({
 });
 const restoreMsg = ref('');
 
+const networkStatus = ref(null);
+const newsItems = ref([]);
+const cpuTemp = ref(null);
+const tempWarning = ref(80);
+const hashHistory = ref([]);
+let lastHashSampleAt = 0;
+const killAllBusy = ref(false);
+
 let unsubStats;
 let unsubLog;
 let unsubErr;
 let unsubClose;
+let unsubStarted;
+let unsubStopped;
+let statusInterval;
+let tempInterval;
 
 function fmtHash(h) {
   if (h >= 1e6) return `${(h / 1e6).toFixed(2)} MH/s`;
@@ -48,6 +63,50 @@ const canStart = computed(() => {
   );
 });
 
+const tempHot = computed(() => {
+  if (cpuTemp.value == null) return false;
+  return cpuTemp.value >= tempWarning.value;
+});
+
+async function fetchKotoStatus() {
+  try {
+    const r = await fetch('https://api.isekai-pool.com/api/v1/koto/status');
+    if (!r.ok) return;
+    networkStatus.value = await r.json();
+  } catch {
+    /* ignore */
+  }
+}
+
+async function applyMinerStatusFromMain() {
+  try {
+    const st = await api.getMinerStatus();
+    mining.value = !!st.running;
+    if (st.stats) {
+      hashrate.value = st.stats.hashrate || 0;
+      shares.value = { ...st.stats.shares };
+      threadHashrates.value = Array.isArray(st.stats.threads) ? st.stats.threads.map((t) => ({ ...t })) : [];
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+async function fetchNews() {
+  try {
+    const r = await fetch('https://api.isekai-pool.com/api/v1/news');
+    if (!r.ok) {
+      newsItems.value = [];
+      return;
+    }
+    const data = await r.json();
+    const list = Array.isArray(data) ? data : data.items || data.news || [];
+    newsItems.value = Array.isArray(list) ? list.slice(0, 3) : [];
+  } catch {
+    newsItems.value = [];
+  }
+}
+
 onMounted(async () => {
   const s = await api.getSettings();
   wallet.value = s.wallet_address || '';
@@ -62,13 +121,31 @@ onMounted(async () => {
     threads.value = cpu.recommended_threads;
   }
   threads.value = Math.min(Math.max(1, threads.value), maxLogicalCpus.value);
+  tempWarning.value = typeof s.temp_warning === 'number' ? s.temp_warning : 80;
 
   paths.value = await api.getMinerPaths();
+  await applyMinerStatusFromMain();
+
+  await fetchKotoStatus();
+  await fetchNews();
+  statusInterval = setInterval(fetchKotoStatus, 60_000);
+  tempInterval = setInterval(async () => {
+    cpuTemp.value = await api.getCpuTemp();
+  }, 10_000);
+  cpuTemp.value = await api.getCpuTemp();
 
   unsubStats = api.onMinerStats((s) => {
     hashrate.value = s.hashrate || 0;
     shares.value = { ...s.shares };
     threadHashrates.value = Array.isArray(s.threads) ? s.threads.map((t) => ({ ...t })) : [];
+    const now = Date.now();
+    if (mining.value && now - lastHashSampleAt > 2500) {
+      lastHashSampleAt = now;
+      const h = s.hashrate || 0;
+      if (h > 0) {
+        hashHistory.value = [...hashHistory.value, h].slice(-72);
+      }
+    }
   });
   unsubLog = api.onMinerLog((line) => {
     logs.value = [line, ...logs.value].slice(0, 40);
@@ -79,6 +156,14 @@ onMounted(async () => {
   });
   unsubClose = api.onMinerClose(() => {
     mining.value = false;
+    hashHistory.value = [];
+  });
+  unsubStarted = api.onMinerStarted(() => {
+    mining.value = true;
+  });
+  unsubStopped = api.onMinerStopped(() => {
+    mining.value = false;
+    hashHistory.value = [];
   });
 });
 
@@ -87,6 +172,10 @@ onUnmounted(() => {
   unsubLog?.();
   unsubErr?.();
   unsubClose?.();
+  unsubStarted?.();
+  unsubStopped?.();
+  clearInterval(statusInterval);
+  clearInterval(tempInterval);
 });
 
 async function persist() {
@@ -119,6 +208,8 @@ async function startMining() {
 async function stopMining() {
   await api.minerStop();
   mining.value = false;
+  hashHistory.value = [];
+  lastHashSampleAt = 0;
 }
 
 async function refreshPaths() {
@@ -130,6 +221,25 @@ async function restoreMiner() {
   const r = await api.restoreMiner();
   restoreMsg.value = r.ok ? `Restored to ${r.path}` : r.error || 'Restore failed';
   await refreshPaths();
+}
+
+async function killAllMiners() {
+  killAllBusy.value = true;
+  minerError.value = '';
+  try {
+    const r = await api.minerKillAll();
+    if (!r.ok) {
+      minerError.value = r.error || 'Could not kill miner processes';
+      return;
+    }
+    mining.value = false;
+    hashHistory.value = [];
+    hashrate.value = 0;
+    shares.value = { accepted: 0, rejected: 0 };
+    threadHashrates.value = [];
+  } finally {
+    killAllBusy.value = false;
+  }
 }
 </script>
 
@@ -164,14 +274,11 @@ async function restoreMiner() {
       <p v-if="restoreMsg" class="mt-2 font-mono text-xs text-slate-400">{{ restoreMsg }}</p>
     </div>
 
-    <p
-      v-else
-      class="rounded-lg border border-slate-800/80 bg-kotominer-elevated/40 px-3 py-2 font-mono text-xs text-slate-400"
-    >
-      Miner:
-      <span class="text-kotominer-gold">{{ paths.selectedBasename || '—' }}</span>
-      <span class="text-slate-600"> · </span>
-      <span class="break-all text-slate-500">{{ paths.resourcesDir }}</span>
+    <p v-else class="rounded-lg border border-slate-800/80 bg-kotominer-elevated/40 px-3 py-2 text-xs text-slate-500">
+      Using
+      <span class="font-mono text-kotominer-gold">{{ paths.selectedBasename || '—' }}</span>
+      <span class="text-slate-600"> — </span>
+      fastest build your CPU can run (auto-detected).
     </p>
 
     <section class="rounded-xl border border-slate-800 bg-kotominer-card p-6">
@@ -239,7 +346,75 @@ async function restoreMiner() {
       <span class="font-mono text-sm text-slate-500">
         shares {{ shares.accepted }} / {{ shares.rejected }}
       </span>
+      <span v-if="cpuTemp != null" class="font-mono text-sm" :class="tempHot ? 'text-amber-400' : 'text-slate-500'">
+        CPU {{ cpuTemp }}°C
+      </span>
     </div>
+
+    <p v-if="paths.present" class="font-mono text-[11px] leading-relaxed text-slate-500">
+      If mining gets stuck or you see “miner already running” after a crash, force-stop the app’s miner and end stray
+      <code class="text-slate-400">minerd</code> processes.
+      <button
+        type="button"
+        class="ml-1 text-amber-400/90 underline decoration-amber-400/40 hover:text-amber-300"
+        :disabled="killAllBusy"
+        @click="killAllMiners"
+      >
+        {{ killAllBusy ? 'Stopping…' : 'Force stop & kill all' }}
+      </button>
+    </p>
+
+    <p
+      v-if="tempHot"
+      class="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 font-mono text-xs text-amber-200/90"
+    >
+      CPU temperature is at or above your warning ({{ tempWarning }}°C). Consider fewer threads or better cooling.
+    </p>
+
+    <section
+      v-if="networkStatus"
+      class="rounded-xl border border-slate-800 bg-kotominer-bg/50 p-4 font-mono text-[11px] text-slate-400"
+    >
+      <h2 class="text-xs uppercase tracking-wide text-slate-500">KOTO network</h2>
+      <p class="mt-2">
+        Difficulty {{ Number(networkStatus.difficulty).toFixed(2) }} · Blocks {{ networkStatus.blocks }} · Peers
+        {{ networkStatus.peers }} ·
+        <span :class="networkStatus.synced ? 'text-emerald-500/90' : 'text-amber-400'">
+          {{ networkStatus.synced ? 'Synced' : 'Syncing' }}
+        </span>
+      </p>
+      <a
+        v-if="networkStatus.explorer"
+        class="mt-2 inline-block text-kotominer-violet hover:underline"
+        href="#"
+        @click.prevent="api.openExternal(networkStatus.explorer)"
+      >
+        Block explorer
+      </a>
+    </section>
+
+    <section v-if="mining" class="rounded-xl border border-slate-800 bg-kotominer-bg/50 p-4">
+      <h2 class="font-mono text-xs uppercase tracking-wide text-slate-500">Hashrate (recent)</h2>
+      <HashrateSparkline class="mt-2" :samples="hashHistory" />
+    </section>
+
+    <section v-if="newsItems.length > 0" class="rounded-xl border border-slate-800 bg-kotominer-bg/50 p-4">
+      <h2 class="font-mono text-xs uppercase tracking-wide text-slate-500">News</h2>
+      <ul class="mt-2 space-y-2">
+        <li v-for="(item, i) in newsItems" :key="i" class="text-sm">
+          <button
+            v-if="item.url"
+            type="button"
+            class="text-left text-kotominer-violet hover:underline"
+            @click="api.openExternal(item.url)"
+          >
+            {{ item.title || item.headline || 'Announcement' }}
+          </button>
+          <span v-else class="text-slate-300">{{ item.title || item.body }}</span>
+          <p v-if="item.body && item.title" class="mt-0.5 text-xs text-slate-500">{{ item.body }}</p>
+        </li>
+      </ul>
+    </section>
 
     <section
       v-if="mining && threadHashrates.length > 0"

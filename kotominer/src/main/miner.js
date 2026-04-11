@@ -32,6 +32,48 @@ export class MinerProcess extends EventEmitter {
       uptime: 0,
     };
     this._startTime = null;
+    /** Last successful mining config (for tray resume). */
+    this.lastMiningConfig = null;
+  }
+
+  isRunning() {
+    return this.process != null;
+  }
+
+  getLastMiningConfig() {
+    return this.lastMiningConfig;
+  }
+
+  /** Snapshot for renderer after tab switch / remount (main process is source of truth). */
+  getStatusForRenderer() {
+    return {
+      running: this.isRunning(),
+      stats: {
+        hashrate: this.stats.hashrate,
+        hashrate_unit: this.stats.hashrate_unit,
+        shares: { ...this.stats.shares },
+        threads: this.stats.threads.map((t) => ({ ...t })),
+      },
+    };
+  }
+
+  /** SIGKILL tracked child (e.g. before killing orphans). */
+  forceStop() {
+    if (this.process) {
+      try {
+        this.process.kill('SIGKILL');
+      } catch {
+        /* ignore */
+      }
+      this.process = null;
+    }
+    this._startTime = null;
+    this._threadRates.clear();
+    this.stats.threads = [];
+    this.stats.hashrate = 0;
+    this.stats.shares = { accepted: 0, rejected: 0 };
+    this.emit('stats', { ...this.stats, threads: [] });
+    this.emit('stopped');
   }
 
   getExecutablePath() {
@@ -67,8 +109,10 @@ export class MinerProcess extends EventEmitter {
       return { ok: false, error: msg };
     }
 
-    // cpuminer-yescrypt (minerd-*.exe): -o / -u / -p / -t (see resources/win32-x64/start.bat)
+    // cpuminer-yescrypt (minerd-*.exe): KOTO uses yescrypt (not default yespower). See resources/win32-x64/start.bat
     const args = [
+      '-a',
+      'yescrypt',
       '-o',
       config.pool_url,
       '-u',
@@ -98,6 +142,13 @@ export class MinerProcess extends EventEmitter {
 
     this.process.stdout.on('data', (data) => this.parseOutput(data.toString()));
     this.process.stderr.on('data', (data) => this.parseOutput(data.toString()));
+
+    this.lastMiningConfig = {
+      pool_url: config.pool_url,
+      wallet_address: config.wallet_address,
+      threads: config.threads,
+      solo: !!config.solo,
+    };
 
     this.process.on('error', (err) => {
       this.emit('error', err);
